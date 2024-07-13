@@ -1,0 +1,73 @@
+[{
+    "name" : "program->A",
+    "requires": [
+        {"who":"A", "what":"def"},
+        {"who":"A", "what":"end"}
+    ],
+    "provides": [
+        {"who":"program", "what":"def"}
+    ],
+    "conditionalProvides": [{
+        "needs": [
+            {"who":"A", "what":"end"}
+        ],
+        "provides": [
+            {"who":"program", "what":"end"}
+        ]}
+    ]
+},
+{
+    "name" : "A->aB",
+    "requires": [
+        {"who":"B", "what":"def"},
+        {"who":"B", "what":"end"}
+    ],
+    "provides": [
+        {"who":"A", "what":"def"}
+    ],
+    "conditionalProvides": [{
+        "needs": [
+            {"who":"B", "what":"end"}
+        ],
+        "provides": [
+            {"who":"A", "what":"end"}
+        ]}
+    ]
+},
+{
+    "name" : "B->b",
+    "provides": [
+        {"who":"B", "what":"def"},
+        {"who":"B", "what":"end"}
+    ]
+},
+{
+    "name" : "A->aA",
+    "requires": [
+        {"who":"A", "what":"def"},
+        {"who":"A", "what":"end"}
+    ],
+    "provides": [
+        {"who":"A", "what":"def"}
+    ]
+},
+{
+    "name" : "B->bA",
+    "requires": [
+        {"who":"A", "what":"def"},
+        {"who":"A", "what":"end"}
+    ],
+    "provides": [
+        {"who":"B", "what":"def"}
+    ],
+    "conditionalProvides": [{
+        "needs": [
+            {"who":"A", "what":"end"}
+        ],
+        "provides": [
+            {"who":"B", "what":"end"}
+        ]}
+    ]
+}
+
+]
