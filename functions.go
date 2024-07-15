@@ -20,6 +20,9 @@ func md5hash(s string)string{
 	return fmt.Sprintf("%x", md5.Sum([]byte(s)))
 }
 
-func require(who, what string, hashes map[string]string)string{
+func require(who, what any, hashes map[string]string)string{
+	requiredHash := md5hash(fmt.Sprint(what))
+	hashes[requiredHash] = fmt.Sprint(what)
+
 	return fmt.Sprintf("require(%s,%s)", who,what)
 }
