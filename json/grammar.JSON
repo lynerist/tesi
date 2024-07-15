@@ -5,15 +5,8 @@
         {"who":"A", "what":"end"}
     ],
     "provides": [
-        {"who":"program", "what":"def"}
-    ],
-    "conditionalProvides": [{
-        "needs": [
-            {"who":"A", "what":"end"}
-        ],
-        "provides": [
-            {"who":"program", "what":"end"}
-        ]}
+        {"who":"program", "what":"def"},
+        {"who":"program", "what":"end"}
     ]
 },
 {
@@ -23,15 +16,8 @@
         {"who":"B", "what":"end"}
     ],
     "provides": [
-        {"who":"A", "what":"def"}
-    ],
-    "conditionalProvides": [{
-        "needs": [
-            {"who":"B", "what":"end"}
-        ],
-        "provides": [
-            {"who":"A", "what":"end"}
-        ]}
+        {"who":"A", "what":"def"},
+        {"who":"A", "what":"end"}
     ]
 },
 {
@@ -58,16 +44,8 @@
         {"who":"A", "what":"end"}
     ],
     "provides": [
-        {"who":"B", "what":"def"}
-    ],
-    "conditionalProvides": [{
-        "needs": [
-            {"who":"A", "what":"end"}
-        ],
-        "provides": [
-            {"who":"B", "what":"end"}
-        ]}
+        {"who":"B", "what":"def"},
+        {"who":"B", "what":"end"}
     ]
 }
-
 ]

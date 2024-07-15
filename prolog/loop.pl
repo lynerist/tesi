@@ -23,12 +23,22 @@ requires(a->b,  bDef).
 requires(a->b,  bEnd).
 requires(b->c,  cDef).
 requires(b->c,  cEnd).
+requires(c->a,  aDef).
+requires(c->a,  aEnd).
+
+%requires(b->d,  dDef).
+%requires(b->d,  dEnd).
 
 provides(p->a,  pDef).
+provides(p->a,  pEnd).
 provides(a->b,  aDef).
+provides(a->b,  aEnd).
 provides(b->c,  bDef).
-provides(c->x,  cDef).
-provides(c->x,  cEnd).
+provides(b->c,  bEnd).
+provides(c->a,  cDef).
+provides(c->a,  cEnd).
 
-provides(b->c, bEnd).
-provides(a->b, aEnd).
+%provides(d->x, dDef).
+%provides(d->x, dEnd).
+%provides(b->d, bDef).
+%provides(b->d, bEnd).
