@@ -2,8 +2,11 @@ requisites(ToCheck) :-
     requisites(ToCheck, []).
 
 requisites(ToCheck, CantProvide) :-
-    forall(requires(ToCheck, Thing), 
-            exists(Thing, [ToCheck | CantProvide])).
+	findall(Thing, requires(ToCheck, Thing), NeededThings),
+	maplist(existsExcluding([ToCheck | CantProvide]), NeededThings),!.
+
+	%forall(requires(ToCheck, Thing), 
+	%		exists(Thing, [ToCheck | CantProvide])).
 
 exists(Thing) :-
     exists(Thing, []).
@@ -13,9 +16,12 @@ exists(Thing, CantProvide) :-
     \+ member(Provider, CantProvide),
     requisites(Provider, CantProvide).
 
+existsExcluding(CantProvide, Thing) :-
+    exists(Thing, CantProvide).
+
 valid(ToCheck) :-
     provides(ToCheck, _), %può non avere provides una feature?
-    requisites(ToCheck).
+    requisites(ToCheck),!.
 
 requires(p->a,  aDef).
 requires(p->a,  aEnd).

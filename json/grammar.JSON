@@ -1,12 +1,12 @@
 [{
-    "name" : "program->A",
+    "name" : "p->A",
     "requires": [
         {"who":"A", "what":"def"},
         {"who":"A", "what":"end"}
     ],
     "provides": [
-        {"who":"program", "what":"def"},
-        {"who":"program", "what":"end"}
+        {"who":"p", "what":"def"},
+        {"who":"p", "what":"end"}
     ]
 },
 {

@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/ichiban/prolog"
 )
 
 func main(){
 	json := readJSON("json/grammar.JSON")
 	hashesToText 	:= make(map[string]string)
-	dependencies := prolog.New(nil,nil)
+	core := setupProlog()
 
 	for _, production := range json{
 		log(production["name"])
@@ -19,15 +18,16 @@ func main(){
 		log("requires:")
 		for _, required := range production["requires"].([]any){
 			log("\t",required,md5hash(fmt.Sprint(required)))
-			dependencies.Exec(require(production["name"],required,hashesToText))
+			core.addLine(require(production["name"],required,hashesToText), "require")
 		}
 
 		log("provides:")
 		for _, provided := range production["provides"].([]any){
 			log("\t",provided,md5hash(fmt.Sprint(provided)))
-			dependencies.Exec(provide(production["name"], provided, hashesToText))
+			core.addLine(provide(production["name"], provided, hashesToText), "provide")
 		}
 
+		/*
 		log("Conditional provides:")
 		for _, rule := range production["conditionalProvides"].([]any){
 			log("\tif got:")
@@ -43,9 +43,17 @@ func main(){
 			}
 		}
 		log("")
+		*/
 	}
 
 	log(hashesToText)
+
+	core.runProgram()
+
+	fmt.Println(core.getProgram())
+	fmt.Println()
+
+	prologQueryConsole(core, hashesToText)
 
 	
 }
