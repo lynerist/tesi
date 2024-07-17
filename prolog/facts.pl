@@ -3,21 +3,15 @@ requisites(ToCheck) :-
 
 requisites(ToCheck, CantProvide) :-
 	findall(Thing, requires(ToCheck, Thing), NeededThings),
-	maplist(existsExcluding([ToCheck | CantProvide]), NeededThings),!.
-
-	%forall(requires(ToCheck, Thing), 
-	%		exists(Thing, [ToCheck | CantProvide])).
+	maplist(exists([ToCheck | CantProvide]), NeededThings),!.
 
 exists(Thing) :-
-    exists(Thing, []).
+    exists([], Thing).
 
-exists(Thing, CantProvide) :-
+exists(CantProvide, Thing) :-
     provides(Provider, Thing), 
     \+ member(Provider, CantProvide),
     requisites(Provider, CantProvide).
-
-existsExcluding(CantProvide, Thing) :-
-    exists(Thing, CantProvide).
 
 valid(ToCheck) :-
     provides(ToCheck, _), %può non avere provides una feature?

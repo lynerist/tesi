@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
-
 	"github.com/ichiban/prolog"
 )
 
@@ -75,27 +75,23 @@ func setupProlog() prologCore{
 	return prologCore{prolog.New(nil,nil), map[string]string{"start":
 		`
 requisites(ToCheck) :-
-	requisites(ToCheck, []).
+    requisites(ToCheck, []).
 
 requisites(ToCheck, CantProvide) :-
 	findall(Thing, requires(ToCheck, Thing), NeededThings),
-	maplist(existsExcluding([ToCheck | CantProvide]), NeededThings),!.
+	maplist(exists([ToCheck | CantProvide]), NeededThings),!.
 
 exists(Thing) :-
-    exists(Thing, []).
+    exists([], Thing).
 
-exists(Thing, CantProvide) :-
+exists(CantProvide, Thing) :-
     provides(Provider, Thing), 
     \+ member(Provider, CantProvide),
     requisites(Provider, CantProvide).
 
-existsExcluding(CantProvide, Thing) :-
-    exists(Thing, CantProvide).
-
-
 valid(ToCheck) :-
-	provides(ToCheck, _), 
-	requisites(ToCheck),!.
+    provides(ToCheck, _), 
+    requisites(ToCheck),!.
 	`}}
 }
 
@@ -105,8 +101,7 @@ var prologErrorsMeaning = map[string]string {
 
 func prologQueryConsole(core prologCore, hashes map[string]string){
 	sc := bufio.NewScanner(os.Stdin)
-
-	for sc.Scan(){
+	for fmt.Print("?- "); sc.Scan(); fmt.Print("?- "){
 		query := sc.Text()
 		for hash, fullName := range hashes{
 			query = strings.ReplaceAll(query, fullName, hash)
@@ -115,19 +110,31 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 		solutions, err := core.interpreter.Query(query)
 		if err != nil{
 			if meaning, ok := prologErrorsMeaning[fmt.Sprint(err)]; ok{
-				fmt.Println(meaning)
+				fmt.Printf("Errore in '%s': %s\n\n", query, meaning)
 			}else{
-				fmt.Println("ecco: errore in", query)
-				fmt.Println(err)
+				fmt.Printf("Errore in '%s': %v\n\n", query, err)
 			}
 			continue
 		}
 
+		var output string
 		for solutions.Next(){
 			variables := make(map[string]any)
 			solutions.Scan(variables)
-			fmt.Println("Solution:")
-			fmt.Println(variables)
-		}		
+			if len(variables) == 0{
+				output += "true."
+			}
+			toPrint := make([]string,0,len(output))
+			for k,v := range variables{
+				toPrint = append(toPrint, fmt.Sprintf("%s:%s\t",k,hashes["'"+v.(string)+"'"]))
+			}
+			sort.Strings(toPrint)
+			output += strings.Join(toPrint, "\t") + "\n"
+		}
+		
+		if output == "" {
+			fmt.Print("false.\n")
+		}
+		fmt.Println(output)
 	}
 }

@@ -50,10 +50,8 @@ func main(){
 
 	core.runProgram()
 
-	fmt.Println(core.getProgram())
-	fmt.Println()
+	//fmt.Println(core.getProgram())
 
 	prologQueryConsole(core, hashesToText)
-
 	
 }
