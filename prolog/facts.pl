@@ -17,8 +17,8 @@ valid(ToCheck) :-
     provides(ToCheck, _), %può non avere provides una feature?
     requisites(ToCheck),!.
 
-requires(p->a,  aDef).
-requires(p->a,  aEnd).
+requires('P->a',  aDef).
+requires('P->a',  aEnd).
 requires(a->xb, bDef).
 requires(a->xb, bEnd).
 requires(a->xa, aDef).
@@ -26,8 +26,8 @@ requires(a->xa, aEnd).
 requires(b->ya, aDef).
 requires(b->ya, aEnd).
 
-provides(p->a,  pDef).
-provides(p->a,  pEnd).
+provides('P->a',  pDef).
+provides('P->a',  pEnd).
 provides(a->xb, aDef).
 provides(a->xb, aEnd).
 provides(b->y,  bDef).

@@ -6,30 +6,29 @@ import (
 
 func main(){
 	json := readJSON("json/grammar.JSON")
-	hashesToText 	:= make(map[string]string)
+	hashesToText := make(map[string]string)
 	core := setupProlog()
 
-	for _, production := range json{
-		log(production["name"])
-		if _, ok := production["requires"]; !ok {production["requires"]=[]any{}}
-		if _, ok := production["provides"]; !ok {production["provides"]=[]any{}}
-		if _, ok := production["conditionalProvides"]; !ok {production["conditionalProvides"]=[]any{}}
+	for _, artifact := range json{
+		log(artifact["name"])
+		fillMissingKeys(artifact)
 		
-		log("requires:")
-		for _, required := range production["requires"].([]any){
+		log("requires all:")
+
+		for _, required := range artifact["requires"].(map[string]any)["all"].([]any){
 			log("\t",required,md5hash(fmt.Sprint(required)))
-			core.addLine(require(production["name"],required,hashesToText), "require")
+			core.addLine(requireAll(artifact["name"],required,hashesToText), "requiresAll")
 		}
 
 		log("provides:")
-		for _, provided := range production["provides"].([]any){
+		for _, provided := range artifact["provides"].([]any){
 			log("\t",provided,md5hash(fmt.Sprint(provided)))
-			core.addLine(provide(production["name"], provided, hashesToText), "provide")
+			core.addLine(provide(artifact["name"], provided, hashesToText), "provides")
 		}
 
 		/*
 		log("Conditional provides:")
-		for _, rule := range production["conditionalProvides"].([]any){
+		for _, rule := range artifact["conditionalProvides"].([]any){
 			log("\tif got:")
 			for _, needed := range rule.(map[string]any)["needs"].([]any){
 				log("\t\t",needed,md5hash(fmt.Sprint(needed)))
@@ -51,7 +50,5 @@ func main(){
 	core.runProgram()
 
 	//fmt.Println(core.getProgram())
-
-	prologQueryConsole(core, hashesToText)
-	
+	prologQueryConsole(core, hashesToText)	
 }

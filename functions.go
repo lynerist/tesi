@@ -22,16 +22,34 @@ func readJSON(fileName string)(json []map[string]any){
 	return
 }
 
+func fillMissingKeys(artifact map[string]any){
+	if _, ok := artifact["requires"]; !ok {artifact["requires"]=make(map[string]any)}
+	if _, ok := artifact["requires"].(map[string]any)["all"]; !ok {
+		artifact["requires"].(map[string]any)["all"] = []any{}
+	}
+	if _, ok := artifact["requires"].(map[string]any)["not"]; !ok {
+		artifact["requires"].(map[string]any)["not"] = []any{}
+	}
+	if _, ok := artifact["requires"].(map[string]any)["any"]; !ok {
+		artifact["requires"].(map[string]any)["any"] = [][]any{}
+	}
+	if _, ok := artifact["requires"].(map[string]any)["one"]; !ok {
+		artifact["requires"].(map[string]any)["one"] = [][]any{}
+	}
+	if _, ok := artifact["provides"]; !ok {artifact["provides"]=[]any{}}
+	if _, ok := artifact["conditionalProvides"]; !ok {artifact["conditionalProvides"]=[]any{}}
+}
+
 func md5hash(s string)string{
 	return fmt.Sprintf("'%x'", md5.Sum([]byte(s)))
 }
 
-func require(who, what any, hashes map[string]string)string{
+func requireAll(who, what any, hashes map[string]string)string{
 	requiredHash := md5hash(fmt.Sprint(what))
 	hashes[requiredHash] = fmt.Sprint(what)
 	requiringHash := md5hash(fmt.Sprint(who))
 	hashes[requiringHash] = fmt.Sprint(who)
-	return fmt.Sprintf("requires(%s,%s).", requiringHash,requiredHash)
+	return fmt.Sprintf("requiresAll(%s,%s).", requiringHash,requiredHash)
 }
 
 func provide(who, what any, hashes map[string]string)string{
@@ -60,8 +78,8 @@ func (core *prologCore) addLine(s, where string){
 func (core *prologCore)getProgram()string{
 	return fmt.Sprintf("%s\n%s\n%s", 
 						core.program["start"],
-						core.program["require"],
-						core.program["provide"])
+						core.program["requiresAll"],
+						core.program["provides"])
 }
 
 func (core prologCore) runProgram(){
@@ -72,27 +90,13 @@ func (core prologCore) runProgram(){
 }
 
 func setupProlog() prologCore{
-	return prologCore{prolog.New(nil,nil), map[string]string{"start":
-		`
-requisites(ToCheck) :-
-    requisites(ToCheck, []).
-
-requisites(ToCheck, CantProvide) :-
-	findall(Thing, requires(ToCheck, Thing), NeededThings),
-	maplist(exists([ToCheck | CantProvide]), NeededThings),!.
-
-exists(Thing) :-
-    exists([], Thing).
-
-exists(CantProvide, Thing) :-
-    provides(Provider, Thing), 
-    \+ member(Provider, CantProvide),
-    requisites(Provider, CantProvide).
-
-valid(ToCheck) :-
-    provides(ToCheck, _), 
-    requisites(ToCheck),!.
-	`}}
+	file, _ := os.Open("core.pl")
+	sc := bufio.NewScanner(file)
+	var program string
+	for sc.Scan(){
+		program += sc.Text() + "\n"
+	}
+	return prologCore{prolog.New(nil,nil), map[string]string{"start":program}}
 }
 
 var prologErrorsMeaning = map[string]string {
