@@ -52,6 +52,14 @@ func requireAll(who, what any, hashes map[string]string)string{
 	return fmt.Sprintf("requiresAll(%s,%s).", requiringHash,requiredHash)
 }
 
+func requireNot(who, what any, hashes map[string]string)string{
+	requiredHash := md5hash(fmt.Sprint(what))
+	hashes[requiredHash] = fmt.Sprint(what)
+	requiringHash := md5hash(fmt.Sprint(who))
+	hashes[requiringHash] = fmt.Sprint(who)
+	return fmt.Sprintf("requiresNot(%s,%s).", requiringHash,requiredHash)
+}
+
 func provide(who, what any, hashes map[string]string)string{
 	providedHash := md5hash(fmt.Sprint(what))
 	hashes[providedHash] = fmt.Sprint(what)
@@ -76,9 +84,10 @@ func (core *prologCore) addLine(s, where string){
 }
 
 func (core *prologCore)getProgram()string{
-	return fmt.Sprintf("%s\n%s\n%s", 
+	return fmt.Sprintf("%s\n%s\n%s\n%s", 
 						core.program["start"],
 						core.program["requiresAll"],
+						core.program["requiresNot"],
 						core.program["provides"])
 }
 
@@ -130,7 +139,8 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 			}
 			toPrint := make([]string,0,len(output))
 			for k,v := range variables{
-				toPrint = append(toPrint, fmt.Sprintf("%s:%s\t",k,hashes["'"+v.(string)+"'"]))
+
+				toPrint = append(toPrint, fmt.Sprintf("%s:%s\t",k,hashes["'"+fmt.Sprint(v)+"'"]))
 			}
 			sort.Strings(toPrint)
 			output += strings.Join(toPrint, "\t") + "\n"

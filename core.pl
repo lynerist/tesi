@@ -2,8 +2,14 @@ requisitesAll(ToCheck) :-
     requisitesAll(ToCheck, []).
 
 requisitesAll(ToCheck, CantProvide) :-
-	findall(Thing, requiresAll(ToCheck, Thing), NeededThings), 
-	maplist(exists([ToCheck | CantProvide]), NeededThings),!.
+    \+ (requiresAll(ToCheck, Thing), 
+        \+ exists([ToCheck | CantProvide], Thing)).
+
+requisitesNot(ToCheck) :-
+    requisitesNot(ToCheck, []).
+
+requisitesNot(ToCheck, CantProvide) :-
+    \+ (requiresNot(ToCheck, Thing), exists([ToCheck | CantProvide], Thing)).
 
 exists(Thing) :-
     exists([], Thing).
@@ -15,8 +21,8 @@ exists(CantProvide, Thing) :-
 
 valid(ToCheck, CantProvide) :-
     provides(ToCheck, _),
-    requisitesAll(ToCheck, CantProvide),!.
+    requisitesAll(ToCheck, CantProvide),
+    requisitesNot(ToCheck, CantProvide),!.
 
 valid(ToCheck) :-
-    provides(ToCheck, _), 
-    requisitesAll(ToCheck),!.
+    valid(ToCheck, []).
