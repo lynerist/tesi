@@ -5,7 +5,7 @@ import (
 )
 
 func main(){
-	json := readJSON("json/testNot.JSON")
+	json := readJSON("json/testAny.JSON")
 	hashesToText := make(map[string]string)
 	core := setupProlog()
 
@@ -17,11 +17,19 @@ func main(){
 
 		for _, required := range artifact["requires"].(map[string]any)["all"].([]any){
 			log("\t",required,md5hash(fmt.Sprint(required)))
-			core.addLine(requireAll(artifact["name"],required,hashesToText), "requiresAll")
+			core.addLine(requiresAll(artifact["name"],required,hashesToText), "requiresAll")
 		}
 		for _, required := range artifact["requires"].(map[string]any)["not"].([]any){
 			log("\t",required,md5hash(fmt.Sprint(required)))
-			core.addLine(requireNot(artifact["name"],required,hashesToText), "requiresNot")
+			core.addLine(requiresNot(artifact["name"],required,hashesToText), "requiresNot")
+		}
+
+		for groupID, requiredAnyGroup := range artifact["requires"].(map[string]any)["any"].([]any){
+			log("\t","one of:",requiredAnyGroup)
+			for _, required :=  range requiredAnyGroup.([]any){
+				log("\t\t",required,md5hash(fmt.Sprint(required)))
+				core.addLine(requiresAny(artifact["name"], required, groupID, hashesToText), "requiresAny")
+			}
 		}
 
 		log("provides:")

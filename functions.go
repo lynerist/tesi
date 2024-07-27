@@ -31,8 +31,9 @@ func fillMissingKeys(artifact map[string]any){
 		artifact["requires"].(map[string]any)["not"] = []any{}
 	}
 	if _, ok := artifact["requires"].(map[string]any)["any"]; !ok {
-		artifact["requires"].(map[string]any)["any"] = [][]any{}
+		artifact["requires"].(map[string]any)["any"] = make([]any, 0)
 	}
+
 	if _, ok := artifact["requires"].(map[string]any)["one"]; !ok {
 		artifact["requires"].(map[string]any)["one"] = [][]any{}
 	}
@@ -44,20 +45,25 @@ func md5hash(s string)string{
 	return fmt.Sprintf("'%x'", md5.Sum([]byte(s)))
 }
 
-func requireAll(who, what any, hashes map[string]string)string{
-	requiredHash := md5hash(fmt.Sprint(what))
-	hashes[requiredHash] = fmt.Sprint(what)
-	requiringHash := md5hash(fmt.Sprint(who))
-	hashes[requiringHash] = fmt.Sprint(who)
+func calculateAndAddHashes(who, what any, hashes map[string]string)(string, string){
+	requiredHash := md5hash(fmt.Sprint(what)); hashes[requiredHash] = fmt.Sprint(what)
+	requiringHash := md5hash(fmt.Sprint(who)); hashes[requiringHash] = fmt.Sprint(who)
+	return requiringHash, requiredHash
+}
+
+func requiresAll(who, what any, hashes map[string]string)string{
+	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
 	return fmt.Sprintf("requiresAll(%s,%s).", requiringHash,requiredHash)
 }
 
-func requireNot(who, what any, hashes map[string]string)string{
-	requiredHash := md5hash(fmt.Sprint(what))
-	hashes[requiredHash] = fmt.Sprint(what)
-	requiringHash := md5hash(fmt.Sprint(who))
-	hashes[requiringHash] = fmt.Sprint(who)
+func requiresNot(who, what any, hashes map[string]string)string{
+	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
 	return fmt.Sprintf("requiresNot(%s,%s).", requiringHash,requiredHash)
+}
+
+func requiresAny(who, what any, groupID int, hashes map[string]string)string{
+	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
+	return fmt.Sprintf("requiresAny(%s,%s,%d).", requiringHash,requiredHash, groupID)
 }
 
 func provide(who, what any, hashes map[string]string)string{
@@ -84,10 +90,11 @@ func (core *prologCore) addLine(s, where string){
 }
 
 func (core *prologCore)getProgram()string{
-	return fmt.Sprintf("%s\n%s\n%s\n%s", 
+	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s", 
 						core.program["start"],
 						core.program["requiresAll"],
 						core.program["requiresNot"],
+						core.program["requiresAny"],
 						core.program["provides"])
 }
 
@@ -105,7 +112,13 @@ func setupProlog() prologCore{
 	for sc.Scan(){
 		program += sc.Text() + "\n"
 	}
-	return prologCore{prolog.New(nil,nil), map[string]string{"start":program}}
+	return prologCore{prolog.New(nil,nil), map[string]string{
+											"start":program, 
+											"requiresAll":"requiresAll(foo,foo).",
+											"requiresNot":"requiresNot(foo,foo).",
+											"requiresAny":"requiresAny(foo,foo,0).",
+											"requiresOne":"requiresOne(foo,foo,0).",
+											}}
 }
 
 var prologErrorsMeaning = map[string]string {
@@ -139,8 +152,9 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 			}
 			toPrint := make([]string,0,len(output))
 			for k,v := range variables{
-
-				toPrint = append(toPrint, fmt.Sprintf("%s:%s\t",k,hashes["'"+fmt.Sprint(v)+"'"]))
+				answer, ok := hashes["'"+fmt.Sprint(v)+"'"]
+				if !ok {answer = fmt.Sprint(v)}
+				toPrint = append(toPrint, fmt.Sprintf("%s:%s\t",k,answer))
 			}
 			sort.Strings(toPrint)
 			output += strings.Join(toPrint, "\t") + "\n"
