@@ -1,4 +1,4 @@
-[
+{"artifacts":[
     {
         "name" : "grass",
         "provides": [
@@ -47,4 +47,4 @@
             {"control":"bark"}
         ]
     }
-]
+]}

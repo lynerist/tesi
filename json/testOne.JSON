@@ -1,4 +1,4 @@
-[
+{"artifacts":[
     {
         "name" : "sortList",
         "provides": [
@@ -24,4 +24,4 @@
             {"sort":"counting"}
         ]
     }
-]
+]}

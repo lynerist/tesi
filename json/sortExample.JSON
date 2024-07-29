@@ -1,0 +1,35 @@
+{"artifacts":[
+    {
+        "name" : "sortList",
+        "provides": [
+            {"exist":"sort"}
+        ],
+        "requires": {
+            "all":[
+                {"exist":"sort"}
+            ]
+        }
+    },
+    {
+        "name" :"mergeSort",
+        "requires": {
+            "not":[
+                {"exist":"sort"}     
+            ]
+        },
+        "provides":[
+            {"exist":"sort"}
+        ]
+    },
+    {
+        "name" :"countingSort",
+        "requires": {
+            "not":[
+                {"exist":"sort"}     
+            ]
+        },
+        "provides":[
+            {"exist":"sort"}
+        ]
+    }
+]}

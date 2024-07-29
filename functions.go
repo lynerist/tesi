@@ -14,7 +14,7 @@ import (
 
 const VERBOSE = false
 
-func readJSON(fileName string)(json []map[string]any){
+func readJSON(fileName string)(json map[string]any){
 	jsonFile, _ := os.Open(fileName)
 	jsonBin, _ := io.ReadAll(jsonFile)
 	j.Unmarshal(jsonBin, &json)

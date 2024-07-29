@@ -5,11 +5,14 @@ import (
 )
 
 func main(){
-	json := readJSON("json/testOne.JSON")
+	json := readJSON("json/sortExample.JSON")
 	hashesToText := make(map[string]string)
 	core := setupProlog()
+	artifacts := json["artifacts"].([]any)
 
-	for _, artifact := range json{
+	for _, a := range artifacts{
+		artifact := a.(map[string]any)
+
 		log(artifact["name"])
 		fillMissingKeys(artifact)
 		
