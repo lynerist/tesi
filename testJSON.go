@@ -5,7 +5,7 @@ import (
 )
 
 func main(){
-	json := readJSON("json/testAny.JSON")
+	json := readJSON("json/testOne.JSON")
 	hashesToText := make(map[string]string)
 	core := setupProlog()
 
@@ -25,10 +25,18 @@ func main(){
 		}
 
 		for groupID, requiredAnyGroup := range artifact["requires"].(map[string]any)["any"].([]any){
-			log("\t","one of:",requiredAnyGroup)
+			log("\t","any of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
 				log("\t\t",required,md5hash(fmt.Sprint(required)))
 				core.addLine(requiresAny(artifact["name"], required, groupID, hashesToText), "requiresAny")
+			}
+		}
+
+		for groupID, requiredAnyGroup := range artifact["requires"].(map[string]any)["one"].([]any){
+			log("\t","one of:",requiredAnyGroup)
+			for _, required :=  range requiredAnyGroup.([]any){
+				log("\t\t",required,md5hash(fmt.Sprint(required)))
+				core.addLine(requiresOne(artifact["name"], required, groupID, hashesToText), "requiresOne")
 			}
 		}
 

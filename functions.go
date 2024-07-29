@@ -33,10 +33,10 @@ func fillMissingKeys(artifact map[string]any){
 	if _, ok := artifact["requires"].(map[string]any)["any"]; !ok {
 		artifact["requires"].(map[string]any)["any"] = make([]any, 0)
 	}
-
 	if _, ok := artifact["requires"].(map[string]any)["one"]; !ok {
-		artifact["requires"].(map[string]any)["one"] = [][]any{}
+		artifact["requires"].(map[string]any)["one"] = make([]any, 0)
 	}
+
 	if _, ok := artifact["provides"]; !ok {artifact["provides"]=[]any{}}
 	if _, ok := artifact["conditionalProvides"]; !ok {artifact["conditionalProvides"]=[]any{}}
 }
@@ -66,6 +66,11 @@ func requiresAny(who, what any, groupID int, hashes map[string]string)string{
 	return fmt.Sprintf("requiresAny(%s,%s,%d).", requiringHash,requiredHash, groupID)
 }
 
+func requiresOne(who, what any, groupID int, hashes map[string]string)string{
+	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
+	return fmt.Sprintf("requiresOne(%s,%s,%d).", requiringHash,requiredHash, groupID)
+}
+
 func provide(who, what any, hashes map[string]string)string{
 	providedHash := md5hash(fmt.Sprint(what))
 	hashes[providedHash] = fmt.Sprint(what)
@@ -90,11 +95,12 @@ func (core *prologCore) addLine(s, where string){
 }
 
 func (core *prologCore)getProgram()string{
-	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s", 
+	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s", 
 						core.program["start"],
 						core.program["requiresAll"],
 						core.program["requiresNot"],
 						core.program["requiresAny"],
+						core.program["requiresOne"],
 						core.program["provides"])
 }
 
