@@ -12,54 +12,54 @@ func main(){
 	attributes := make(map[string]map[string]any)
 
 	for _, a := range artifacts{
-		artifact := a.(map[string]any)
-		artifactName := artifact["name"].(string)
-		for i, attribute := range artifact["attributes"].([]any){
-			if i==0 {attributes[artifactName] = make(map[string]any)}
+		artifact := Artifact(a.(map[string]any))
+		for i, attribute := range artifact.attributes(){
+			if i==0 {attributes[artifact.name()] = make(map[string]any)}
 			if name, ok := attribute.(map[string]any)["name"]; ok{
 				if value, ok := attribute.(map[string]any)["default"]; ok{
-					attributes[artifactName][name.(string)] = value
+					attributes[artifact.name()][name.(string)] = value
 				}
 			}
 		}
 
-		log(artifact["name"])
-		log("requires all:")
-
-		for _, required := range artifact["requires"].(map[string]any)["all"].([]any){
-			required = insertVariables(required, attributes[artifactName])
+		log(artifact.name())
+		
+		for _, required := range artifact.requires("all"){
+			log("requires all:")
+			required = insertVariables(required, attributes[artifact.name()])
 			log("\t",required,md5hash(fmt.Sprint(required)))
-			core.addLine(requiresAll(artifact["name"],required,hashesToText), "requiresAll")
+			core.addLine(requiresAll(artifact.name(),required,hashesToText), "requiresAll")
 		}
-		for _, required := range artifact["requires"].(map[string]any)["not"].([]any){
-			required = insertVariables(required, attributes[artifactName])
+		for _, required := range artifact.requires("not"){
+			log("requires not:")
+			required = insertVariables(required, attributes[artifact.name()])
 			log("\t",required,md5hash(fmt.Sprint(required)))
-			core.addLine(requiresNot(artifact["name"],required,hashesToText), "requiresNot")
+			core.addLine(requiresNot(artifact.name(),required,hashesToText), "requiresNot")
 		}
 
-		for groupID, requiredAnyGroup := range artifact["requires"].(map[string]any)["any"].([]any){
+		for groupID, requiredAnyGroup := range artifact.requires("any"){
 			log("\t","any of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
-				required = insertVariables(required, attributes[artifactName])
+				required = insertVariables(required, attributes[artifact.name()])
 				log("\t\t",required,md5hash(fmt.Sprint(required)))
-				core.addLine(requiresAny(artifact["name"], required, groupID, hashesToText), "requiresAny")
+				core.addLine(requiresAny(artifact.name(), required, groupID, hashesToText), "requiresAny")
 			}
 		}
 
-		for groupID, requiredAnyGroup := range artifact["requires"].(map[string]any)["one"].([]any){
+		for groupID, requiredAnyGroup := range artifact.requires("one"){
 			log("\t","one of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
-				required = insertVariables(required, attributes[artifactName])
+				required = insertVariables(required, attributes[artifact.name()])
 				log("\t\t",required,md5hash(fmt.Sprint(required)))
-				core.addLine(requiresOne(artifact["name"], required, groupID, hashesToText), "requiresOne")
+				core.addLine(requiresOne(artifact.name(), required, groupID, hashesToText), "requiresOne")
 			}
 		}
 
 		log("provides:")
-		for _, provided := range artifact["provides"].([]any){
-			provided = insertVariables(provided, attributes[artifactName])
+		for _, provided := range artifact.provides(){
+			provided = insertVariables(provided, attributes[artifact.name()])
 			log("\t",provided,md5hash(fmt.Sprint(provided)))
-			core.addLine(provide(artifact["name"], provided, hashesToText), "provides")
+			core.addLine(provide(artifact.name(), provided, hashesToText), "provides")
 		}
 
 		/*
@@ -81,7 +81,7 @@ func main(){
 		*/
 	}
 
-	log(hashesToText)
+	//log(hashesToText)
 
 	core.runProgram()
 

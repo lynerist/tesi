@@ -22,9 +22,6 @@ func readJSON(fileName string)(json map[string]any){
 
 	for k := range json["artifacts"].([]any){
 		fillMissingKeys((json["artifacts"].([]any)[k]).(map[string]any))
-
-
-
 	}
 
 	return
@@ -191,3 +188,18 @@ func insertVariables(atom any, variables map[string]any)string{
 	}
 	return stringAtom
 }
+
+type Artifact map[string]any
+
+func (a Artifact) name() string{
+	return a["name"].(string)
+}
+func (a Artifact) requires(how string)[]any{
+	return a["requires"].(map[string]any)[how].([]any)
+} 
+func (a Artifact) provides()[]any{
+	return a["provides"].([]any)
+} 
+func (a Artifact) attributes()[]any{
+	return a["attributes"].([]any)
+} 
