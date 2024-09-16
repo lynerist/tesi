@@ -1,0 +1,29 @@
+{
+    "artifacts" : [{
+        "name": "temperatura",
+        "provides": [
+            {"temp":"$a"}
+        ],
+        "attributes" : {
+            "temp": "$a"
+        }
+    },
+    {
+        "name": "termometroA",
+        "requires": [{
+                "temp": {
+                "min": "20",
+                "max": "40"
+            }
+        }]
+    },
+    {
+        "name": "termometroB",
+        "requires": [{
+                "temp": {
+               "min": "20",
+                "max": "40"
+            }
+        }]
+    }]
+}

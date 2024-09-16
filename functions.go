@@ -12,13 +12,21 @@ import (
 	"github.com/ichiban/prolog"
 )
 
-const VERBOSE = false
+const VERBOSE = true
 
 func readJSON(fileName string)(json map[string]any){
 	jsonFile, _ := os.Open(fileName)
 	jsonBin, _ := io.ReadAll(jsonFile)
 	j.Unmarshal(jsonBin, &json)
 	jsonFile.Close()
+
+	for k := range json["artifacts"].([]any){
+		fillMissingKeys((json["artifacts"].([]any)[k]).(map[string]any))
+
+
+
+	}
+
 	return
 }
 
@@ -38,6 +46,9 @@ func fillMissingKeys(artifact map[string]any){
 	}
 
 	if _, ok := artifact["provides"]; !ok {artifact["provides"]=[]any{}}
+	if _, ok := artifact["attributes"]; !ok {artifact["attributes"]=[]any{}}
+	if _, ok := artifact["tags"]; !ok {artifact["tags"]=[]string{}}
+
 	if _, ok := artifact["conditionalProvides"]; !ok {artifact["conditionalProvides"]=[]any{}}
 }
 
@@ -171,4 +182,12 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 		}
 		fmt.Println(output)
 	}
+}
+
+func insertVariables(atom any, variables map[string]any)string{
+	stringAtom := fmt.Sprint(atom)
+	for name, value := range variables {
+		stringAtom = strings.ReplaceAll(stringAtom, name, fmt.Sprint(value))
+	}
+	return stringAtom
 }

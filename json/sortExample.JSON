@@ -1,8 +1,8 @@
 {"artifacts":[
     {
-        "name" : "sortList",
+        "name" : "sortedList",
         "provides": [
-            {"exist":"sort"}
+            {"exist":"sortedList"}
         ],
         "requires": {
             "all":[

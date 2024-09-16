@@ -1,61 +1,68 @@
-{"artifacts":[
-    {
-        "name" : "p->A",
-        "requires": {
-            "all": [
+{
+    "artifacts":[
+        {
+            "name" : "p->A",
+            "requires": {
+                "all": [
+                    {"who":"A", "what":"def"},
+                    {"who":"A", "what":"end"}
+                ]
+            },
+            "provides": [
+                {"who":"p", "what":"def"},
+                {"who":"p", "what":"end"}
+            ]
+        },
+        {
+            "name" : "A->aB",
+            "requires": {
+                "all": [
+                    {"who":"B", "what":"def"},
+                    {"who":"B", "what":"end"}
+                ]
+            },
+            "provides": [
                 {"who":"A", "what":"def"},
                 {"who":"A", "what":"end"}
             ]
         },
-        "provides": [
-            {"who":"p", "what":"def"},
-            {"who":"p", "what":"end"}
-        ]
-    },
-    {
-        "name" : "A->aB",
-        "requires": {
-            "all": [
+        {
+            "name" : "B->b",
+            "provides": [
                 {"who":"B", "what":"def"},
                 {"who":"B", "what":"end"}
             ]
         },
-        "provides": [
-            {"who":"A", "what":"def"},
-            {"who":"A", "what":"end"}
-        ]
-    },
-    {
-        "name" : "B->b",
-        "provides": [
-            {"who":"B", "what":"def"},
-            {"who":"B", "what":"end"}
-        ]
-    },
-    {
-        "name" : "A->aA",
-        "requires": {
-            "all": [
-                {"who":"A", "what":"def"},
-                {"who":"A", "what":"end"}
+        {
+            "name" : "A->aA",
+            "requires": {
+                "all": [
+                    {"who":"A", "what":"def"},
+                    {"who":"A", "what":"end"}
+                ]
+            },
+            "provides": [
+                {"who":"A", "what":"def"}
             ]
         },
-        "provides": [
-            {"who":"A", "what":"def"}
-        ]
-    },
-    {
-        "name" : "B->bA",
-        "requires": {
-            "all": [
-                {"who":"A", "what":"def"},
-                {"who":"A", "what":"end"}
+        {
+            "name" : "B->bA",
+            "requires": {
+                "all": [
+                    {"who":"A", "what":"def"},
+                    {"who":"A", "what":"end"}
+                ]
+            },
+            "provides": [
+                {"who":"B", "what":"def"},
+                {"who":"B", "what":"end"}
             ]
-        },
-        "provides": [
-            {"who":"B", "what":"def"},
-            {"who":"B", "what":"end"}
-        ]
-    }
+        }
+    ],
+    "features":[
+        {
+            "name": "programma",
+            "artifacts":["p->A"]
+        }
     ]
 }
