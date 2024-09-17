@@ -61,23 +61,23 @@
     "features": [
         {
             "name":"switch input",
-            "artifacts":"switch"
+            "artifacts":["switch"]
         },
         {
             "name":"case A",
-            "artifacts":"case A"
+            "artifacts":["case A"]
         },
         {
             "name":"case B",
-            "artifacts":"case B"
+            "artifacts":["case B"]
         },
         {
             "name":"case C",
-            "artifacts":"case C"
+            "artifacts":["case C"]
         },
         {
             "name":"default",
-            "artifacts":"default"
+            "artifacts":["default"]
         }
     ]
 }

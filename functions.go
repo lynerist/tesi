@@ -189,7 +189,7 @@ func insertVariables(atom any, variables map[string]any)string{
 	return stringAtom
 }
 
-type Artifact map[string]any
+type Artifact map[string]any 
 
 func (a Artifact) name() string{
 	return a["name"].(string)
@@ -203,3 +203,12 @@ func (a Artifact) provides()[]any{
 func (a Artifact) attributes()[]any{
 	return a["attributes"].([]any)
 } 
+
+type Feature map[string]any
+
+func (f Feature) name() string{
+	return f["name"].(string)
+}
+func (f Feature) artifacts()[]any{
+	return f["artifacts"].([]any)
+}
