@@ -5,24 +5,35 @@ import (
 )
 
 func main(){
+
+	/* --- READ JSON ---*/
 	json := readJSON("json/switch.JSON")
 	hashesToText := make(map[string]string)
 	core := setupProlog()
-	// attributes[artifactName][featureName][variableName]
 	
+	/* --- MAP ARTIFACTS TO FEATURES AND FEATURES TO ARTIFACTS ---*/
+
 	artifactsInFeature := make(map[string][]string)
 	featureWithArtifact := make(map[string][]string)
 	for _, f := range json["features"].([]any){
-		feature := Feature(f.(map[string]any))
+		feature := FeatureArtifacts(f.(map[string]any))
 		for _, artifact := range feature.artifacts(){
 			artifactsInFeature[feature.name()]=append(artifactsInFeature[feature.name()], artifact.(string))
 			featureWithArtifact[artifact.(string)]=append(featureWithArtifact[artifact.(string)], feature.name())
 		}
 	}
 	
+	/* --- STORE ARTIFACTS ---*/
+
+	artifacts := make(map[string]Artifact)
 	attributes := make(map[string]map[string]map[string]any)
+	// attributes[artifactName][featureName][variableName]
 	for _, a := range json["artifacts"].([]any){
 		artifact := Artifact(a.(map[string]any))
+		artifacts[artifact.name()] = artifact
+
+		/* --- STORE ATTRIBUTES ---*/
+
 		for _, attribute := range artifact.attributes(){
 			if name, ok := attribute.(map[string]any)["name"]; ok{
 				if value, ok := attribute.(map[string]any)["default"]; ok{
@@ -79,26 +90,25 @@ func main(){
 
 		/*
 		log("Conditional provides:")
-		for _, rule := range artifact["conditionalProvides"].([]any){
-			log("\tif got:")
-			for _, needed := range rule.(map[string]any)["needs"].([]any){
-				log("\t\t",needed,md5hash(fmt.Sprint(needed)))
-				hashesToText[md5hash(fmt.Sprint(needed))] = fmt.Sprint(needed)
-
-			}
-			log("\tthen:")
-			for _, provided := range rule.(map[string]any)["provides"].([]any){
-				log("\t\t",provided,md5hash(fmt.Sprint(provided)))
-				hashesToText[md5hash(fmt.Sprint(provided))] = fmt.Sprint(provided)
-			}
-		}
-		log("")
 		*/
 	}
 
 	log("\n")
 	log(attributes)
 	//log(hashesToText)
+
+	/* --- STORE FEATURES ---*/
+
+	features := make(map[string]Feature)
+	for _, f := range json["features"].([]any){
+		features[f.(map[string]any)["name"].(string)] = newFeature(FeatureArtifacts(f.(map[string]any)), artifacts)
+	}
+
+	log("\n\n",features)
+
+	// ALGORITMO DI FEATUREIDE SUI TAG
+
+	
 
 	core.runProgram()
 

@@ -203,12 +203,34 @@ func (a Artifact) provides()[]any{
 func (a Artifact) attributes()[]any{
 	return a["attributes"].([]any)
 } 
+func (a Artifact) tags()[]any{
+	return a["tags"].([]any)
+}
 
-type Feature map[string]any
+type FeatureArtifacts map[string]any
 
-func (f Feature) name() string{
+func (f FeatureArtifacts) name() string{
 	return f["name"].(string)
 }
-func (f Feature) artifacts()[]any{
+func (f FeatureArtifacts) artifacts()[]any{
 	return f["artifacts"].([]any)
+}
+
+type Feature struct {
+	name string
+	artifacts []string
+	tags map[string]bool
+}
+
+func newFeature(fa FeatureArtifacts, artifacts map[string]Artifact)Feature{
+	var feature Feature
+	feature.name = fa.name()
+	feature.tags = make(map[string]bool)
+	for _, artifact := range fa.artifacts(){
+		feature.artifacts = append(feature.artifacts, artifact.(string))
+		for _, tag := range artifacts[artifact.(string)].tags(){
+			feature.tags[tag.(string)] = true
+		}
+	}
+	return feature
 }
