@@ -220,12 +220,12 @@ type Feature struct {
 	name string
 	artifacts []string
 	tags map[string]bool
+	children map[string]bool
 }
 
-func newFeature(fa FeatureArtifacts, artifacts map[string]Artifact)Feature{
-	var feature Feature
-	feature.name = fa.name()
-	feature.tags = make(map[string]bool)
+func newFeature(name string, fa FeatureArtifacts, artifacts map[string]Artifact)Feature{
+	feature := Feature{name, nil, make(map[string]bool), make(map[string]bool)}
+
 	for _, artifact := range fa.artifacts(){
 		feature.artifacts = append(feature.artifacts, artifact.(string))
 		for _, tag := range artifacts[artifact.(string)].tags(){
@@ -233,4 +233,64 @@ func newFeature(fa FeatureArtifacts, artifacts map[string]Artifact)Feature{
 		}
 	}
 	return feature
+}
+
+func newAbstractFeature(name string)Feature{
+	return Feature{name, nil, nil, make(map[string]bool)}
+}
+
+func (f Feature) String()string {
+	var tags []string
+	for tag := range f.tags{
+		tags = append(tags, tag)
+	}
+	var children []string
+	for child := range f.children{
+		children = append(children, child)
+	}
+	return fmt.Sprintf("'%s' --> artifacts:%v tags: %v children: %v", f.name, f.artifacts, tags, children)
+}
+
+func (f Feature) isAbstract()bool{
+	return len(f.artifacts)>0
+}
+
+func generateFeatureTree(root string, features map[string]Feature){
+	tagCount := make(map[string]int)
+	for child := range features[root].children{
+		for tag := range features[child].tags{
+			tagCount[tag]++
+		}
+	}
+
+	for{
+		var mostPresentTag string 
+		for tag, count := range tagCount{
+			if count > tagCount[mostPresentTag] && count>1{
+				mostPresentTag = tag
+			}
+		}
+		if mostPresentTag == ""{
+			break
+		}
+
+		newAbstractFeature := newAbstractFeature(mostPresentTag)
+		for child := range features[root].children{
+			if features[child].tags[mostPresentTag]{
+				newAbstractFeature.children[child] = true
+			}
+		}
+		for child := range newAbstractFeature.children{
+			for tag := range features[child].tags{
+				tagCount[tag]--
+			}
+			delete(features[child].tags, mostPresentTag)
+			delete(features[root].children, child)
+		}
+		features[root].children[mostPresentTag] = true
+		features[mostPresentTag] = newAbstractFeature
+	}
+	for child := range features[root].children{
+		generateFeatureTree(child, features)
+	}
 }

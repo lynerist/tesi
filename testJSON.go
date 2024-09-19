@@ -32,7 +32,9 @@ func main(){
 		artifact := Artifact(a.(map[string]any))
 		artifacts[artifact.name()] = artifact
 
-		/* --- STORE ATTRIBUTES ---*/
+		/* --- STORE ATTRIBUTES ---*/ // TODO GLOBALI
+		//TODO LEN MAP A NOME NODI
+		
 
 		for _, attribute := range artifact.attributes(){
 			if name, ok := attribute.(map[string]any)["name"]; ok{
@@ -98,18 +100,23 @@ func main(){
 	//log(hashesToText)
 
 	/* --- STORE FEATURES ---*/
+	featureModelRoot := newAbstractFeature("")
+	features := map[string]Feature{"":featureModelRoot}
 
-	features := make(map[string]Feature)
 	for _, f := range json["features"].([]any){
-		features[f.(map[string]any)["name"].(string)] = newFeature(FeatureArtifacts(f.(map[string]any)), artifacts)
+		featureName := fmt.Sprintf("%s_%d", f.(map[string]any)["name"].(string), len(features))
+		features[featureName] = newFeature(featureName, FeatureArtifacts(f.(map[string]any)), artifacts)
+		featureModelRoot.children[featureName] = true
 	}
 
-	log("\n\n",features)
-
-	// ALGORITMO DI FEATUREIDE SUI TAG
-
 	
-
+	// ALGORITMO DI AIDE SUI TAG
+	generateFeatureTree("", features)
+	
+	log("\n\n")
+	for _, feature := range features{
+		log(feature)
+	}
 	core.runProgram()
 
 	//fmt.Println(core.getProgram())
