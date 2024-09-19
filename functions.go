@@ -188,10 +188,13 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 	}
 }
 
-func insertVariables(atom any, variables map[string]any)string{
+func insertVariables(atom any, artifact, feature string, variables map[string]map[string]variableValue, globals globalRegister)string{
 	stringAtom := fmt.Sprint(atom)
-	for name, value := range variables {
+	for name, value := range variables[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, name, fmt.Sprint(value))
+	}
+	for name := range globals.needs[artifact]{
+		stringAtom = strings.ReplaceAll(stringAtom, name, fmt.Sprint(globals.get(name)))
 	}
 	return stringAtom
 }
@@ -210,6 +213,9 @@ func (a Artifact) provides()[]any{
 func (a Artifact) attributes()[]any{
 	return a["attributes"].([]any)
 } 
+func (a Artifact) globals()[]any{
+	return a["globals"].([]any)
+} 
 func (a Artifact) tags()[]any{
 	return a["tags"].([]any)
 }
@@ -221,6 +227,36 @@ func (f FeatureArtifacts) name() string{
 }
 func (f FeatureArtifacts) artifacts()[]any{
 	return f["artifacts"].([]any)
+}
+
+type variableValue map[string]any
+
+type globalRegister struct {
+	proposed map[string]map[any]int
+	elected map[string]any
+	needs map[string]map[string]bool
+}
+func newGlobalRegister()(newRegister globalRegister){
+	newRegister.proposed = make(map[string]map[any]int)
+	newRegister.elected = make(map[string]any)
+	newRegister.needs = make(map[string]map[string]bool)
+	return
+}
+func (gr globalRegister)put(name string, value any, artifact string){
+	if len(gr.proposed[name])==0{
+		gr.proposed[name] = make(map[any]int)
+	} 
+	gr.proposed[name][value]++
+	if gr.proposed[name][value] > gr.proposed[name][gr.elected[name]] || len(gr.proposed)==1{
+		gr.elected[name]=value
+	}
+	if len(gr.needs[artifact])==0{
+		gr.needs[artifact] = make(map[string]bool)
+	}
+	gr.needs[artifact][name]=true
+}
+func (gr globalRegister)get(name string)any{
+	return gr.elected[name]
 }
 
 type Feature struct {
@@ -281,7 +317,7 @@ func generateFeatureTree(root string, features map[string]Feature){
 			break
 		}
 
-		newAbstractFeature := newAbstractFeature(fmt.Sprintf("%s_%d",mostPresentTag, len(features)))
+		newAbstractFeature := newAbstractFeature(fmt.Sprintf("%s::%d",mostPresentTag, len(features)))
 		for child := range features[root].children{
 			if features[child].tags[mostPresentTag]{
 				newAbstractFeature.children[child] = true

@@ -26,39 +26,49 @@ func main(){
 	/* --- STORE ARTIFACTS ---*/
 
 	artifacts := make(map[string]Artifact)
-	attributes := make(map[string]map[string]map[string]any)
+	attributes := make(map[string]map[string]variableValue)
 	// attributes[artifactName][featureName][variableName]
+	globals := newGlobalRegister()
+	
 	for _, a := range json["artifacts"].([]any){
 		artifact := Artifact(a.(map[string]any))
 		artifacts[artifact.name()] = artifact
 
-		/* --- STORE ATTRIBUTES ---*/ // TODO GLOBALI		
-
+		/* --- STORE ATTRIBUTES ---*/ 		
 		for _, attribute := range artifact.attributes(){
-			if name, ok := attribute.(map[string]any)["name"]; ok{
+			if name, ok := attribute.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='$'{
 				if value, ok := attribute.(map[string]any)["default"]; ok{
-					attributes[artifact.name()] = make(map[string]map[string]any)
+					attributes[artifact.name()] = make(map[string]variableValue)
 					for _, feature := range featureWithArtifact[artifact.name()]{
-						attributes[artifact.name()][feature] = make(map[string]any) 
+						attributes[artifact.name()][feature] = make(variableValue) 
 						attributes[artifact.name()][feature][name.(string)] = value
 					}
-					attributes[artifact.name()][""] = make(map[string]any) 
+					attributes[artifact.name()][""] = make(variableValue) 
 					attributes[artifact.name()][""][name.(string)] = value
+				}
+			}
+		}
+
+		/* --- STORE GLOBALS ---*/ 		
+		for _, global := range artifact.globals(){
+			if name, ok := global.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='@'{
+				if value, ok := global.(map[string]any)["default"]; ok{
+					globals.put(name.(string), value, artifact.name())
 				}
 			}
 		}
 
 		log(artifact.name())
 		
-		for _, required := range artifact.requires(ALL){
-			log("requires all:")
-			required = insertVariables(required, attributes[artifact.name()][""])
+		for i, required := range artifact.requires(ALL){
+			if i==0 {log("requires all:")}
+			required = insertVariables(required, artifact.name(), "", attributes, globals)
 			log("\t",required,md5hash(fmt.Sprint(required)))
 			core.addLine(requiresAll(artifact.name(),required,hashesToText), "requiresAll")
 		}
-		for _, required := range artifact.requires(NOT){
-			log("requires not:")
-			required = insertVariables(required, attributes[artifact.name()][""])
+		for i, required := range artifact.requires(NOT){
+			if i==0 {log("requires not:")}
+			required = insertVariables(required, artifact.name(), "", attributes, globals)
 			log("\t",required,md5hash(fmt.Sprint(required)))
 			core.addLine(requiresNot(artifact.name(),required,hashesToText), "requiresNot")
 		}
@@ -66,7 +76,7 @@ func main(){
 		for groupID, requiredAnyGroup := range artifact.requires(ANY){
 			log("\t","any of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
-				required = insertVariables(required, attributes[artifact.name()][""])
+				required = insertVariables(required, artifact.name(), "", attributes, globals)
 				log("\t\t",required,md5hash(fmt.Sprint(required)))
 				core.addLine(requiresAny(artifact.name(), required, groupID, hashesToText), "requiresAny")
 			}
@@ -75,7 +85,7 @@ func main(){
 		for groupID, requiredAnyGroup := range artifact.requires(ONE){
 			log("\t","one of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
-				required = insertVariables(required, attributes[artifact.name()][""])
+				required = insertVariables(required, artifact.name(), "", attributes, globals)
 				log("\t\t",required,md5hash(fmt.Sprint(required)))
 				core.addLine(requiresOne(artifact.name(), required, groupID, hashesToText), "requiresOne")
 			}
@@ -83,7 +93,7 @@ func main(){
 
 		log("provides:")
 		for _, provided := range artifact.provides(){
-			provided = insertVariables(provided, attributes[artifact.name()][""])
+			provided = insertVariables(provided, artifact.name(), "", attributes, globals)
 			log("\t",provided,md5hash(fmt.Sprint(provided)))
 			core.addLine(provide(artifact.name(), provided, hashesToText), "provides")
 		}
@@ -102,11 +112,10 @@ func main(){
 	features := map[string]Feature{"":featureModelRoot}
 
 	for _, f := range json["features"].([]any){
-		featureName := fmt.Sprintf("%s_%d", f.(map[string]any)["name"].(string), len(features))
+		featureName := fmt.Sprintf("%s::%d", f.(map[string]any)["name"].(string), len(features))
 		features[featureName] = newFeature(featureName, FeatureArtifacts(f.(map[string]any)), artifacts)
 		featureModelRoot.children[featureName] = true
 	}
-
 	
 	// ALGORITMO DI AIDE SUI TAG
 	generateFeatureTree("", features)
@@ -118,5 +127,5 @@ func main(){
 	core.runProgram()
 
 	//fmt.Println(core.getProgram())
-	prologQueryConsole(core, hashesToText)	
+	//prologQueryConsole(core, hashesToText)	
 }

@@ -2,11 +2,16 @@
     {
         "name": "switch",
         "provides": [
-            {"case":"$x"}
+            {"case":"$x"},
+            {"program":"@p"}
         ],
         "attributes" : [{
             "name": "$x",
             "default":"default"
+        }],
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
         }],
         "tags":["switch", "input"]
     },
@@ -14,9 +19,14 @@
         "name": "case A",
         "requires": {
             "all": [
-                {"case":"A"}
+                {"case":"A"},
+                {"program":"@p"}
             ]
         },
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
         "provides": [
             {"action":"Run code A"}
         ],
@@ -26,9 +36,14 @@
         "name": "case B",
         "requires": {
             "all": [
-                {"case":"B"}
+                {"case":"B"},
+                {"program":"@p"}
             ]
         },
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
         "provides": [
             {"action":"Run code B"}
         ],
@@ -38,9 +53,14 @@
         "name": "case C",
         "requires": {
             "all": [
-                {"case":"C"}
+                {"case":"C"},
+                {"program":"@p"}
             ]
         },
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
         "provides": [
             {"action":"Run code C"}
         ],
@@ -50,12 +70,17 @@
         "name": "default",
         "requires": {
             "all": [
-                {"case":"default"}
+                {"case":"default"},
+                {"program":"@p"}
             ]
         },
         "provides": [
             {"action":"Run default code"}
         ],
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
         "tags":["switch", "case"]
     }],
     "features": [
