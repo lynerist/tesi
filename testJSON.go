@@ -32,9 +32,7 @@ func main(){
 		artifact := Artifact(a.(map[string]any))
 		artifacts[artifact.name()] = artifact
 
-		/* --- STORE ATTRIBUTES ---*/ // TODO GLOBALI
-		//TODO LEN MAP A NOME NODI
-		
+		/* --- STORE ATTRIBUTES ---*/ // TODO GLOBALI		
 
 		for _, attribute := range artifact.attributes(){
 			if name, ok := attribute.(map[string]any)["name"]; ok{
@@ -52,20 +50,20 @@ func main(){
 
 		log(artifact.name())
 		
-		for _, required := range artifact.requires("all"){
+		for _, required := range artifact.requires(ALL){
 			log("requires all:")
 			required = insertVariables(required, attributes[artifact.name()][""])
 			log("\t",required,md5hash(fmt.Sprint(required)))
 			core.addLine(requiresAll(artifact.name(),required,hashesToText), "requiresAll")
 		}
-		for _, required := range artifact.requires("not"){
+		for _, required := range artifact.requires(NOT){
 			log("requires not:")
 			required = insertVariables(required, attributes[artifact.name()][""])
 			log("\t",required,md5hash(fmt.Sprint(required)))
 			core.addLine(requiresNot(artifact.name(),required,hashesToText), "requiresNot")
 		}
 
-		for groupID, requiredAnyGroup := range artifact.requires("any"){
+		for groupID, requiredAnyGroup := range artifact.requires(ANY){
 			log("\t","any of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
 				required = insertVariables(required, attributes[artifact.name()][""])
@@ -74,7 +72,7 @@ func main(){
 			}
 		}
 
-		for groupID, requiredAnyGroup := range artifact.requires("one"){
+		for groupID, requiredAnyGroup := range artifact.requires(ONE){
 			log("\t","one of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
 				required = insertVariables(required, attributes[artifact.name()][""])

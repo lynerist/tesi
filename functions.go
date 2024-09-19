@@ -13,6 +13,13 @@ import (
 )
 
 const VERBOSE = true
+const ALL 		string = "all"
+const NOT 		string = "not"
+const ANY 		string = "any"
+const ONE 		string = "one"
+const REQUIRES 	string = "requires"
+const PROVIDES 	string = "provides"
+
 
 func readJSON(fileName string)(json map[string]any){
 	jsonFile, _ := os.Open(fileName)
@@ -28,21 +35,21 @@ func readJSON(fileName string)(json map[string]any){
 }
 
 func fillMissingKeys(artifact map[string]any){
-	if _, ok := artifact["requires"]; !ok {artifact["requires"]=make(map[string]any)}
-	if _, ok := artifact["requires"].(map[string]any)["all"]; !ok {
-		artifact["requires"].(map[string]any)["all"] = []any{}
+	if _, ok := artifact[REQUIRES]; !ok {artifact[REQUIRES]=make(map[string]any)}
+	if _, ok := artifact[REQUIRES].(map[string]any)[ALL]; !ok {
+		artifact[REQUIRES].(map[string]any)[ALL] = []any{}
 	}
-	if _, ok := artifact["requires"].(map[string]any)["not"]; !ok {
-		artifact["requires"].(map[string]any)["not"] = []any{}
+	if _, ok := artifact[REQUIRES].(map[string]any)[NOT]; !ok {
+		artifact[REQUIRES].(map[string]any)[NOT] = []any{}
 	}
-	if _, ok := artifact["requires"].(map[string]any)["any"]; !ok {
-		artifact["requires"].(map[string]any)["any"] = make([]any, 0)
+	if _, ok := artifact[REQUIRES].(map[string]any)[ANY]; !ok {
+		artifact[REQUIRES].(map[string]any)[ANY] = make([]any, 0)
 	}
-	if _, ok := artifact["requires"].(map[string]any)["one"]; !ok {
-		artifact["requires"].(map[string]any)["one"] = make([]any, 0)
+	if _, ok := artifact[REQUIRES].(map[string]any)[ONE]; !ok {
+		artifact[REQUIRES].(map[string]any)[ONE] = make([]any, 0)
 	}
 
-	if _, ok := artifact["provides"]; !ok {artifact["provides"]=[]any{}}
+	if _, ok := artifact[PROVIDES]; !ok {artifact[PROVIDES]=[]any{}}
 	if _, ok := artifact["attributes"]; !ok {artifact["attributes"]=[]any{}}
 	if _, ok := artifact["tags"]; !ok {artifact["tags"]=[]string{}}
 
@@ -109,7 +116,7 @@ func (core *prologCore)getProgram()string{
 						core.program["requiresNot"],
 						core.program["requiresAny"],
 						core.program["requiresOne"],
-						core.program["provides"])
+						core.program[PROVIDES])
 }
 
 func (core prologCore) runProgram(){
@@ -195,10 +202,10 @@ func (a Artifact) name() string{
 	return a["name"].(string)
 }
 func (a Artifact) requires(how string)[]any{
-	return a["requires"].(map[string]any)[how].([]any)
+	return a[REQUIRES].(map[string]any)[how].([]any)
 } 
 func (a Artifact) provides()[]any{
-	return a["provides"].([]any)
+	return a[PROVIDES].([]any)
 } 
 func (a Artifact) attributes()[]any{
 	return a["attributes"].([]any)
@@ -274,7 +281,7 @@ func generateFeatureTree(root string, features map[string]Feature){
 			break
 		}
 
-		newAbstractFeature := newAbstractFeature(mostPresentTag)
+		newAbstractFeature := newAbstractFeature(fmt.Sprintf("%s_%d",mostPresentTag, len(features)))
 		for child := range features[root].children{
 			if features[child].tags[mostPresentTag]{
 				newAbstractFeature.children[child] = true
