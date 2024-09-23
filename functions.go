@@ -20,6 +20,9 @@ const ONE 		string = "one"
 const REQUIRES 	string = "requires"
 const PROVIDES 	string = "provides"
 
+type artifactName = string
+type featureName = string
+type tagName = string
 
 func readJSON(fileName string)(json map[string]any){
 	jsonFile, _ := os.Open(fileName)
@@ -51,6 +54,7 @@ func fillMissingKeys(artifact map[string]any){
 
 	if _, ok := artifact[PROVIDES]; !ok {artifact[PROVIDES]=[]any{}}
 	if _, ok := artifact["attributes"]; !ok {artifact["attributes"]=[]any{}}
+	if _, ok := artifact["globals"]; !ok {artifact["globals"]=[]any{}}
 	if _, ok := artifact["tags"]; !ok {artifact["tags"]=[]string{}}
 
 	if _, ok := artifact["conditionalProvides"]; !ok {artifact["conditionalProvides"]=[]any{}}
@@ -188,7 +192,7 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 	}
 }
 
-func insertVariables(atom any, artifact, feature string, variables map[string]map[string]variableValue, globals globalRegister)string{
+func insertVariables(atom any, artifact artifactName, feature string, variables map[artifactName]map[string]variableValue, globals globalRegister)string{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range variables[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, name, fmt.Sprint(value))
@@ -201,7 +205,7 @@ func insertVariables(atom any, artifact, feature string, variables map[string]ma
 
 type Artifact map[string]any 
 
-func (a Artifact) name() string{
+func (a Artifact) name() artifactName{
 	return a["name"].(string)
 }
 func (a Artifact) requires(how string)[]any{
@@ -234,15 +238,15 @@ type variableValue map[string]any
 type globalRegister struct {
 	proposed map[string]map[any]int
 	elected map[string]any
-	needs map[string]map[string]bool
+	needs map[artifactName]map[string]bool
 }
 func newGlobalRegister()(newRegister globalRegister){
 	newRegister.proposed = make(map[string]map[any]int)
 	newRegister.elected = make(map[string]any)
-	newRegister.needs = make(map[string]map[string]bool)
+	newRegister.needs = make(map[artifactName]map[string]bool)
 	return
 }
-func (gr globalRegister)put(name string, value any, artifact string){
+func (gr globalRegister)put(name string, value any, artifact artifactName){
 	if len(gr.proposed[name])==0{
 		gr.proposed[name] = make(map[any]int)
 	} 
@@ -266,7 +270,7 @@ type Feature struct {
 	children map[string]bool
 }
 
-func newFeature(name string, fa FeatureArtifacts, artifacts map[string]Artifact)Feature{
+func newFeature(name string, fa FeatureArtifacts, artifacts map[artifactName]Artifact)Feature{
 	feature := Feature{name, nil, make(map[string]bool), make(map[string]bool)}
 
 	for _, artifact := range fa.artifacts(){
@@ -317,7 +321,7 @@ func generateFeatureTree(root string, features map[string]Feature){
 			break
 		}
 
-		newAbstractFeature := newAbstractFeature(fmt.Sprintf("%s::%d",mostPresentTag, len(features)))
+		newAbstractFeature := newAbstractFeature(fmt.Sprintf("T::%s::%d",mostPresentTag, len(features)))
 		for child := range features[root].children{
 			if features[child].tags[mostPresentTag]{
 				newAbstractFeature.children[child] = true
@@ -330,10 +334,22 @@ func generateFeatureTree(root string, features map[string]Feature){
 			delete(features[child].tags, mostPresentTag)
 			delete(features[root].children, child)
 		}
-		features[root].children[mostPresentTag] = true
-		features[mostPresentTag] = newAbstractFeature
+		features[root].children[newAbstractFeature.name] = true
+		features[newAbstractFeature.name] = newAbstractFeature
 	}
 	for child := range features[root].children{
 		generateFeatureTree(child, features)
 	}
+}
+
+func printTree(root string, indent int, features map[string]Feature){
+	if len(features[root].children)==0{
+		fmt.Printf("%s%s\n", strings.Repeat("\t", indent), root)
+		return
+	}
+	fmt.Printf("%s%s -> [\n", strings.Repeat("\t", indent), root)
+	for child := range features[root].children{
+		printTree(child, indent+1, features)
+	}
+	fmt.Printf("%s]\n", strings.Repeat("\t", indent))
 }

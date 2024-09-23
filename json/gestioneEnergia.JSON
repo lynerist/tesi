@@ -1,0 +1,182 @@
+{
+    "artifacts": [
+        {
+            "name": "solar_panel_module",
+            "provides": [
+                {"energy_source": "solar"},
+                {"system": "@sys"}
+            ],
+            "attributes": [
+                {
+                    "name": "$output",
+                    "default": "5kW"
+                }
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Energy Management"
+                }
+            ],
+            "tags": ["energy", "production"]
+        },
+        {
+            "name": "wind_turbine_module",
+            "provides": [
+                {"energy_source": "wind"},
+                {"system": "@sys"}
+            ],
+            "attributes": [
+                {
+                    "name": "$output",
+                    "default": "3kW"
+                }
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Energy Management"
+                }
+            ],
+            "tags": ["energy", "production"]
+        },
+        {
+            "name": "grid_connection_module",
+            "requires": {
+                "any": [
+                    [
+                        {"energy_source": "solar"},
+                        {"energy_source": "wind"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"energy_source": "grid"},
+                {"system": "@sys"}
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Energy Management"
+                }
+            ],
+            "tags": ["energy", "grid"]
+        },
+        {
+            "name": "battery_storage_module",
+            "requires": {
+                "any": [
+                    [
+                        {"energy_source": "solar"},
+                        {"energy_source": "wind"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"storage": "battery"},
+                {"energy_source": "stored_energy"}
+            ],
+            "tags": ["storage", "backup"]
+        },
+        {
+            "name": "energy_monitoring_module",
+            "provides": [
+                {"monitor": "energy_usage"},
+                {"system": "@sys"}
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Energy Management"
+                }
+            ],
+            "tags": ["monitoring", "sensor"]
+        },
+        {
+            "name": "smart_appliance_module",
+            "requires": {
+                "all": [
+                    {"monitor": "energy_usage"},
+                    {"system": "@sys"}
+                ]
+            },
+            "provides": [
+                {"appliance": "smart_device"}
+            ],
+            "tags": ["appliance", "consumer"]
+        },
+        {
+            "name": "backup_generator_module",
+            "requires": {
+                "not": [
+                    {"energy_source": "grid"}
+                ]
+            },
+            "provides": [
+                {"energy_source": "generator"}
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Energy Management"
+                }
+            ],
+            "tags": ["backup", "generation"]
+        },
+        {
+            "name": "emergency_shutdown_module",
+            "requires": {
+                "any": [
+                    [
+                        {"system_status": "overload"},
+                        {"system_status": "failure"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"action": "shutdown"}
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Energy Management"
+                }
+            ],
+            "tags": ["system", "shutdown"]
+        }
+    ],
+    "features": [
+        {
+            "name": "solar energy production",
+            "artifacts": ["solar_panel_module"]
+        },
+        {
+            "name": "wind energy production",
+            "artifacts": ["wind_turbine_module"]
+        },
+        {
+            "name": "grid energy backup",
+            "artifacts": ["grid_connection_module"]
+        },
+        {
+            "name": "battery storage system",
+            "artifacts": ["battery_storage_module"]
+        },
+        {
+            "name": "energy monitoring",
+            "artifacts": ["energy_monitoring_module"]
+        },
+        {
+            "name": "smart appliances",
+            "artifacts": ["smart_appliance_module"]
+        },
+        {
+            "name": "backup generator",
+            "artifacts": ["backup_generator_module"]
+        },
+        {
+            "name": "emergency shutdown",
+            "artifacts": ["emergency_shutdown_module"]
+        }
+    ]
+}

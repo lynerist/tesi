@@ -7,14 +7,15 @@ import (
 func main(){
 
 	/* --- READ JSON ---*/
-	json := readJSON("json/switch.JSON")
+	jsonName := "domotica"
+	json := readJSON(fmt.Sprintf("json/%s.JSON", jsonName))
 	hashesToText := make(map[string]string)
 	core := setupProlog()
 	
 	/* --- MAP ARTIFACTS TO FEATURES AND FEATURES TO ARTIFACTS ---*/
 
-	artifactsInFeature := make(map[string][]string)
-	featureWithArtifact := make(map[string][]string)
+	artifactsInFeature := make(map[string][]artifactName)
+	featureWithArtifact := make(map[artifactName][]string)
 	for _, f := range json["features"].([]any){
 		feature := FeatureArtifacts(f.(map[string]any))
 		for _, artifact := range feature.artifacts(){
@@ -25,9 +26,8 @@ func main(){
 	
 	/* --- STORE ARTIFACTS ---*/
 
-	artifacts := make(map[string]Artifact)
-	attributes := make(map[string]map[string]variableValue)
-	// attributes[artifactName][featureName][variableName]
+	artifacts := make(map[artifactName]Artifact)
+	attributes := make(map[artifactName]map[string]variableValue)
 	globals := newGlobalRegister()
 	
 	for _, a := range json["artifacts"].([]any){
@@ -125,7 +125,7 @@ func main(){
 		log(feature)
 	}
 	core.runProgram()
-
+	printTree("", 0, features)
 	//fmt.Println(core.getProgram())
 	//prologQueryConsole(core, hashesToText)	
 }
