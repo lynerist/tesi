@@ -20,9 +20,10 @@ const ONE 		string = "one"
 const REQUIRES 	string = "requires"
 const PROVIDES 	string = "provides"
 
-type artifactName	 string
-type featureName	 string
-type tagName		 string
+type artifactName	string
+type featureName	string
+type tagName		string
+type variableName	string
 
 func (t tagName) String()string{
 	return fmt.Sprintf("T::%s", string(t))
@@ -196,13 +197,13 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 	}
 }
 
-func insertVariables(atom any, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]variableValue, globals globalRegister)string{
+func insertVariables(atom any, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]map[variableName]any, globals globalRegister)string{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range variables[artifact][feature] {
-		stringAtom = strings.ReplaceAll(stringAtom, name, fmt.Sprint(value))
+		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(value))
 	}
 	for name := range globals.needs[artifact]{
-		stringAtom = strings.ReplaceAll(stringAtom, name, fmt.Sprint(globals.get(name)))
+		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(globals.get(name)))
 	}
 	return stringAtom
 }
@@ -235,34 +236,22 @@ func getNameFromFeatureJSON(f any) featureName{
 	return featureName(f.(map[string]any)["name"].(string))
 }
 
-/*
-type FeatureArtifacts map[string]any
-
-func (f FeatureArtifacts) name() featureName{
-	return featureName(f["name"].(string))
-}
-func (f FeatureArtifacts) artifacts()[]any{
-	return f["artifacts"].([]any)
-}
-*/
 func stringToAN(s any)artifactName{
 	return artifactName(s.(string))
 }
 
-type variableValue map[string]any
-
 type globalRegister struct {
-	proposed map[string]map[any]int
-	elected map[string]any
-	needs map[artifactName]map[string]bool
+	proposed map[variableName]map[any]int
+	elected map[variableName]any
+	needs map[artifactName]map[variableName]bool
 }
 func newGlobalRegister()(newRegister globalRegister){
-	newRegister.proposed = make(map[string]map[any]int)
-	newRegister.elected = make(map[string]any)
-	newRegister.needs = make(map[artifactName]map[string]bool)
+	newRegister.proposed = make(map[variableName]map[any]int)
+	newRegister.elected = make(map[variableName]any)
+	newRegister.needs = make(map[artifactName]map[variableName]bool)
 	return
 }
-func (gr globalRegister)put(name string, value any, artifact artifactName){
+func (gr globalRegister)put(name variableName, value any, artifact artifactName){
 	if len(gr.proposed[name])==0{
 		gr.proposed[name] = make(map[any]int)
 	} 
@@ -271,17 +260,17 @@ func (gr globalRegister)put(name string, value any, artifact artifactName){
 		gr.elected[name]=value
 	}
 	if len(gr.needs[artifact])==0{
-		gr.needs[artifact] = make(map[string]bool)
+		gr.needs[artifact] = make(map[variableName]bool)
 	}
 	gr.needs[artifact][name]=true
 }
-func (gr globalRegister)get(name string)any{
+func (gr globalRegister)get(name variableName)any{
 	return gr.elected[name]
 }
 
 type Feature struct {
 	name featureName
-	artifacts []string
+	artifacts []artifactName
 	tags map[tagName]bool
 	children map[featureName]bool
 }
@@ -294,7 +283,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 	feature := Feature{name, nil, make(map[tagName]bool), make(map[featureName]bool)}
 
 	for _, artifact := range composingArtifacts {
-		feature.artifacts = append(feature.artifacts, artifact.(string))
+		feature.artifacts = append(feature.artifacts, artifactName(artifact.(string)))
 		for _, tag := range artifacts[stringToAN(artifact)].tags(){
 			feature.tags[tagName(tag.(string))] = true
 		}

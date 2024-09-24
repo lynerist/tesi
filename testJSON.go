@@ -6,53 +6,37 @@ import (
 
 func main(){
 
-	/* --- READ JSON ---*/
+	/* --- READ JSON --- */
 	jsonName := "domotica"
 	json := readJSON(fmt.Sprintf("json/%s.JSON", jsonName))
 	hashesToText := make(map[string]string)
 	core := setupProlog()
-	
-	/* --- MAP ARTIFACTS TO FEATURES AND FEATURES TO ARTIFACTS ---*/
-
-	artifactsInFeature := make(map[featureName][]artifactName)
-	featureWithArtifact := make(map[artifactName][]featureName)
-	for _, f := range json["features"].([]any){
-		for _, artifact := range getArtifactsFromFeatureJSON(f){
-			artifactsInFeature[getNameFromFeatureJSON(f)]=append(artifactsInFeature[getNameFromFeatureJSON(f)], stringToAN(artifact))
-			featureWithArtifact[stringToAN(artifact)]=append(featureWithArtifact[stringToAN(artifact)], getNameFromFeatureJSON(f))
-		}
-	}
-	
-	/* --- STORE ARTIFACTS ---*/
-
+		
+	/* --- STORE ARTIFACTS --- */
 	artifacts := make(map[artifactName]Artifact)
-	attributes := make(map[artifactName]map[featureName]variableValue)
+	attributes := make(map[artifactName]map[featureName]map[variableName]any)
 	globals := newGlobalRegister()
 	
 	for _, a := range json["artifacts"].([]any){
 		artifact := Artifact(a.(map[string]any))
 		artifacts[artifact.name()] = artifact
 
-		/* --- STORE ATTRIBUTES ---*/ 		
+		/* --- STORE ATTRIBUTES DEFAULTS---*/ 		
 		for _, attribute := range artifact.attributes(){
 			if name, ok := attribute.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='$'{
 				if value, ok := attribute.(map[string]any)["default"]; ok{
-					attributes[artifact.name()] = make(map[featureName]variableValue)
-					for _, feature := range featureWithArtifact[artifact.name()]{
-						attributes[artifact.name()][feature] = make(variableValue) 
-						attributes[artifact.name()][feature][name.(string)] = value
-					}
-					attributes[artifact.name()][""] = make(variableValue) 
-					attributes[artifact.name()][""][name.(string)] = value
+					attributes[artifact.name()] = make(map[featureName]map[variableName]any)
+					attributes[artifact.name()][""] = make(map[variableName]any) 
+					attributes[artifact.name()][""][variableName(name.(string))] = value
 				}
 			}
 		}
 
-		/* --- STORE GLOBALS ---*/ 		
+		/* --- STORE GLOBALS --- */ 		
 		for _, global := range artifact.globals(){
 			if name, ok := global.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='@'{
 				if value, ok := global.(map[string]any)["default"]; ok{
-					globals.put(name.(string), value, artifact.name())
+					globals.put(variableName(name.(string)), value, artifact.name())
 				}
 			}
 		}
@@ -106,17 +90,23 @@ func main(){
 	log(attributes)
 	//log(hashesToText)
 
-	/* --- STORE FEATURES ---*/
+	/* --- STORE FEATURES --- */
 	featureModelRoot := newAbstractFeature("")
 	features := map[featureName]Feature{"":featureModelRoot}
 
 	for _, f := range json["features"].([]any){
-		name := newFeatureName(f, len(features))
-		features[name] = newFeature(name, getArtifactsFromFeatureJSON(f), artifacts)
-		featureModelRoot.children[name] = true
+		feature := newFeature(newFeatureName(f, len(features)), getArtifactsFromFeatureJSON(f), artifacts)
+		features[feature.name] = feature
+		featureModelRoot.children[feature.name] = true
+		for _, artifact := range feature.artifacts{
+			for variable, value := range attributes[artifact][""]{
+				attributes[artifact][feature.name] = make(map[variableName]any) 
+				attributes[artifact][feature.name][variable] = value
+			}
+		}
 	}
 	
-	// ALGORITMO DI AIDE SUI TAG
+	/* --- FEATURE TREE GENERATION --- */
 	generateFeatureTree("", features)
 	
 	log("\n\n")
