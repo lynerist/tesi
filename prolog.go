@@ -51,11 +51,11 @@ func setupProlog() prologCore{
 											}}
 }
 
-var prologErrorsMeaning = map[string]string {
-	"EOF":"Missing end of the query.",
-}
-
 func prologQueryConsole(core prologCore, hashes map[string]string){
+	var prologErrorsMeaning = map[string]string {
+		"EOF":"Missing end of the query.",
+	}
+
 	sc := bufio.NewScanner(os.Stdin)
 	for fmt.Print("?- "); sc.Scan(); fmt.Print("?- "){
 		query := sc.Text()

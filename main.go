@@ -78,7 +78,7 @@ func main(){
 		for _, provided := range artifact.provides(){
 			provided = insertVariables(provided, artifact.name(), "", attributes, globals)
 			log("\t",provided,md5hash(fmt.Sprint(provided)))
-			core.addLine(provide(artifact.name(), provided, hashesToText), "provides")
+			core.addLine(provides(artifact.name(), provided, hashesToText), "provides")
 		}
 
 		/*
@@ -95,7 +95,7 @@ func main(){
 	features := map[featureName]Feature{"":featureModelRoot}
 
 	for _, f := range json["features"].([]any){
-		feature := newFeature(newFeatureName(f, len(features)), getArtifactsFromFeatureJSON(f), artifacts)
+		feature := newFeature(newFeatureName(f, len(features)), getArtifactsFromFeatureJSON(f), artifacts, "")
 		features[feature.name] = feature
 		featureModelRoot.children[feature.name] = true
 		for _, artifact := range feature.artifacts{
