@@ -20,9 +20,13 @@ const ONE 		string = "one"
 const REQUIRES 	string = "requires"
 const PROVIDES 	string = "provides"
 
-type artifactName = string
-type featureName = string
-type tagName = string
+type artifactName	 string
+type featureName	 string
+type tagName		 string
+
+func (t tagName) String()string{
+	return fmt.Sprintf("T::%s", string(t))
+}
 
 func readJSON(fileName string)(json map[string]any){
 	jsonFile, _ := os.Open(fileName)
@@ -192,7 +196,7 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 	}
 }
 
-func insertVariables(atom any, artifact artifactName, feature string, variables map[artifactName]map[string]variableValue, globals globalRegister)string{
+func insertVariables(atom any, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]variableValue, globals globalRegister)string{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range variables[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, name, fmt.Sprint(value))
@@ -206,7 +210,7 @@ func insertVariables(atom any, artifact artifactName, feature string, variables 
 type Artifact map[string]any 
 
 func (a Artifact) name() artifactName{
-	return a["name"].(string)
+	return artifactName(a["name"].(string))
 }
 func (a Artifact) requires(how string)[]any{
 	return a[REQUIRES].(map[string]any)[how].([]any)
@@ -224,13 +228,25 @@ func (a Artifact) tags()[]any{
 	return a["tags"].([]any)
 }
 
+func getArtifactsFromFeatureJSON(f any)[]any{
+	return f.(map[string]any)["artifacts"].([]any)
+}
+func getNameFromFeatureJSON(f any) featureName{
+	return featureName(f.(map[string]any)["name"].(string))
+}
+
+/*
 type FeatureArtifacts map[string]any
 
-func (f FeatureArtifacts) name() string{
-	return f["name"].(string)
+func (f FeatureArtifacts) name() featureName{
+	return featureName(f["name"].(string))
 }
 func (f FeatureArtifacts) artifacts()[]any{
 	return f["artifacts"].([]any)
+}
+*/
+func stringToAN(s any)artifactName{
+	return artifactName(s.(string))
 }
 
 type variableValue map[string]any
@@ -264,34 +280,38 @@ func (gr globalRegister)get(name string)any{
 }
 
 type Feature struct {
-	name string
+	name featureName
 	artifacts []string
-	tags map[string]bool
-	children map[string]bool
+	tags map[tagName]bool
+	children map[featureName]bool
 }
 
-func newFeature(name string, fa FeatureArtifacts, artifacts map[artifactName]Artifact)Feature{
-	feature := Feature{name, nil, make(map[string]bool), make(map[string]bool)}
+func newFeatureName(feature any, id int)featureName{
+	return featureName(fmt.Sprintf("%s::%d", feature.(map[string]any)["name"].(string), id))
+}
 
-	for _, artifact := range fa.artifacts(){
+func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact)Feature{
+	feature := Feature{name, nil, make(map[tagName]bool), make(map[featureName]bool)}
+
+	for _, artifact := range composingArtifacts {
 		feature.artifacts = append(feature.artifacts, artifact.(string))
-		for _, tag := range artifacts[artifact.(string)].tags(){
-			feature.tags[tag.(string)] = true
+		for _, tag := range artifacts[stringToAN(artifact)].tags(){
+			feature.tags[tagName(tag.(string))] = true
 		}
 	}
 	return feature
 }
 
-func newAbstractFeature(name string)Feature{
-	return Feature{name, nil, nil, make(map[string]bool)}
+func newAbstractFeature(name featureName)Feature{
+	return Feature{name, nil, nil, make(map[featureName]bool)}
 }
 
 func (f Feature) String()string {
-	var tags []string
+	var tags []tagName
 	for tag := range f.tags{
 		tags = append(tags, tag)
 	}
-	var children []string
+	var children []featureName
 	for child := range f.children{
 		children = append(children, child)
 	}
@@ -302,8 +322,8 @@ func (f Feature) isAbstract()bool{
 	return len(f.artifacts)>0
 }
 
-func generateFeatureTree(root string, features map[string]Feature){
-	tagCount := make(map[string]int)
+func generateFeatureTree(root featureName, features map[featureName]Feature){
+	tagCount := make(map[tagName]int)
 	for child := range features[root].children{
 		for tag := range features[child].tags{
 			tagCount[tag]++
@@ -311,7 +331,7 @@ func generateFeatureTree(root string, features map[string]Feature){
 	}
 
 	for{
-		var mostPresentTag string 
+		var mostPresentTag tagName 
 		for tag, count := range tagCount{
 			if count > tagCount[mostPresentTag] && count>1{
 				mostPresentTag = tag
@@ -321,7 +341,7 @@ func generateFeatureTree(root string, features map[string]Feature){
 			break
 		}
 
-		newAbstractFeature := newAbstractFeature(fmt.Sprintf("T::%s::%d",mostPresentTag, len(features)))
+		newAbstractFeature := newAbstractFeature(featureName(fmt.Sprintf("%s::%d",mostPresentTag, len(features))))
 		for child := range features[root].children{
 			if features[child].tags[mostPresentTag]{
 				newAbstractFeature.children[child] = true
@@ -342,7 +362,7 @@ func generateFeatureTree(root string, features map[string]Feature){
 	}
 }
 
-func printTree(root string, indent int, features map[string]Feature){
+func printTree(root featureName, indent int, features map[featureName]Feature){
 	if len(features[root].children)==0{
 		fmt.Printf("%s%s\n", strings.Repeat("\t", indent), root)
 		return

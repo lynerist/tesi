@@ -14,20 +14,19 @@ func main(){
 	
 	/* --- MAP ARTIFACTS TO FEATURES AND FEATURES TO ARTIFACTS ---*/
 
-	artifactsInFeature := make(map[string][]artifactName)
-	featureWithArtifact := make(map[artifactName][]string)
+	artifactsInFeature := make(map[featureName][]artifactName)
+	featureWithArtifact := make(map[artifactName][]featureName)
 	for _, f := range json["features"].([]any){
-		feature := FeatureArtifacts(f.(map[string]any))
-		for _, artifact := range feature.artifacts(){
-			artifactsInFeature[feature.name()]=append(artifactsInFeature[feature.name()], artifact.(string))
-			featureWithArtifact[artifact.(string)]=append(featureWithArtifact[artifact.(string)], feature.name())
+		for _, artifact := range getArtifactsFromFeatureJSON(f){
+			artifactsInFeature[getNameFromFeatureJSON(f)]=append(artifactsInFeature[getNameFromFeatureJSON(f)], stringToAN(artifact))
+			featureWithArtifact[stringToAN(artifact)]=append(featureWithArtifact[stringToAN(artifact)], getNameFromFeatureJSON(f))
 		}
 	}
 	
 	/* --- STORE ARTIFACTS ---*/
 
 	artifacts := make(map[artifactName]Artifact)
-	attributes := make(map[artifactName]map[string]variableValue)
+	attributes := make(map[artifactName]map[featureName]variableValue)
 	globals := newGlobalRegister()
 	
 	for _, a := range json["artifacts"].([]any){
@@ -38,7 +37,7 @@ func main(){
 		for _, attribute := range artifact.attributes(){
 			if name, ok := attribute.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='$'{
 				if value, ok := attribute.(map[string]any)["default"]; ok{
-					attributes[artifact.name()] = make(map[string]variableValue)
+					attributes[artifact.name()] = make(map[featureName]variableValue)
 					for _, feature := range featureWithArtifact[artifact.name()]{
 						attributes[artifact.name()][feature] = make(variableValue) 
 						attributes[artifact.name()][feature][name.(string)] = value
@@ -109,12 +108,12 @@ func main(){
 
 	/* --- STORE FEATURES ---*/
 	featureModelRoot := newAbstractFeature("")
-	features := map[string]Feature{"":featureModelRoot}
+	features := map[featureName]Feature{"":featureModelRoot}
 
 	for _, f := range json["features"].([]any){
-		featureName := fmt.Sprintf("%s::%d", f.(map[string]any)["name"].(string), len(features))
-		features[featureName] = newFeature(featureName, FeatureArtifacts(f.(map[string]any)), artifacts)
-		featureModelRoot.children[featureName] = true
+		name := newFeatureName(f, len(features))
+		features[name] = newFeature(name, getArtifactsFromFeatureJSON(f), artifacts)
+		featureModelRoot.children[name] = true
 	}
 	
 	// ALGORITMO DI AIDE SUI TAG
