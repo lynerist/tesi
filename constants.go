@@ -1,6 +1,6 @@
 package main
 
-const VERBOSE = true
+const VERBOSE = false
 const ALL 		string = "all"
 const NOT 		string = "not"
 const ANY 		string = "any"

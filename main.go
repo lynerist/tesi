@@ -7,7 +7,7 @@ import (
 func main(){
 
 	/* --- READ JSON --- */
-	jsonName := "domotica"
+	jsonName := "gestioneEnergia"
 	json := readJSON(fmt.Sprintf("json/%s.JSON", jsonName))
 	hashesToText := make(map[string]string)
 	core := setupProlog()
@@ -117,4 +117,9 @@ func main(){
 	printTree("", 0, features)
 	//fmt.Println(core.getProgram())
 	//prologQueryConsole(core, hashesToText)	
+
+	exportFeatureModelJson("test/out.json", features)
+
+	initLocalServer()
+	
 }

@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"net/http"
 )
 
 func (t tagName) String()string{
@@ -106,4 +107,41 @@ func insertVariables(atom any, artifact artifactName, feature featureName, varia
 
 func getArtifactsFromFeatureJSON(f any)[]any{
 	return f.(map[string]any)["artifacts"].([]any)
+}
+
+func ifEmptyThenRoot(s featureName)string{
+	if s == "" {return "root"}
+	return string(s)
+}
+
+func cytoscapeJSON(features map[featureName]Feature)([]byte, error){
+	var json []any
+	for name, feature := range features{
+		data := map[string]any{"id":ifEmptyThenRoot(name)} //, "parent":ifEmptyThenRoot(*feature.parent)} //REMOVE PARENT??
+		json = append(json, map[string]any{"group":"nodes", "data":data})
+		for child := range feature.children{
+			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(child)}
+			json = append(json, map[string]any{"group":"edges", "data":data})
+		}
+	}
+	return j.MarshalIndent(json, "", "\t")
+}
+
+func exportFeatureModelJson(path string, features map[featureName]Feature){
+	outJson, _ := cytoscapeJSON(features)
+
+	f, err := os.Create(path)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	f.Write(outJson)
+}
+
+func initLocalServer(){
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "interface/" + r.URL.Path[1:])
+	})
+	
+	fmt.Println(http.ListenAndServe(":60124", nil))
 }
