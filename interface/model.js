@@ -1,6 +1,12 @@
 const LAYOUT = {
     name: 'breadthfirst',
-    levelDistance: 50, // Distanza tra i livelli
+    directed: true,             // Makes the layout directed
+    spacingFactor: 0.9,        // Reduce spacing to keep nodes closer
+    nodeDistance: 50,          // Ideal distance between nodes at the same depth
+    avoidOverlap: true,        // Attempt to prevent node overlap
+    animate: true,             // Optional: enables animations
+    animationDuration: 3000,    // Duration of the animation
+    
 }
 
 var cy = cytoscape({
@@ -16,21 +22,21 @@ var cy = cytoscape({
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'height': '50px',
-                'width': function(ele) {
                 // Calcola la larghezza in base alla lunghezza della label
-                const label = ele.data('id');
-                return Math.max(label.length * 10, 50); // 10px per carattere, larghezza minima di 40px
-            },
+                'width': function(ele) {
+                    const label = ele.data('id');
+                    return Math.max(label.length * 10, 50); // 10px per carattere, larghezza minima di 40px
+                },
             }
         },
         {
             selector: 'edge',
             style: {
                 'line-color': '#FF4136',
-                'width': 2,
+                'width': 3,
                 'target-arrow-shape': 'triangle',
                 'target-arrow-color': '#FF4136',
-                
+                'curve-style': 'bezier'
             }
         }
     ],

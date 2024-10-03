@@ -7,7 +7,9 @@ import (
 func main(){
 
 	/* --- READ JSON --- */
-	jsonName := "gestioneEnergia"
+
+	//jsonName := "gestioneEnergia"
+	jsonName := "workbranch"
 	json := readJSON(fmt.Sprintf("json/%s.JSON", jsonName))
 	hashesToText := make(map[string]string)
 	core := setupProlog()
