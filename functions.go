@@ -94,7 +94,7 @@ func log(s ...any){
 	}
 }
 
-func insertVariables(atom any, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]map[variableName]any, globals globalRegister)string{
+func insertVariables(atom any, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]map[variableName]any, globals globalContext)string{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range variables[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(value))
@@ -118,7 +118,10 @@ func cytoscapeJSON(features map[featureName]Feature)([]byte, error){
 	var json []any
 	for name, feature := range features{
 		data := map[string]any{"id":ifEmptyThenRoot(name)} //, "parent":ifEmptyThenRoot(*feature.parent)} //REMOVE PARENT??
-		json = append(json, map[string]any{"group":"nodes", "data":data})
+		classes := []string{"node"}
+		if len(feature.artifacts) == 0 {classes = append(classes, "tag")}
+		if name == "" {classes = append(classes, "root")}
+		json = append(json, map[string]any{"group":"nodes", "data":data, "classes":classes})
 		for child := range feature.children{
 			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(child)}
 			json = append(json, map[string]any{"group":"edges", "data":data})
@@ -143,5 +146,5 @@ func initLocalServer(){
 		http.ServeFile(w, r, "interface/" + r.URL.Path[1:])
 	})
 	
-	fmt.Println(http.ListenAndServe(":60124", nil))
+	fmt.Println(http.ListenAndServe(":"+PORT, nil))
 }

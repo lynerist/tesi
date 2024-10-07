@@ -1,0 +1,108 @@
+{"artifacts" : [
+    {
+        "name": "switch",
+        "provides": [
+            {"case":"$x"},
+            {"program":"@p"}
+        ],
+        "attributes" : [{
+            "name": "$x",
+            "default":"default"
+        }],
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
+        "tags":["switch", "input"]
+    },
+    {
+        "name": "case A",
+        "requires": {
+            "all": [
+                {"case":"A"},
+                {"program":"@p"}
+            ]
+        },
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
+        "provides": [
+            {"action":"Run code A"}
+        ],
+        "tags":["switch", "case"]
+    },
+    {
+        "name": "case B",
+        "requires": {
+            "all": [
+                {"case":"B"},
+                {"program":"@p"}
+            ]
+        },
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
+        "provides": [
+            {"action":"Run code B"}
+        ],
+        "tags":["switch", "case"]
+    },
+    {
+        "name": "case C",
+        "requires": {
+            "all": [
+                {"case":"C"},
+                {"program":"@p"}
+            ]
+        },
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
+        "provides": [
+            {"action":"Run code C"}
+        ],
+        "tags":["switch", "case"]
+    },
+    {
+        "name": "default",
+        "requires": {
+            "all": [
+                {"case":"default"},
+                {"program":"@p"}
+            ]
+        },
+        "provides": [
+            {"action":"Run default code"}
+        ],
+        "globals":[{
+            "name":"@p",
+            "default":"My Switch Software"
+        }],
+        "tags":["switch", "case"]
+    }],
+    "features": [
+        {
+            "name":"switch input",
+            "artifacts":["switch"]
+        },
+        {
+            "name":"case A",
+            "artifacts":["case A"]
+        },
+        {
+            "name":"case B",
+            "artifacts":["case B"]
+        },
+        {
+            "name":"case C",
+            "artifacts":["case C"]
+        },
+        {
+            "name":"default",
+            "artifacts":["default"]
+        }
+    ]
+}

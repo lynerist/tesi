@@ -1,0 +1,7 @@
+[{
+    "colors":["red", "green", "blue"],
+    "answer":42,
+    "double":{"2":4, "5":10, "1":2, "4":8},
+    "animals":["lion", "turtle", "dolphin"],
+    "things":{"doubleOfTwo":4, "lion":"lion", "onetwothree":[1,2,3]}
+}]

@@ -8,6 +8,8 @@ const ONE 		string = "one"
 const REQUIRES 	string = "requires"
 const PROVIDES 	string = "provides"
 
+const PORT = "60124"
+
 type artifactName 	string
 type featureName	string
 type tagName		string

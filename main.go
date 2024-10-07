@@ -9,15 +9,15 @@ func main(){
 	/* --- READ JSON --- */
 
 	//jsonName := "gestioneEnergia"
-	jsonName := "workbranch"
-	json := readJSON(fmt.Sprintf("json/%s.JSON", jsonName))
+	jsonName := "workbanch"
+	json := readJSON(fmt.Sprintf("json/%s.json", jsonName))
 	hashesToText := make(map[string]string)
 	core := setupProlog()
 		
 	/* --- STORE ARTIFACTS --- */
 	artifacts := make(map[artifactName]Artifact)
 	attributes := make(map[artifactName]map[featureName]map[variableName]any)
-	globals := newGlobalRegister()
+	globals := newGlobalContext()
 	
 	for _, a := range json["artifacts"].([]any){
 		artifact := Artifact(a.(map[string]any))
@@ -115,7 +115,7 @@ func main(){
 	for _, feature := range features{
 		log(feature)
 	}
-	core.runProgram()
+//	core.runProgram()
 	printTree("", 0, features)
 	//fmt.Println(core.getProgram())
 	//prologQueryConsole(core, hashesToText)	

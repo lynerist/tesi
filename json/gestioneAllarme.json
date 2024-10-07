@@ -1,0 +1,123 @@
+{
+    "artifacts": [
+        {
+            "name": "sensor_module",
+            "provides": [
+                {"sensor_type": "$sensor"},
+                {"system": "@sys"}
+            ],
+            "attributes": [
+                {
+                    "name": "$sensor",
+                    "default": "motion"
+                }
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Security System"
+                }
+            ],
+            "tags": ["sensor", "input"]
+        },
+        {
+            "name": "alarm_module",
+            "requires": {
+                "all": [
+                    {"sensor_type": "motion"},
+                    {"system": "@sys"}
+                ]
+            },
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Security System"
+                }
+            ],
+            "provides": [
+                {"alarm": "Activate alarm"}
+            ],
+            "tags": ["alarm", "action"]
+        },
+        {
+            "name": "silent_alarm_module",
+            "requires": {
+                "all": [
+                    {"sensor_type": "glass_break"},
+                    {"system": "@sys"}
+                ]
+            },
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Security System"
+                }
+            ],
+            "provides": [
+                {"alarm": "Activate silent alarm"}
+            ],
+            "tags": ["alarm", "action"]
+        },
+        {
+            "name": "door_sensor_module",
+            "requires": {
+                "any": [
+                    [
+                        {"sensor_type": "door_open"},
+                        {"sensor_type": "door_closed"}
+                    ]
+                ]
+            },
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Security System"
+                }
+            ],
+            "provides": [
+                {"status": "Track door status"}
+            ],
+            "tags": ["sensor", "input"]
+        },
+        {
+            "name": "emergency_shutdown_module",
+            "requires": {
+                "not": [
+                    {"sensor_type": "operational"}
+                ]
+            },
+            "provides": [
+                {"action": "Shutdown system"}
+            ],
+            "globals": [
+                {
+                    "name": "@sys",
+                    "default": "Home Security System"
+                }
+            ],
+            "tags": ["system", "shutdown"]
+        }
+    ],
+    "features": [
+        {
+            "name": "sensor input",
+            "artifacts": ["sensor_module"]
+        },
+        {
+            "name": "motion detection",
+            "artifacts": ["sensor_module", "alarm_module"]
+        },
+        {
+            "name": "glass break detection",
+            "artifacts": ["sensor_module", "silent_alarm_module"]
+        },
+        {
+            "name": "door sensor",
+            "artifacts": ["door_sensor_module"]
+        },
+        {
+            "name": "emergency shutdown",
+            "artifacts": ["emergency_shutdown_module"]
+        }
+    ]
+}

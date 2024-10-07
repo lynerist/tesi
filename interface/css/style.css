@@ -1,5 +1,6 @@
 #cy {
     width: 100%;
-    height: 600px;  /* Definisci una buona altezza per assicurarti che il grafo sia visibile */
+    height: 90%;  /* Definisci una buona altezza per assicurarti che il grafo sia visibile */
     border: 1px solid #ccc;
 }
+

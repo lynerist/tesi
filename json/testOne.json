@@ -1,0 +1,27 @@
+{"artifacts":[
+    {
+        "name" : "sortList",
+        "provides": [
+            {"exist":"sortList"}
+        ],
+        "requires": {
+            "one":[
+                [{"sort":"bubble"},
+                {"sort":"counting"},
+                {"sort":"merge"}]
+            ]
+        }
+    },
+    {
+        "name" :"mergeSort",
+        "provides":[
+            {"sort":"merge"}
+        ]
+    },
+    {
+        "name" :"countingSort",
+        "provides":[
+            {"sort":"counting"}
+        ]
+    }
+]}
