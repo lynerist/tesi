@@ -1,3 +1,5 @@
+const PORT = "60124"
+
 var cy = cytoscape({
     container: document.getElementById('cy'),
     elements: [], 
@@ -13,19 +15,31 @@ var cy = cytoscape({
 document.getElementById('fileInput').addEventListener('change', function(event) {
     const file = event.target.files[0]; 
     if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const contents = e.target.result; // Contenuto del file
-            try {
-                const json = JSON.parse(contents); // Parse JSON
-                cy.elements().remove(); // Rimuovi elementi esistenti (se necessario)
-                cy.add(json); // Aggiungi i nuovi elementi direttamente dal file
-                cy.layout(LAYOUT).run(); // Applica un layout 
-                console.log("Grafo caricato con successo!");
-            } catch (error) {
-                console.error("Errore durante il parsing del JSON:", error);
-            }
-        };
-        reader.readAsText(file); 
+        loadJSON_GO(file)
     }
 });
+
+function displayModel(model){
+    cy.elements().remove(); // Rimuovi elementi esistenti (se necessario)
+    cy.add(model); // Aggiungi i nuovi elementi direttamente dal file
+    cy.layout(LAYOUT).run(); // Applica un layout 
+    console.log("Grafo caricato con successo!");
+}
+
+function loadJSON_GO(file){
+    let formData = new FormData();
+    formData.delete("json")
+    formData.append('json', file, file.name);
+
+    fetch(`http://localhost:${PORT}/loadjson`, {  // Sostituisci con il tuo endpoint
+        method: 'POST',
+        body: formData,  // Qui passa il FormData con il file
+    })
+    .then(response => response.json())  // Converti la risposta in JSON (o altro formato, a seconda del server)
+    .then(data => {
+        displayModel(data)
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}

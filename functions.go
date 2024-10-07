@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"strings"
-	"net/http"
 )
 
 func (t tagName) String()string{
@@ -23,7 +22,16 @@ func readJSON(fileName string)(json map[string]any){
 	for k := range json["artifacts"].([]any){
 		fillMissingKeys((json["artifacts"].([]any)[k]).(map[string]any))
 	}
+	return
+}
 
+func parseJSON(jsonFile io.Reader)(json map[string]any){
+	jsonBin, _ := io.ReadAll(jsonFile)
+	j.Unmarshal(jsonBin, &json)
+
+	for k := range json["artifacts"].([]any){
+		fillMissingKeys((json["artifacts"].([]any)[k]).(map[string]any))
+	}
 	return
 }
 
@@ -139,12 +147,4 @@ func exportFeatureModelJson(path string, features map[featureName]Feature){
 	}
 	defer f.Close()
 	f.Write(outJson)
-}
-
-func initLocalServer(){
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "interface/" + r.URL.Path[1:])
-	})
-	
-	fmt.Println(http.ListenAndServe(":"+PORT, nil))
 }

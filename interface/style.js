@@ -19,7 +19,10 @@ const EDGE = {
 }
 
 const NODE = {
-    'label': 'data(id)',  // Mostra l'id del nodo come etichetta
+    'label': function(ele) {
+        let label = ele.data('id');
+        return label.split("::")[0];
+    },
     'background-color': '#1074D9',
     'color': '#fff',
     'text-valign': 'center',
@@ -36,7 +39,7 @@ const NODE = {
 const TAG = {
     'label': function(ele) {
         let label = ele.data('id');
-        return label.substring(3);
+        return label.split("::")[1];
     },
     'background-color': '#0000D9',
 }
