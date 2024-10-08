@@ -14,3 +14,8 @@ type artifactName 	string
 type featureName	string
 type tagName		string
 type variableName	string
+type hash 			string
+type variableValue	any
+type declaration any
+
+type set[T comparable] map[T]bool

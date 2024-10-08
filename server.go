@@ -32,8 +32,8 @@ func handleJSONLoading(state *State) {
 			for _, attribute := range artifact.attributes(){
 				if name, ok := attribute.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='$'{
 					if value, ok := attribute.(map[string]any)["default"]; ok{
-						state.attributes[artifact.name()] = make(map[featureName]map[variableName]any)
-						state.attributes[artifact.name()][""] = make(map[variableName]any) 
+						state.attributes[artifact.name()] = make(map[featureName]map[variableName]variableValue)
+						state.attributes[artifact.name()][""] = make(map[variableName]variableValue) 
 						state.attributes[artifact.name()][""][variableName(name.(string))] = value
 					}
 				}
@@ -58,7 +58,7 @@ func handleJSONLoading(state *State) {
 			state.features[""].children[feature.name] = true //all features are root's children
 			for _, artifact := range feature.artifacts{
 				for variable, value := range state.attributes[artifact][""]{
-					state.attributes[artifact][feature.name] = make(map[variableName]any) 
+					state.attributes[artifact][feature.name] = make(map[variableName]variableValue) 
 					state.attributes[artifact][feature.name][variable] = value
 				}
 			}
@@ -66,10 +66,7 @@ func handleJSONLoading(state *State) {
 
 		/* --- FEATURE TREE GENERATION --- */
 		generateFeatureTree("", state.features)
-		
 		outJson, _ := cytoscapeJSON(state.features)
-		fmt.Println(outJson)
 		w.Write(outJson)
-		
 	})
 }

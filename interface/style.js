@@ -14,7 +14,7 @@ const EDGE = {
     'width': 3,
     'target-arrow-shape': 'triangle',
     'target-arrow-color': '#FF4136',
-    'opacity':0.7,
+    'opacity':0.9,
     'curve-style': 'bezier'
 }
 
@@ -28,7 +28,7 @@ const NODE = {
     'text-valign': 'center',
     'text-halign': 'center',
     'height': '50px',
-    'opacity':0.9,
+    'opacity':0.3,
     // Calcola la larghezza in base alla lunghezza della label
     'width': function(ele) {
         const label = ele.data('id');

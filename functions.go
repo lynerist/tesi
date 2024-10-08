@@ -102,7 +102,7 @@ func log(s ...any){
 	}
 }
 
-func insertVariables(atom any, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]map[variableName]any, globals globalContext)string{
+func insertVariables(atom declaration, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]map[variableName]any, globals globalContext)string{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range variables[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(value))

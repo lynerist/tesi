@@ -8,8 +8,8 @@ import (
 type Feature struct {
 	name featureName
 	artifacts []artifactName
-	tags map[tagName]bool
-	children map[featureName]bool
+	tags set[tagName]
+	children set[featureName]
 	parent *featureName
 }
 
@@ -25,7 +25,7 @@ func (f featureName) String()string{
 }
 
 func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact, parent featureName)Feature{
-	feature := Feature{name, nil, make(map[tagName]bool), make(map[featureName]bool), &parent}
+	feature := Feature{name, nil, make(set[tagName]), make(set[featureName]), &parent}
 
 	for _, artifact := range composingArtifacts {
 		feature.artifacts = append(feature.artifacts, artifactName(artifact.(string)))
@@ -37,7 +37,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 }
 
 func newAbstractFeature(name featureName)Feature{
-	return Feature{name, nil, nil, make(map[featureName]bool), new(featureName)}
+	return Feature{name, nil, nil, make(set[featureName]), new(featureName)}
 }
 
 func (f Feature) String()string {
