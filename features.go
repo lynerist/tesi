@@ -11,6 +11,8 @@ type Feature struct {
 	tags set[tagName]
 	children set[featureName]
 	parent *featureName
+	requirements Requirements
+	variadicRequirements Requirements
 }
 
 func newFeatureName(feature any, id int)featureName{
@@ -18,15 +20,17 @@ func newFeatureName(feature any, id int)featureName{
 }
 
 func (f featureName) String()string{
-	if f==""{
+	if f=="" {
 		return "Feature Model Root"
 	}
 	return string(f)
 }
 
 func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact, parent featureName)Feature{
-	feature := Feature{name, nil, make(set[tagName]), make(set[featureName]), &parent}
-
+	feature := Feature{name, nil, make(set[tagName]), make(set[featureName]), &parent, 
+		Requirements{make(set[declaration]),make(set[declaration]), nil, nil}, 
+		Requirements{make(set[declaration]),make(set[declaration]), nil, nil}}
+	
 	for _, artifact := range composingArtifacts {
 		feature.artifacts = append(feature.artifacts, artifactName(artifact.(string)))
 		for _, tag := range artifacts[stringToAN(artifact)].tags(){
@@ -37,7 +41,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 }
 
 func newAbstractFeature(name featureName)Feature{
-	return Feature{name, nil, nil, make(set[featureName]), new(featureName)}
+	return Feature{name, nil, nil, make(set[featureName]), new(featureName), Requirements{}, Requirements{}}
 }
 
 func (f Feature) String()string {
@@ -49,6 +53,7 @@ func (f Feature) String()string {
 	for child := range f.children{
 		children = append(children, child)
 	}
+
 	return fmt.Sprintf("'%s' --> artifacts:%v tags: %v children: %v parent: %s", f.name, f.artifacts, tags, children, *f.parent)
 }
 
@@ -103,4 +108,59 @@ func printTree(root featureName, indent int, features map[featureName]Feature){
 		printTree(child, indent+1, features)
 	}
 	fmt.Printf("%s]\n", strings.Repeat("\t", indent))
+}
+
+func storeFeatures(json map[string]any, state *State){
+	for _, f := range json["features"].([]any){
+		feature := newFeature(newFeatureName(f, len(state.features)), getArtifactsFromFeatureJSON(f), state.artifacts, "")
+		for _, thisArtifactName := range feature.artifacts{
+			artifact := state.artifacts[thisArtifactName]
+
+			/* --- STORE ARTIFACT VARIABLES --- */
+			for variable, value := range state.attributes[thisArtifactName][""]{
+				state.attributes[thisArtifactName][feature.name] = make(map[variableName]variableValue) 
+				state.attributes[thisArtifactName][feature.name][variable] = value
+			}
+
+			/* --- STORE REQUIRED DECLARATIONS --- */
+			for _, required := range artifact.requires(ALL){
+				atom := declaration(fmt.Sprint(required))
+				if artifact.isVariadic(){
+					atom = insertVariables(required, thisArtifactName, "", state)
+					feature.variadicRequirements.ALL[atom] = true
+				}else{
+					feature.requirements.ALL[atom] = true
+				}
+			}
+
+			for _, required := range artifact.requires(NOT){
+				atom := declaration(fmt.Sprint(required))
+				if artifact.isVariadic(){
+					atom = insertVariables(required, thisArtifactName, "", state)
+					feature.variadicRequirements.NOT[atom] = true
+				}else{
+					feature.requirements.NOT[atom] = true
+				}
+			}
+
+			
+
+			//TODO ANY ONE
+
+			/* --- STORE PROVIDED DECLARATIONS --- */
+			for _, provided := range artifact.provides(){
+				atom := declaration(fmt.Sprint(provided))
+				if artifact.isVariadic(){
+					atom = insertVariables(provided, thisArtifactName, feature.name, state)
+					if len(state.variadicProviders[atom])==0{state.variadicProviders[atom] = make(set[featureName])}
+					state.variadicProviders[atom][feature.name]=true
+				} else {
+					if len(state.providers[atom])==0{state.providers[atom] = make(set[featureName])}
+					state.providers[atom][feature.name]=true
+				}
+			}
+		}
+		state.features[feature.name] = feature
+		state.features[""].children[feature.name] = true //all features are root's children
+	}
 }

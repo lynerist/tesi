@@ -1,0 +1,199 @@
+{
+    "artifacts": [
+        {
+            "name": "parser",
+            "provides": [
+                {"feature": "syntax_analysis"}
+            ],
+            "tags": ["parser", "syntax"]
+        },
+        {
+            "name": "JVM_syntax_analysis",
+            "requires": {
+                "all": [
+                    {"feature": "syntax_analysis"}
+                ]
+            },
+            "provides": [
+                {"feature": "JVM_syntax"}
+            ],
+            "tags": ["JVM", "syntax"]
+        },
+        {
+            "name": "LLVM_syntax_analysis",
+            "requires": {
+                "all": [
+                    {"feature": "syntax_analysis"}
+                ]
+            },
+            "provides": [
+                {"feature": "LLVM_syntax"}
+            ],
+            "tags": ["LLVM", "syntax"]
+        },
+        {
+            "name": "WebAssembly_syntax_analysis",
+            "requires": {
+                "all": [
+                    {"feature": "syntax_analysis"},
+                    {"not": [
+                        {"feature": "LLVM_syntax"}
+                    ]}
+                ]
+            },
+            "provides": [
+                {"feature": "Wasm_syntax"}
+            ],
+            "tags": ["WebAssembly", "syntax"]
+        },
+        {
+            "name": "JVM_code_generator",
+            "requires": {
+                "all": [
+                    {"feature": "JVM_syntax"}
+                ]
+            },
+            "provides": [
+                {"feature": "JVM_code"}
+            ],
+            "tags": ["JVM", "code_generation"]
+        },
+        {
+            "name": "LLVM_code_generator",
+            "requires": {
+                "all": [
+                    {"feature": "LLVM_syntax"}
+                ]
+            },
+            "provides": [
+                {"feature": "LLVM_code"}
+            ],
+            "tags": ["LLVM", "code_generation"]
+        },
+        {
+            "name": "WebAssembly_code_generator",
+            "requires": {
+                "all": [
+                    {"feature": "Wasm_syntax"}
+                ]
+            },
+            "provides": [
+                {"feature": "Wasm_code"}
+            ],
+            "tags": ["WebAssembly", "code_generation"]
+        },
+        {
+            "name": "advanced_optimizer_JVM",
+            "requires": {
+                "all": [
+                    {"feature": "JVM_code"}
+                ]
+            },
+            "provides": [
+                {"feature": "JVM_optimization"}
+            ],
+            "tags": ["JVM", "optimization"]
+        },
+        {
+            "name": "advanced_optimizer_LLVM",
+            "requires": {
+                "all": [
+                    {"feature": "LLVM_code"}
+                ]
+            },
+            "provides": [
+                {"feature": "LLVM_optimization"}
+            ],
+            "tags": ["LLVM", "optimization"]
+        },
+        {
+            "name": "advanced_optimizer_WebAssembly",
+            "requires": {
+                "all": [
+                    {"feature": "Wasm_code"}
+                ],
+                "not": [
+                    {"feature": "LLVM_code"}
+                ]
+            },
+            "provides": [
+                {"feature": "Wasm_optimization"}
+            ],
+            "tags": ["WebAssembly", "optimization"]
+        },
+        {
+            "name": "runtime_interpreter",
+            "requires": {
+                "any": [
+                    [
+                        {"feature": "JVM_code"},
+                        {"feature": "LLVM_code"},
+                        {"feature": "Wasm_code"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"feature": "runtime_execution"}
+            ],
+            "tags": ["runtime", "interpreter"]
+        },
+        {
+            "name": "runtime_error_handler",
+            "requires": {
+                "all": [
+                    {"feature": "runtime_execution"}
+                ]
+            },
+            "provides": [
+                {"feature": "runtime_error_handling"}
+            ],
+            "tags": ["runtime", "error_handling"]
+        }
+    ],
+    "features": [
+        {
+            "name": "syntax analysis (JVM)",
+            "artifacts": ["parser", "JVM_syntax_analysis"]
+        },
+        {
+            "name": "syntax analysis (LLVM)",
+            "artifacts": ["parser", "LLVM_syntax_analysis"]
+        },
+        {
+            "name": "syntax analysis (WebAssembly)",
+            "artifacts": ["parser", "WebAssembly_syntax_analysis"]
+        },
+        {
+            "name": "code generation (JVM)",
+            "artifacts": ["JVM_code_generator"]
+        },
+        {
+            "name": "code generation (LLVM)",
+            "artifacts": ["LLVM_code_generator"]
+        },
+        {
+            "name": "code generation (WebAssembly)",
+            "artifacts": ["WebAssembly_code_generator"]
+        },
+        {
+            "name": "advanced optimization (JVM)",
+            "artifacts": ["advanced_optimizer_JVM"]
+        },
+        {
+            "name": "advanced optimization (LLVM)",
+            "artifacts": ["advanced_optimizer_LLVM"]
+        },
+        {
+            "name": "advanced optimization (WebAssembly)",
+            "artifacts": ["advanced_optimizer_WebAssembly"]
+        },
+        {
+            "name": "runtime interpreter",
+            "artifacts": ["runtime_interpreter"]
+        },
+        {
+            "name": "runtime error handling",
+            "artifacts": ["runtime_error_handler"]
+        }
+    ]
+}

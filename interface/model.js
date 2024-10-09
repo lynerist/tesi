@@ -7,7 +7,10 @@ var cy = cytoscape({
         {selector: 'node', style: NODE },
         {selector: 'edge', style: EDGE },
         {selector: ".tag", style:TAG },
-        {selector: ".root", style:ROOT }
+        {selector: ".root", style:ROOT },
+        {selector: ".dependencyAll", style:DEPENDENCYALL},
+        {selector: ".dependencyNot", style:DEPENDENCYNOT}
+
     ],
     layout: LAYOUT
 });

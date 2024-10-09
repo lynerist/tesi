@@ -44,15 +44,16 @@ func mainn(){
 
 		log(artifact.name())
 		
+		var state State
 		for i, required := range artifact.requires(ALL){
 			if i==0 {log("requires all:")}
-			required = insertVariables(required, artifact.name(), "", attributes, globals)
+			required = insertVariables(required, artifact.name(), "", &state)
 			log("\t",required,md5hash(fmt.Sprint(required)))
 			core.addLine(requiresAll(artifact.name(),required,hashesToText), "requiresAll")
 		}
 		for i, required := range artifact.requires(NOT){
 			if i==0 {log("requires not:")}
-			required = insertVariables(required, artifact.name(), "", attributes, globals)
+			required = insertVariables(required, artifact.name(), "", &state)
 			log("\t",required,md5hash(fmt.Sprint(required)))
 			core.addLine(requiresNot(artifact.name(),required,hashesToText), "requiresNot")
 		}
@@ -60,7 +61,7 @@ func mainn(){
 		for groupID, requiredAnyGroup := range artifact.requires(ANY){
 			log("\t","any of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
-				required = insertVariables(required, artifact.name(), "", attributes, globals)
+				required = insertVariables(required, artifact.name(), "", &state)
 				log("\t\t",required,md5hash(fmt.Sprint(required)))
 				core.addLine(requiresAny(artifact.name(), required, groupID, hashesToText), "requiresAny")
 			}
@@ -69,7 +70,7 @@ func mainn(){
 		for groupID, requiredAnyGroup := range artifact.requires(ONE){
 			log("\t","one of:",requiredAnyGroup)
 			for _, required :=  range requiredAnyGroup.([]any){
-				required = insertVariables(required, artifact.name(), "", attributes, globals)
+				required = insertVariables(required, artifact.name(), "", &state)
 				log("\t\t",required,md5hash(fmt.Sprint(required)))
 				core.addLine(requiresOne(artifact.name(), required, groupID, hashesToText), "requiresOne")
 			}
@@ -77,7 +78,7 @@ func mainn(){
 
 		log("provides:")
 		for _, provided := range artifact.provides(){
-			provided = insertVariables(provided, artifact.name(), "", attributes, globals)
+			provided = insertVariables(provided, artifact.name(), "", &state)
 			log("\t",provided,md5hash(fmt.Sprint(provided)))
 			core.addLine(provides(artifact.name(), provided, hashesToText), "provides")
 		}
@@ -119,7 +120,7 @@ func mainn(){
 	//fmt.Println(core.getProgram())
 	//prologQueryConsole(core, hashesToText)	
 
-	exportFeatureModelJson("test/out.json", features)
+	exportFeatureModelJson("test/out.json", features, &State{})
 
 	startLocalServer()
 	

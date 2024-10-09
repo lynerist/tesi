@@ -9,6 +9,25 @@ import (
 	"strings"
 )
 
+type set[T comparable] map[T]bool
+
+func (s set[T])add(o set[T]){
+	for k := range o{
+		s[k]=true
+	}
+}
+
+func (s set[T]) String()string {
+	if len(s)==0{
+		return "empty"
+	}
+	out := "set{"
+	for e := range s{
+		out += fmt.Sprintf("%v ", e)
+	}
+	return out[:len(out)-1]+"}"
+}
+
 func (t tagName) String()string{
 	return fmt.Sprintf("T::%s", string(t))
 }
@@ -102,15 +121,15 @@ func log(s ...any){
 	}
 }
 
-func insertVariables(atom declaration, artifact artifactName, feature featureName, variables map[artifactName]map[featureName]map[variableName]any, globals globalContext)string{
+func insertVariables(atom any, artifact artifactName, feature featureName, state *State)declaration{
 	stringAtom := fmt.Sprint(atom)
-	for name, value := range variables[artifact][feature] {
+	for name, value := range state.attributes[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(value))
 	}
-	for name := range globals.needs[artifact]{
-		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(globals.get(name)))
+	for name := range state.globals.needs[artifact]{
+		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(state.globals.get(name)))
 	}
-	return stringAtom
+	return declaration(stringAtom)
 }
 
 func getArtifactsFromFeatureJSON(f any)[]any{
@@ -122,24 +141,64 @@ func ifEmptyThenRoot(s featureName)string{
 	return string(s)
 }
 
-func cytoscapeJSON(features map[featureName]Feature)([]byte, error){
+func cytoscapeJSON(state *State)([]byte, error){
 	var json []any
-	for name, feature := range features{
+	for name, feature := range state.features{
 		data := map[string]any{"id":ifEmptyThenRoot(name)} //, "parent":ifEmptyThenRoot(*feature.parent)} //REMOVE PARENT??
 		classes := []string{"node"}
 		if len(feature.artifacts) == 0 {classes = append(classes, "tag")}
 		if name == "" {classes = append(classes, "root")}
 		json = append(json, map[string]any{"group":"nodes", "data":data, "classes":classes})
+		
+		/* --- FEATURE MODEL TREE EDGES --- */
 		for child := range feature.children{
 			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(child)}
 			json = append(json, map[string]any{"group":"edges", "data":data})
 		}
+
+		/* --- DEPENDENCIES --- */
+
+		/* REQUIRES ALL */
+		requiredAll := make(set[featureName])
+		for atom := range feature.requirements.ALL{
+			requiredAll.add(getProviders(atom, state))
+		}
+		for atom := range feature.variadicRequirements.ALL{
+			requiredAll.add(getProviders(atom, state))
+		}
+		for requiredFeature := range requiredAll{
+			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(requiredFeature)}
+			json = append(json, map[string]any{"group":"edges", "data":data, "classes":[]string{"dependencyAll"}})
+		}
+
+		/* REQUIRES NOT */
+		requiredNot := make(set[featureName])
+		for atom := range feature.requirements.NOT{
+			requiredNot.add(getProviders(atom, state))
+		}
+		for atom := range feature.variadicRequirements.NOT{
+			requiredNot.add(getProviders(atom, state))
+		}
+		for requiredFeature := range requiredNot{
+			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(requiredFeature)}
+			json = append(json, map[string]any{"group":"edges", "data":data, "classes":[]string{"dependencyNot"}})
+		}
+
+		//TODO ANY ONE
+
 	}
 	return j.MarshalIndent(json, "", "\t")
 }
 
-func exportFeatureModelJson(path string, features map[featureName]Feature){
-	outJson, _ := cytoscapeJSON(features)
+func getProviders(atom declaration, state *State)set[featureName]{
+	providers := make(set[featureName])
+	providers.add(state.providers[atom])
+	providers.add(state.variadicProviders[atom])
+	return providers
+}
+
+func exportFeatureModelJson(path string, features map[featureName]Feature, state *State){
+	outJson, _ := cytoscapeJSON(state)
 
 	f, err := os.Create(path)
 	if err != nil {

@@ -16,6 +16,11 @@ type tagName		string
 type variableName	string
 type hash 			string
 type variableValue	any
-type declaration any
+type declaration 	string
 
-type set[T comparable] map[T]bool
+type Requirements struct {
+	ALL set[declaration]
+	NOT set[declaration]
+	ANY []set[declaration]
+	ONE []set[declaration]
+}

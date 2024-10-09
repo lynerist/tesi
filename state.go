@@ -1,13 +1,14 @@
 package main
 
 type State struct {
-	hashesToText map[hash]string
-	core prologCore
-	artifacts map[artifactName]Artifact
-	attributes map[artifactName]map[featureName]map[variableName]variableValue
-	globals globalContext
-	features map[featureName]Feature
-	providers map[declaration]set[featureName]
+	hashesToText 		map[hash]string
+	core 				prologCore
+	artifacts 			map[artifactName]Artifact
+	attributes 			map[artifactName]map[featureName]map[variableName]variableValue
+	globals 			globalContext
+	features 			map[featureName]Feature
+	providers 			map[declaration]set[featureName]
+	variadicProviders 	map[declaration]set[featureName]
 }
 
 func newState()(state State){
@@ -16,9 +17,11 @@ func newState()(state State){
 }
 
 func (state *State) reset(){
-	state.hashesToText = make(map[hash]string)
-	state.artifacts = make(map[artifactName]Artifact)
-	state.attributes = make(map[artifactName]map[featureName]map[variableName]variableValue)
-	state.globals = newGlobalContext()
-	state.features = map[featureName]Feature{"":newAbstractFeature("")}
+	state.hashesToText 		= make(map[hash]string)
+	state.artifacts 		= make(map[artifactName]Artifact)
+	state.attributes 		= make(map[artifactName]map[featureName]map[variableName]variableValue)
+	state.globals 			= newGlobalContext()
+	state.features 			= map[featureName]Feature{"":newAbstractFeature("")}
+	state.providers 		= make(map[declaration]set[featureName])
+	state.variadicProviders = make(map[declaration]set[featureName])
 }
