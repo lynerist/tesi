@@ -1,0 +1,320 @@
+{
+    "artifacts": [
+        {
+            "name": "solar_panel",
+            "provides": [
+                {"feature": "solar_energy"}
+            ],
+            "tags": ["energy", "generation"]
+        },
+        {
+            "name": "wind_turbine",
+            "provides": [
+                {"feature": "wind_energy"}
+            ],
+            "tags": ["energy", "generation"]
+        },
+        {
+            "name": "energy_storage",
+            "provides": [
+                {"feature": "stored_energy"}
+            ],
+            "tags": ["energy", "storage"]
+        },
+        {
+            "name": "energy_monitoring",
+            "provides": [
+                {"feature": "energy_usage"},
+                {"feature": "real_time_data"}
+            ],
+            "tags": ["monitoring", "analytics"]
+        },
+        {
+            "name": "energy_management_system",
+            "requires": {
+                "all": [
+                    {"feature": "solar_energy"},
+                    {"feature": "wind_energy"},
+                    {"feature": "stored_energy"},
+                    {"feature": "energy_usage"},
+                    {"feature": "real_time_data"}
+                ]
+            },
+            "provides": [
+                {"feature": "optimized_energy_usage"},
+                {"feature": "predictive_maintenance"}
+            ],
+            "tags": ["management", "optimization"]
+        },
+        {
+            "name": "demand_response_system",
+            "requires": {
+                "any": [
+                    [
+                        {"feature": "optimized_energy_usage"},
+                        {"feature": "stored_energy"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"feature": "demand_response"}
+            ],
+            "tags": ["demand_response", "management"]
+        },
+        {
+            "name": "smart_meter",
+            "provides": [
+                {"feature": "meter_readings"},
+                {"feature": "usage_patterns"}
+            ],
+            "tags": ["monitoring", "sensors"]
+        },
+        {
+            "name": "home_automation_system",
+            "requires": {
+                "all": [
+                    {"feature": "meter_readings"},
+                    {"feature": "real_time_data"}
+                ]
+            },
+            "provides": [
+                {"feature": "automated_energy_management"}
+            ],
+            "tags": ["automation", "management"]
+        },
+        {
+            "name": "electric_vehicle_charging",
+            "requires": {
+                "any": [
+                    [
+                        {"feature": "solar_energy"},
+                        {"feature": "wind_energy"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"feature": "EV_charging"}
+            ],
+            "tags": ["charging", "vehicles"]
+        },
+        {
+            "name": "battery_management_system",
+            "requires": {
+                "all": [
+                    {"feature": "stored_energy"},
+                    {"feature": "EV_charging"}
+                ]
+            },
+            "provides": [
+                {"feature": "battery_health"},
+                {"feature": "charging_status"}
+            ],
+            "tags": ["battery", "management"]
+        },
+        {
+            "name": "grid_management_system",
+            "requires": {
+                "all": [
+                    {"feature": "demand_response"},
+                    {"feature": "optimized_energy_usage"}
+                ]
+            },
+            "provides": [
+                {"feature": "grid_stability"},
+                {"feature": "resource_allocation"}
+            ],
+            "tags": ["grid", "management"]
+        },
+        {
+            "name": "renewable_energy_integration",
+            "requires": {
+                "all": [
+                    {"feature": "solar_energy"},
+                    {"feature": "wind_energy"},
+                    {"feature": "stored_energy"}
+                ]
+            },
+            "provides": [
+                {"feature": "integrated_energy_system"}
+            ],
+            "tags": ["renewable", "integration"]
+        },
+        {
+            "name": "energy_efficiency_analysis",
+            "requires": {
+                "all": [
+                    {"feature": "energy_usage"},
+                    {"feature": "real_time_data"}
+                ]
+            },
+            "provides": [
+                {"feature": "efficiency_report"}
+            ],
+            "tags": ["analysis", "efficiency"]
+        },
+        {
+            "name": "fault_detection_system",
+            "requires": {
+                "all": [
+                    {"feature": "real_time_data"},
+                    {"feature": "battery_health"}
+                ]
+            },
+            "provides": [
+                {"feature": "fault_alerts"}
+            ],
+            "tags": ["monitoring", "safety"]
+        },
+        {
+            "name": "energy_trading_system",
+            "requires": {
+                "any": [
+                    [
+                        {"feature": "integrated_energy_system"},
+                        {"feature": "grid_stability"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"feature": "energy_trading"}
+            ],
+            "tags": ["trading", "energy"]
+        },
+        {
+            "name": "environmental_impact_analysis",
+            "requires": {
+                "all": [
+                    {"feature": "renewable_energy_integration"},
+                    {"feature": "energy_efficiency_analysis"}
+                ]
+            },
+            "provides": [
+                {"feature": "impact_report"}
+            ],
+            "tags": ["environment", "analysis"]
+        },
+        {
+            "name": "user_interface",
+            "provides": [
+                {"feature": "user_dashboard"},
+                {"feature": "alerts"}
+            ],
+            "tags": ["interface", "user"]
+        },
+        {
+            "name": "system_security",
+            "provides": [
+                {"feature": "data_encryption"},
+                {"feature": "access_control"}
+            ],
+            "tags": ["security", "management"]
+        },
+        {
+            "name": "backup_power_system",
+            "requires": {
+                "not": [
+                    {"feature": "grid_stability"}
+                ]
+            },
+            "provides": [
+                {"feature": "backup_power"}
+            ],
+            "tags": ["backup", "power"]
+        },
+        {
+            "name": "energy_auditing_system",
+            "requires": {
+                "all": [
+                    {"feature": "energy_usage"},
+                    {"feature": "efficiency_report"}
+                ]
+            },
+            "provides": [
+                {"feature": "audit_report"}
+            ],
+            "tags": ["auditing", "energy"]
+        }
+    ],
+    "features": [
+        {
+            "name": "solar energy generation",
+            "artifacts": ["solar_panel"]
+        },
+        {
+            "name": "wind energy generation",
+            "artifacts": ["wind_turbine"]
+        },
+        {
+            "name": "energy storage",
+            "artifacts": ["energy_storage"]
+        },
+        {
+            "name": "energy monitoring",
+            "artifacts": ["energy_monitoring"]
+        },
+        {
+            "name": "energy management",
+            "artifacts": ["energy_management_system"]
+        },
+        {
+            "name": "demand response management",
+            "artifacts": ["demand_response_system"]
+        },
+        {
+            "name": "smart metering",
+            "artifacts": ["smart_meter"]
+        },
+        {
+            "name": "home automation",
+            "artifacts": ["home_automation_system"]
+        },
+        {
+            "name": "electric vehicle charging",
+            "artifacts": ["electric_vehicle_charging"]
+        },
+        {
+            "name": "battery management",
+            "artifacts": ["battery_management_system"]
+        },
+        {
+            "name": "grid management",
+            "artifacts": ["grid_management_system"]
+        },
+        {
+            "name": "renewable energy integration",
+            "artifacts": ["renewable_energy_integration"]
+        },
+        {
+            "name": "energy efficiency analysis",
+            "artifacts": ["energy_efficiency_analysis"]
+        },
+        {
+            "name": "fault detection",
+            "artifacts": ["fault_detection_system"]
+        },
+        {
+            "name": "energy trading",
+            "artifacts": ["energy_trading_system"]
+        },
+        {
+            "name": "environmental impact analysis",
+            "artifacts": ["environmental_impact_analysis"]
+        },
+        {
+            "name": "user interface",
+            "artifacts": ["user_interface"]
+        },
+        {
+            "name": "system security",
+            "artifacts": ["system_security"]
+        },
+        {
+            "name": "backup power",
+            "artifacts": ["backup_power_system"]
+        },
+        {
+            "name": "energy auditing",
+            "artifacts": ["energy_auditing_system"]
+        }
+    ]
+}

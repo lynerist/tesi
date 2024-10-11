@@ -141,6 +141,15 @@ func ifEmptyThenRoot(s featureName)string{
 	return string(s)
 }
 
+func generateEdgeData(source, target featureName)map[string]any{
+	return map[string]any{"source":ifEmptyThenRoot(source), "target":ifEmptyThenRoot(target)}
+}
+
+func generateDependencyEdgeData(source, target featureName, dependencyID int, atom declaration)map[string]any{
+	return map[string]any{"source":ifEmptyThenRoot(source), "target":ifEmptyThenRoot(target), 
+							"dependencyID":dependencyID, "declaration":atom}
+}
+
 func cytoscapeJSON(state *State)([]byte, error){
 	var json []any
 	for name, feature := range state.features{
@@ -152,37 +161,48 @@ func cytoscapeJSON(state *State)([]byte, error){
 		
 		/* --- FEATURE MODEL TREE EDGES --- */
 		for child := range feature.children{
-			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(child)}
-			json = append(json, map[string]any{"group":"edges", "data":data})
+			json = append(json, map[string]any{"group":"edges", "data":generateEdgeData(name, child)})
 		}
 
 		/* --- DEPENDENCIES --- */
 
-		/* REQUIRES ALL */
-		requiredAll := make(set[featureName])
+		/* ALL */
+		var	dependencyID int
 		for atom := range feature.requirements.ALL{
-			requiredAll.add(getProviders(atom, state))
+			for requiredFeature := range getProviders(atom, state){
+				json = append(json, map[string]any{"group":"edges", 
+													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+													"classes":[]string{"dependency","dependencyAll"}})
+			}
+			dependencyID++
 		}
 		for atom := range feature.variadicRequirements.ALL{
-			requiredAll.add(getProviders(atom, state))
-		}
-		for requiredFeature := range requiredAll{
-			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(requiredFeature)}
-			json = append(json, map[string]any{"group":"edges", "data":data, "classes":[]string{"dependencyAll"}})
+			if feature.requirements.ALL[atom] {continue}
+			for requiredFeature := range getProviders(atom, state){
+				json = append(json, map[string]any{"group":"edges", 
+													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+													"classes":[]string{"dependency","dependencyAll"}})
+			}
+			dependencyID++
 		}
 
-		/* REQUIRES NOT */
-		requiredNot := make(set[featureName])
+		/* NOT */
 		for atom := range feature.requirements.NOT{
-			requiredNot.add(getProviders(atom, state))
+			for requiredFeature := range getProviders(atom, state){
+				json = append(json, map[string]any{"group":"edges", 
+													"data":generateDependencyEdgeData(requiredFeature, name, 0, atom), 
+													"classes":[]string{"dependency","dependencyNot"}})
+			}
 		}
 		for atom := range feature.variadicRequirements.NOT{
-			requiredNot.add(getProviders(atom, state))
+			if feature.requirements.NOT[atom] {continue}
+			for requiredFeature := range getProviders(atom, state){
+				json = append(json, map[string]any{"group":"edges", 
+													"data":generateDependencyEdgeData(requiredFeature, name, 0, atom), 
+													"classes":[]string{"dependency","dependencyNot"}})
+			}
 		}
-		for requiredFeature := range requiredNot{
-			data := map[string]any{"source":ifEmptyThenRoot(name), "target":ifEmptyThenRoot(requiredFeature)}
-			json = append(json, map[string]any{"group":"edges", "data":data, "classes":[]string{"dependencyNot"}})
-		}
+
 
 		//TODO ANY ONE
 

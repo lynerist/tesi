@@ -1,0 +1,246 @@
+{
+    "artifacts": [
+        {
+            "name": "hotel_booking",
+            "provides": [
+                {"feature": "room_availability"},
+                {"feature": "reservation_confirmation"}
+            ],
+            "tags": ["hotel", "booking"]
+        },
+        {
+            "name": "flight_booking",
+            "provides": [
+                {"feature": "flight_availability"},
+                {"feature": "ticket_confirmation"}
+            ],
+            "tags": ["flight", "booking"]
+        },
+        {
+            "name": "car_rental",
+            "provides": [
+                {"feature": "car_availability"},
+                {"feature": "rental_confirmation"}
+            ],
+            "tags": ["car", "rental"]
+        },
+        {
+            "name": "event_booking",
+            "provides": [
+                {"feature": "event_availability"},
+                {"feature": "event_ticket_confirmation"}
+            ],
+            "tags": ["event", "booking"]
+        },
+        {
+            "name": "user_management",
+            "provides": [
+                {"feature": "user_registration"},
+                {"feature": "user_authentication"},
+                {"feature": "user_profile_management"}
+            ],
+            "tags": ["user", "management"]
+        },
+        {
+            "name": "payment_processing",
+            "provides": [
+                {"feature": "payment_confirmation"},
+                {"feature": "refund_processing"}
+            ],
+            "tags": ["payment", "financial"]
+        },
+        {
+            "name": "review_system",
+            "provides": [
+                {"feature": "review_submission"},
+                {"feature": "review_display"}
+            ],
+            "tags": ["reviews", "feedback"]
+        },
+        {
+            "name": "notification_system",
+            "provides": [
+                {"feature": "email_notifications"},
+                {"feature": "sms_notifications"}
+            ],
+            "tags": ["notifications", "communication"]
+        },
+        {
+            "name": "search_engine",
+            "provides": [
+                {"feature": "search_results"},
+                {"feature": "filter_options"}
+            ],
+            "tags": ["search", "filter"]
+        },
+        {
+            "name": "booking_management",
+            "requires": {
+                "all": [
+                    {"feature": "room_availability"},
+                    {"feature": "flight_availability"},
+                    {"feature": "car_availability"},
+                    {"feature": "event_availability"},
+                    {"feature": "user_registration"},
+                    {"feature": "payment_confirmation"}
+                ]
+            },
+            "provides": [
+                {"feature": "booking_confirmation"},
+                {"feature": "booking_history"}
+            ],
+            "tags": ["management", "booking"]
+        },
+        {
+            "name": "loyalty_program",
+            "requires": {
+                "all": [
+                    {"feature": "user_registration"},
+                    {"feature": "payment_confirmation"}
+                ]
+            },
+            "provides": [
+                {"feature": "points_accumulation"},
+                {"feature": "exclusive_offers"}
+            ],
+            "tags": ["loyalty", "user"]
+        },
+        {
+            "name": "mobile_app",
+            "requires": {
+                "any": [
+                    [
+                        {"feature": "user_authentication"},
+                        {"feature": "user_registration"}
+                    ]
+                ]
+            },
+            "provides": [
+                {"feature": "mobile_access"},
+                {"feature": "push_notifications"}
+            ],
+            "tags": ["mobile", "access"]
+        },
+        {
+            "name": "analytics_dashboard",
+            "requires": {
+                "all": [
+                    {"feature": "review_display"},
+                    {"feature": "booking_history"}
+                ]
+            },
+            "provides": [
+                {"feature": "business_insights"},
+                {"feature": "user_trends"}
+            ],
+            "tags": ["analytics", "dashboard"]
+        },
+        {
+            "name": "customer_support",
+            "provides": [
+                {"feature": "live_chat"},
+                {"feature": "ticket_system"}
+            ],
+            "tags": ["support", "customer"]
+        },
+        {
+            "name": "admin_panel",
+            "requires": {
+                "all": [
+                    {"feature": "user_authentication"},
+                    {"feature": "booking_confirmation"}
+                ]
+            },
+            "provides": [
+                {"feature": "user_management_tools"},
+                {"feature": "booking_overview"}
+            ],
+            "tags": ["admin", "management"]
+        },
+        {
+            "name": "multi_language_support",
+            "provides": [
+                {"feature": "language_selection"},
+                {"feature": "translated_content"}
+            ],
+            "tags": ["localization", "accessibility"]
+        },
+        {
+            "name": "API_integration",
+            "provides": [
+                {"feature": "external_service_integration"}
+            ],
+            "tags": ["API", "integration"]
+        }
+    ],
+    "features": [
+        {
+            "name": "hotel booking",
+            "artifacts": ["hotel_booking"]
+        },
+        {
+            "name": "flight booking",
+            "artifacts": ["flight_booking"]
+        },
+        {
+            "name": "car rental",
+            "artifacts": ["car_rental"]
+        },
+        {
+            "name": "event booking",
+            "artifacts": ["event_booking"]
+        },
+        {
+            "name": "user management",
+            "artifacts": ["user_management"]
+        },
+        {
+            "name": "payment processing",
+            "artifacts": ["payment_processing"]
+        },
+        {
+            "name": "review system",
+            "artifacts": ["review_system"]
+        },
+        {
+            "name": "notification system",
+            "artifacts": ["notification_system"]
+        },
+        {
+            "name": "search functionality",
+            "artifacts": ["search_engine"]
+        },
+        {
+            "name": "booking management",
+            "artifacts": ["booking_management"]
+        },
+        {
+            "name": "loyalty program",
+            "artifacts": ["loyalty_program"]
+        },
+        {
+            "name": "mobile access",
+            "artifacts": ["mobile_app"]
+        },
+        {
+            "name": "analytics",
+            "artifacts": ["analytics_dashboard"]
+        },
+        {
+            "name": "customer support",
+            "artifacts": ["customer_support"]
+        },
+        {
+            "name": "admin management",
+            "artifacts": ["admin_panel"]
+        },
+        {
+            "name": "multi-language support",
+            "artifacts": ["multi_language_support"]
+        },
+        {
+            "name": "API integration",
+            "artifacts": ["API_integration"]
+        }
+    ]
+}

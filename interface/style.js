@@ -49,12 +49,21 @@ const ROOT = {
     'background-color': '#002129',
 }
 
+const COLORS = [];
+for (let i = 0; i < 1000; i++) {
+  COLORS.push("#" + Math.floor(Math.random() * 16777215).toString(16));
+}
+
 const DEPENDENCYALL = {
-    'line-color': '#48F7C3',
+    'line-color': function(ele) {
+        return COLORS[ele.data("dependencyID")]
+    },
+    'target-arrow-color': function(ele) {
+        return COLORS[ele.data("dependencyID")]
+    },
     'target-arrow-shape': 'circle',
     'opacity':0.7,
     'width': 2,
-    'target-arrow-color': '#48F7C3',
 }
 
 const DEPENDENCYNOT = {

@@ -123,29 +123,56 @@ func storeFeatures(json map[string]any, state *State){
 			}
 
 			/* --- STORE REQUIRED DECLARATIONS --- */
-			for _, required := range artifact.requires(ALL){
-				atom := declaration(fmt.Sprint(required))
-				if artifact.isVariadic(){
-					atom = insertVariables(required, thisArtifactName, "", state)
-					feature.variadicRequirements.ALL[atom] = true
-				}else{
-					feature.requirements.ALL[atom] = true
-				}
-			}
-
-			for _, required := range artifact.requires(NOT){
-				atom := declaration(fmt.Sprint(required))
-				if artifact.isVariadic(){
-					atom = insertVariables(required, thisArtifactName, "", state)
-					feature.variadicRequirements.NOT[atom] = true
-				}else{
-					feature.requirements.NOT[atom] = true
-				}
-			}
-
 			
+			/* ALL */
+			for _, required := range artifact.requires(ALL){
+				if artifact.isVariadic(){
+					feature.variadicRequirements.ALL[insertVariables(required, thisArtifactName, "", state)] = true
+				}else{
+					feature.requirements.ALL[declaration(fmt.Sprint(required))] = true
+				}
+			}
 
-			//TODO ANY ONE
+			/* NOT */
+			for _, required := range artifact.requires(NOT){
+				if artifact.isVariadic(){
+					feature.variadicRequirements.NOT[insertVariables(required, thisArtifactName, "", state)] = true
+				}else{
+					feature.requirements.NOT[declaration(fmt.Sprint(required))] = true
+				}
+			}
+
+			/* ANY */
+			for _, group := range artifact.requires(ANY){
+				declarations := make(set[declaration])
+				variadicDeclarations := make(set[declaration])
+
+				for _, required := range group.([]any){
+					if artifact.isVariadic(){
+						variadicDeclarations[insertVariables(required, thisArtifactName, "", state)] = true
+					}else{
+						declarations[declaration(fmt.Sprint(required))] = true
+					}
+				}
+				feature.requirements.ANY = append(feature.requirements.ANY, declarations)
+				feature.variadicRequirements.ANY = append(feature.variadicRequirements.ANY, variadicDeclarations)
+			}
+
+			/* ONE */
+			for _, group := range artifact.requires(ONE){
+				declarations := make(set[declaration])
+				variadicDeclarations := make(set[declaration])
+
+				for _, required := range group.([]any){
+					if artifact.isVariadic(){
+						variadicDeclarations[insertVariables(required, thisArtifactName, "", state)] = true
+					}else{
+						declarations[declaration(fmt.Sprint(required))] = true
+					}
+				}
+				feature.requirements.ONE = append(feature.requirements.ONE, declarations)
+				feature.variadicRequirements.ONE = append(feature.variadicRequirements.ONE, variadicDeclarations)
+			}
 
 			/* --- STORE PROVIDED DECLARATIONS --- */
 			for _, provided := range artifact.provides(){

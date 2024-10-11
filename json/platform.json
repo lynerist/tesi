@@ -1,0 +1,245 @@
+{
+    "artifacts": [
+        {
+            "name": "course_management",
+            "provides": [
+                {"feature": "course_creation"},
+                {"feature": "course_update"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "user_signup"}
+                ]
+            },
+            "tags": ["courses", "management"]
+        },
+        {
+            "name": "user_registration",
+            "provides": [
+                {"feature": "user_signup"},
+                {"feature": "user_profile"}
+            ],
+            "requires": {
+                "not": [
+                    {"feature": "guest_access"}
+                ]
+            },
+            "tags": ["user", "registration"]
+        },
+        {
+            "name": "video_content",
+            "provides": [
+                {"feature": "video_upload"},
+                {"feature": "video_playback"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "course_creation"}
+                ]
+            },
+            "tags": ["media", "video"]
+        },
+        {
+            "name": "quiz_system",
+            "provides": [
+                {"feature": "quiz_creation"},
+                {"feature": "quiz_results"}
+            ],
+            "requires": {
+                "any": [
+                    [{"feature": "course_creation"}, {"feature": "user_profile"}]
+                ]
+            },
+            "tags": ["assessments", "quizzes"]
+        },
+        {
+            "name": "discussion_forum",
+            "provides": [
+                {"feature": "post_creation"},
+                {"feature": "comment_system"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "user_signup"},
+                    {"feature": "course_creation"}
+                ]
+            },
+            "tags": ["interaction", "forum"]
+        },
+        {
+            "name": "grading_system",
+            "provides": [
+                {"feature": "grade_submission"},
+                {"feature": "feedback_provision"}
+            ],
+            "requires": {
+                "any": [
+                    [{"feature": "quiz_results"}, {"feature": "assignment_submission"}]
+                ]
+            },
+            "tags": ["assessment", "grading"]
+        },
+        {
+            "name": "notification_system",
+            "provides": [
+                {"feature": "email_notifications"},
+                {"feature": "push_notifications"}
+            ],
+            "requires": {
+                "any": [
+                    [{"feature": "user_profile"}, {"feature": "course_update"}]
+                ]
+            },
+            "tags": ["notifications", "communication"]
+        },
+        {
+            "name": "course_catalog",
+            "provides": [
+                {"feature": "course_listing"},
+                {"feature": "course_search"}
+            ],
+            "requires": {
+                "not": [
+                    {"feature": "course_deletion"}
+                ]
+            },
+            "tags": ["catalog", "courses"]
+        },
+        {
+            "name": "payment_processing",
+            "provides": [
+                {"feature": "payment_confirmation"},
+                {"feature": "refund_processing"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "user_signup"},
+                    {"feature": "course_creation"}
+                ]
+            },
+            "tags": ["payment", "financial"]
+        },
+        {
+            "name": "analytics_dashboard",
+            "provides": [
+                {"feature": "user_engagement"},
+                {"feature": "course_statistics"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "course_creation"},
+                    {"feature": "quiz_results"}
+                ]
+            },
+            "tags": ["analytics", "data"]
+        },
+        {
+            "name": "mobile_app",
+            "provides": [
+                {"feature": "mobile_access"},
+                {"feature": "offline_mode"}
+            ],
+            "requires": {
+                "not": [
+                    {"feature": "web_only_access"}
+                ]
+            },
+            "tags": ["mobile", "access"]
+        },
+        {
+            "name": "certification_system",
+            "provides": [
+                {"feature": "certificate_generation"},
+                {"feature": "certificate_verification"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "course_completion"}
+                ]
+            },
+            "tags": ["certification", "credentials"]
+        },
+        {
+            "name": "live_classes",
+            "provides": [
+                {"feature": "live_streaming"},
+                {"feature": "class_recording"}
+            ],
+            "requires": {
+                "any": [
+                    [{"feature": "video_upload"}, {"feature": "mobile_access"}]
+                ]
+            },
+            "tags": ["live", "classes"]
+        },
+        {
+            "name": "user_feedback",
+            "provides": [
+                {"feature": "feedback_submission"},
+                {"feature": "feedback_display"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "course_completion"}
+                ]
+            },
+            "tags": ["feedback", "user"]
+        },
+        {
+            "name": "resource_library",
+            "provides": [
+                {"feature": "resource_upload"},
+                {"feature": "resource_download"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "course_creation"},
+                    {"feature": "user_signup"}
+                ]
+            },
+            "tags": ["resources", "library"]
+        }
+    ],
+    "features": [
+        {
+            "name": "course management",
+            "artifacts": ["course_management", "course_catalog"]
+        },
+        {
+            "name": "user registration",
+            "artifacts": ["user_registration", "notification_system"]
+        },
+        {
+            "name": "video learning",
+            "artifacts": ["video_content", "live_classes"]
+        },
+        {
+            "name": "assessments",
+            "artifacts": ["quiz_system", "grading_system"]
+        },
+        {
+            "name": "discussion forum",
+            "artifacts": ["discussion_forum", "user_feedback"]
+        },
+        {
+            "name": "payment handling",
+            "artifacts": ["payment_processing", "notification_system"]
+        },
+        {
+            "name": "analytics and reporting",
+            "artifacts": ["analytics_dashboard", "user_feedback"]
+        },
+        {
+            "name": "mobile access",
+            "artifacts": ["mobile_app", "video_content"]
+        },
+        {
+            "name": "certification",
+            "artifacts": ["certification_system", "user_registration"]
+        },
+        {
+            "name": "resources access",
+            "artifacts": ["resource_library", "course_catalog"]
+        }
+    ]
+}

@@ -26,8 +26,43 @@ function displayModel(model){
     cy.elements().remove(); // Rimuovi elementi esistenti (se necessario)
     cy.add(model); // Aggiungi i nuovi elementi direttamente dal file
     cy.layout(LAYOUT).run(); // Applica un layout 
+    cy.elements().forEach(function(ele) {
+        if (ele.group() == "edges")
+            makePopper(ele);
+    });
+
+    cy.on('mouseover', '.dependency', (event) => {
+        let target = event.target;
+        if (target.tippy) {
+            target.tippy.show();
+        }
+    });
+
+    cy.on('mouseout', '.dependency', (event) => {
+        let target = event.target;
+        if (target.tippy) {
+            target.tippy.hide();
+        }
+    });
+    
     console.log("Grafo caricato con successo!");
 }
+
+function makePopper(ele) {
+    let ref = ele.popperRef(); // used only for positioning
+    
+    ele.tippy = tippy(ref, { // tippy options:
+        content: () => {
+            let content = document.createElement('div');
+            content.innerHTML = ele.data("declaration");
+            return content;
+        },
+        trigger: 'manual' // probably want manual mode
+    });
+
+}
+
+/* BACKEND */
 
 function loadJSON_GO(file){
     let formData = new FormData();
