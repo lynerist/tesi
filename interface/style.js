@@ -3,7 +3,7 @@ const LAYOUT = {
     directed: true,             // Makes the layout directed
     spacingFactor: 0.9,        // Reduce spacing to keep nodes closer
     nodeDistance: 50,          // Ideal distance between nodes at the same depth
-    idealEdgeLength: 150,
+    idealEdgeLength: 250,
     avoidOverlap: true,        // Attempt to prevent node overlap
     animate: true,             // Optional: enables animations
     animationDuration: 3000,    // Duration of the animation
@@ -12,7 +12,7 @@ const LAYOUT = {
 const EDGE = {
     'line-color': '#000000',
     'width': 3,
-    'target-arrow-shape': 'triangle',
+    'target-arrow-shape': 'triangle-backcurve',
     'target-arrow-color': '#000000',
     'opacity':0.8,
     'curve-style': 'bezier'
@@ -61,7 +61,7 @@ const DEPENDENCYALL = {
     'target-arrow-color': function(ele) {
         return COLORS[ele.data("dependencyID")]
     },
-    'target-arrow-shape': 'circle',
+    'target-arrow-shape': 'triangle',
     'opacity':0.7,
     'width': 2,
 }
@@ -73,4 +73,16 @@ const DEPENDENCYNOT = {
     'width': 2,
     'line-style': 'dashed',
     'target-arrow-color': '#FF4136',
+}
+
+const DEPENDENCYANY = {
+    'line-color': function(ele) {
+        return COLORS[ele.data("dependencyID")]
+    },
+    'target-arrow-color': function(ele) {
+        return COLORS[ele.data("dependencyID")]
+    },
+    'target-arrow-shape': 'circle-triangle',
+    'opacity':0.7,
+    'width': 2,
 }

@@ -198,6 +198,20 @@
                 ]
             },
             "tags": ["resources", "library"]
+        },
+        {
+            "name": "subscription_management",
+            "provides": [
+                {"feature": "subscription_tracking"},
+                {"feature": "payment_subscription"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "user_signup"},
+                    {"feature": "payment_confirmation"}
+                ]
+            },
+            "tags": ["subscription", "management"]
         }
     ],
     "features": [
@@ -240,6 +254,10 @@
         {
             "name": "resources access",
             "artifacts": ["resource_library", "course_catalog"]
+        },
+        {
+            "name": "subscription management",
+            "artifacts": ["subscription_management", "payment_processing"]
         }
     ]
 }

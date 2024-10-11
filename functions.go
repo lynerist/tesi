@@ -203,8 +203,52 @@ func cytoscapeJSON(state *State)([]byte, error){
 			}
 		}
 
+		/* ANY */
+		done := make(set[string])
+		for _, group := range feature.requirements.ANY{
+			done[fmt.Sprint(map[declaration]bool(group))] = true
+			providers := make(map[featureName]map[string]any)
+			for atom := range group{
+				for requiredFeature := range getProviders(atom, state){
+					if _, ok := providers[requiredFeature]; ok{
+						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
+						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
+					}else{
+						providers[requiredFeature] = map[string]any{"group":"edges", 
+																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+																	"classes":[]string{"dependency","dependencyAny"}}
+					}
 
-		//TODO ANY ONE
+				}
+			}
+			for _, edge := range providers{
+				json = append(json, edge)
+			}
+			dependencyID++
+		}
+
+		for _, group := range feature.variadicRequirements.ANY{
+			if done[fmt.Sprint(map[declaration]bool(group))]{continue}
+			providers := make(map[featureName]map[string]any)
+			for atom := range group{
+				for requiredFeature := range getProviders(atom, state){
+					if _, ok := providers[requiredFeature]; ok{
+						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
+						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
+					}else{
+						providers[requiredFeature] = map[string]any{"group":"edges", 
+																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+																	"classes":[]string{"dependency","dependencyAny"}}
+					}
+
+				}
+			}
+			for _, edge := range providers{
+				json = append(json, edge)
+			}
+			dependencyID++
+		}
+		//TODO ONE
 
 	}
 	return j.MarshalIndent(json, "", "\t")

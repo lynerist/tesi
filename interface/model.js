@@ -9,7 +9,8 @@ var cy = cytoscape({
         {selector: ".tag", style:TAG },
         {selector: ".root", style:ROOT },
         {selector: ".dependencyAll", style:DEPENDENCYALL},
-        {selector: ".dependencyNot", style:DEPENDENCYNOT}
+        {selector: ".dependencyNot", style:DEPENDENCYNOT},
+        {selector: ".dependencyAny", style:DEPENDENCYANY}
 
     ],
     layout: LAYOUT
@@ -25,10 +26,16 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
 function displayModel(model){
     cy.elements().remove(); // Rimuovi elementi esistenti (se necessario)
     cy.add(model); // Aggiungi i nuovi elementi direttamente dal file
-    cy.layout(LAYOUT).run(); // Applica un layout 
+
+    let layout = LAYOUT
+    layout.idealEdgeLength = 50 + 5*cy.edges().length
+    console.log(layout.idealEdgeLength)
+    cy.layout(layout).run();
+
     cy.elements().forEach(function(ele) {
-        if (ele.group() == "edges")
+        if (ele.group() == "edges"){
             makePopper(ele);
+        }
     });
 
     cy.on('mouseover', '.dependency', (event) => {
@@ -55,9 +62,10 @@ function makePopper(ele) {
         content: () => {
             let content = document.createElement('div');
             content.innerHTML = ele.data("declaration");
+            content.innerHTML = content.innerHTML.replace(/\n/g, "<br />")
             return content;
         },
-        trigger: 'manual' // probably want manual mode
+        trigger: 'manual' 
     });
 
 }
