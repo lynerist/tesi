@@ -169,7 +169,7 @@ func cytoscapeJSON(state *State)([]byte, error){
 		/* ALL */
 		var	dependencyID int
 		for atom := range feature.requirements.ALL{
-			for requiredFeature := range getProviders(atom, state){
+			for requiredFeature := range getProviders(atom, state, feature.name){
 				json = append(json, map[string]any{"group":"edges", 
 													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
 													"classes":[]string{"dependency","dependencyAll"}})
@@ -178,7 +178,7 @@ func cytoscapeJSON(state *State)([]byte, error){
 		}
 		for atom := range feature.variadicRequirements.ALL{
 			if feature.requirements.ALL[atom] {continue}
-			for requiredFeature := range getProviders(atom, state){
+			for requiredFeature := range getProviders(atom, state, feature.name){
 				json = append(json, map[string]any{"group":"edges", 
 													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
 													"classes":[]string{"dependency","dependencyAll"}})
@@ -188,7 +188,7 @@ func cytoscapeJSON(state *State)([]byte, error){
 
 		/* NOT */
 		for atom := range feature.requirements.NOT{
-			for requiredFeature := range getProviders(atom, state){
+			for requiredFeature := range getProviders(atom, state, feature.name){
 				json = append(json, map[string]any{"group":"edges", 
 													"data":generateDependencyEdgeData(requiredFeature, name, 0, atom), 
 													"classes":[]string{"dependency","dependencyNot"}})
@@ -196,7 +196,7 @@ func cytoscapeJSON(state *State)([]byte, error){
 		}
 		for atom := range feature.variadicRequirements.NOT{
 			if feature.requirements.NOT[atom] {continue}
-			for requiredFeature := range getProviders(atom, state){
+			for requiredFeature := range getProviders(atom, state, feature.name){
 				json = append(json, map[string]any{"group":"edges", 
 													"data":generateDependencyEdgeData(requiredFeature, name, 0, atom), 
 													"classes":[]string{"dependency","dependencyNot"}})
@@ -209,7 +209,7 @@ func cytoscapeJSON(state *State)([]byte, error){
 			done[fmt.Sprint(map[declaration]bool(group))] = true
 			providers := make(map[featureName]map[string]any)
 			for atom := range group{
-				for requiredFeature := range getProviders(atom, state){
+				for requiredFeature := range getProviders(atom, state, feature.name){
 					if _, ok := providers[requiredFeature]; ok{
 						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
 						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
@@ -231,7 +231,7 @@ func cytoscapeJSON(state *State)([]byte, error){
 			if done[fmt.Sprint(map[declaration]bool(group))]{continue}
 			providers := make(map[featureName]map[string]any)
 			for atom := range group{
-				for requiredFeature := range getProviders(atom, state){
+				for requiredFeature := range getProviders(atom, state, feature.name){
 					if _, ok := providers[requiredFeature]; ok{
 						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
 						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
@@ -248,16 +248,63 @@ func cytoscapeJSON(state *State)([]byte, error){
 			}
 			dependencyID++
 		}
-		//TODO ONE
+
+		/* ONE */
+
+		done = make(set[string])
+		for _, group := range feature.requirements.ONE{
+			done[fmt.Sprint(map[declaration]bool(group))] = true
+			providers := make(map[featureName]map[string]any)
+			for atom := range group{
+				for requiredFeature := range getProviders(atom, state, feature.name){
+					if _, ok := providers[requiredFeature]; ok{
+						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
+						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
+					}else{
+						providers[requiredFeature] = map[string]any{"group":"edges", 
+																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+																	"classes":[]string{"dependency","dependencyOne"}}
+					}
+
+				}
+			}
+			for _, edge := range providers{
+				json = append(json, edge)
+			}
+			dependencyID++
+		}
+
+		for _, group := range feature.variadicRequirements.ONE{
+			if done[fmt.Sprint(map[declaration]bool(group))]{continue}
+			providers := make(map[featureName]map[string]any)
+			for atom := range group{
+				for requiredFeature := range getProviders(atom, state, feature.name){
+					if _, ok := providers[requiredFeature]; ok{
+						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
+						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
+					}else{
+						providers[requiredFeature] = map[string]any{"group":"edges", 
+																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+																	"classes":[]string{"dependency","dependencyOne"}}
+					}
+
+				}
+			}
+			for _, edge := range providers{
+				json = append(json, edge)
+			}
+			dependencyID++
+		}
 
 	}
 	return j.MarshalIndent(json, "", "\t")
 }
 
-func getProviders(atom declaration, state *State)set[featureName]{
+func getProviders(atom declaration, state *State, requier featureName)set[featureName]{
 	providers := make(set[featureName])
 	providers.add(state.providers[atom])
 	providers.add(state.variadicProviders[atom])
+	delete(providers, requier)
 	return providers
 }
 

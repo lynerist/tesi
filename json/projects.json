@@ -1,0 +1,188 @@
+{
+    "artifacts": [
+        {
+            "name": "task_management",
+            "provides": [
+                {"feature": "task_creation"},
+                {"feature": "task_tracking"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "user_authentication"}
+                ]
+            },
+            "tags": ["tasks", "management"]
+        },
+        {
+            "name": "user_authentication",
+            "provides": [
+                {"feature": "user_login"},
+                {"feature": "user_signup"}
+            ],
+            "tags": ["user", "authentication"]
+        },
+        {
+            "name": "cloud_file_storage",
+            "provides": [
+                {"feature": "cloud_storage"},
+                {"feature": "file_upload"}
+            ],
+            "tags": ["files", "cloud", "storage"]
+        },
+        {
+            "name": "local_file_storage",
+            "provides": [
+                {"feature": "local_storage"},
+                {"feature": "file_upload"}
+            ],
+            "tags": ["files", "local", "storage"]
+        },
+        {
+            "name": "project_overview",
+            "provides": [
+                {"feature": "project_dashboard"},
+                {"feature": "progress_tracking"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "task_creation"}
+                ]
+            },
+            "tags": ["project", "overview"]
+        },
+        {
+            "name": "team_collaboration",
+            "provides": [
+                {"feature": "team_chat"},
+                {"feature": "shared_documents"}
+            ],
+            "requires": {
+                "one": [
+                    [
+                        {"feature": "cloud_storage"},
+                        {"feature": "local_storage"}
+                    ]
+                ]
+            },
+            "tags": ["collaboration", "team"]
+        },
+        {
+            "name": "time_tracking",
+            "provides": [
+                {"feature": "time_logging"},
+                {"feature": "time_reports"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "task_tracking"}
+                ]
+            },
+            "tags": ["time", "tracking"]
+        },
+        {
+            "name": "notification_system",
+            "provides": [
+                {"feature": "email_notifications"},
+                {"feature": "push_notifications"}
+            ],
+            "requires": {
+                "any": [
+                    [{"feature": "task_creation"}, {"feature": "team_chat"}]
+                ]
+            },
+            "tags": ["notifications", "communication"]
+        },
+        {
+            "name": "bug_tracking",
+            "provides": [
+                {"feature": "bug_creation"},
+                {"feature": "bug_resolution"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "project_dashboard"}
+                ]
+            },
+            "tags": ["bugs", "tracking"]
+        },
+        {
+            "name": "version_control",
+            "provides": [
+                {"feature": "git_integration"},
+                {"feature": "version_history"}
+            ],
+            "requires": {
+                "not": [
+                    {"feature": "local_storage"}
+                ]
+            },
+            "tags": ["version_control", "git"]
+        },
+        {
+            "name": "continuous_integration",
+            "provides": [
+                {"feature": "ci_pipeline"},
+                {"feature": "automated_testing"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "git_integration"},
+                    {"feature": "task_tracking"}
+                ]
+            },
+            "tags": ["ci", "automation"]
+        },
+        {
+            "name": "documentation_system",
+            "provides": [
+                {"feature": "wiki_pages"},
+                {"feature": "shared_docs"}
+            ],
+            "requires": {
+                "all": [
+                    {"feature": "file_upload"},
+                    {"feature": "user_login"}
+                ]
+            },
+            "tags": ["documentation", "wiki"]
+        }
+    ],
+    "features": [
+        {
+            "name": "task management",
+            "artifacts": ["task_management", "notification_system"]
+        },
+        {
+            "name": "user authentication",
+            "artifacts": ["user_authentication", "notification_system"]
+        },
+        {
+            "name": "cloud file storage",
+            "artifacts": ["cloud_file_storage"]
+        },
+        {
+            "name": "local file storage",
+            "artifacts": ["local_file_storage"]
+        },
+        {
+            "name": "project overview",
+            "artifacts": ["project_overview", "team_collaboration"]
+        },
+        {
+            "name": "time tracking",
+            "artifacts": ["time_tracking", "notification_system"]
+        },
+        {
+            "name": "bug tracking",
+            "artifacts": ["bug_tracking", "notification_system"]
+        },
+        {
+            "name": "version control",
+            "artifacts": ["version_control", "continuous_integration"]
+        },
+        {
+            "name": "documentation system",
+            "artifacts": ["documentation_system"]
+        }
+    ]
+}

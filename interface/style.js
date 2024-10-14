@@ -86,3 +86,15 @@ const DEPENDENCYANY = {
     'opacity':0.7,
     'width': 2,
 }
+
+const DEPENDENCYONE = {
+    'line-color': function(ele) {
+        return COLORS[ele.data("dependencyID")]
+    },
+    'target-arrow-color': function(ele) {
+        return COLORS[ele.data("dependencyID")]
+    },
+    'target-arrow-shape': 'triangle-tee',
+    'opacity':0.7,
+    'width': 2,
+}
