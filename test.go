@@ -120,7 +120,7 @@ func mainn(){
 	//fmt.Println(core.getProgram())
 	//prologQueryConsole(core, hashesToText)	
 
-	exportFeatureModelJson("test/out.json", features, &State{})
+	exportFeatureModelJson("test/out.json", &State{})
 
 	startLocalServer()
 	

@@ -40,18 +40,20 @@ function displayModel(model){
     });
 
     cy.on('mouseover', '.dependency', (event) => {
-        let target = event.target;
-        if (target.tippy) {
-            target.tippy.show();
+        if (event.target.tippy) {
+            event.target.tippy.show();
         }
     });
 
     cy.on('mouseout', '.dependency', (event) => {
-        let target = event.target;
-        if (target.tippy) {
-            target.tippy.hide();
+        if (event.target.tippy) {
+            event.target.tippy.hide();
         }
     });
+
+    cy.on("click", "node", (event) => {
+        activation(event.target)
+    })
     
     console.log("Grafo caricato con successo!");
 }
@@ -68,7 +70,26 @@ function makePopper(ele) {
         },
         trigger: 'manual' 
     });
+}
 
+function activateUp(ele){
+    parents = cy.nodes().edgesTo(ele).sources().filter((e)=> e.data('abstract'))
+    parents.forEach((parent)=>parent.data("active", true) && activateUp(parent))
+}
+
+function unactivateDown(ele) {
+    children = ele.data("abstract")?ele.edgesTo(cy.nodes()).targets():[]
+    children.forEach((child)=>child.data("active", false) && unactivateDown(child))
+}
+
+function activation(ele){
+    ele.data("active", !ele.data("active"))     //activate or unactivate node
+    if (ele.data("active")){                    //activate parent node
+        activateUp(ele)
+    }else{
+        unactivateDown(ele)
+    }
+    cy.style().update()
 }
 
 /* BACKEND */

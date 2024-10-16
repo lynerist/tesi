@@ -14,32 +14,32 @@ const EDGE = {
     'width': 3,
     'target-arrow-shape': 'triangle-backcurve',
     'target-arrow-color': '#000000',
-    'opacity':0.8,
+    'opacity': function(ele){
+        return ele.source().data("active") ? 0.9 : 0.2
+    },
     'curve-style': 'bezier'
 }
 
 const NODE = {
     'label': function(ele) {
-        let label = ele.data('id');
-        return label.split("::")[0];
+        return ele.data("id").split("::")[0];          //Remove node incremental id
     },
     'background-color': '#1074D9',
     'color': '#fff',
     'text-valign': 'center',
     'text-halign': 'center',
     'height': '50px',
-    'opacity':0.3,
-    // Calcola la larghezza in base alla lunghezza della label
+    'opacity': function(ele){
+        return ele.data("active") ? 0.9 : 0.2          //Higher opacity for active nodes  
+    },
     'width': function(ele) {
-        const label = ele.data('id');
-        return Math.max(label.length * 10, 50); // 10px per carattere, larghezza minima di 40px
+        return Math.max(ele.data("id").length * 10, 50); // 10px for each char, min length 50px
     }
 }
 
 const TAG = {
     'label': function(ele) {
-        let label = ele.data('id');
-        return label.split("::")[1];
+        return ele.data("id").split("::")[1];                //Remove node incremental id
     },
     'background-color': '#0000D9',
 }
@@ -62,14 +62,12 @@ const DEPENDENCYALL = {
         return COLORS[ele.data("dependencyID")]
     },
     'target-arrow-shape': 'triangle',
-    'opacity':0.7,
     'width': 2,
 }
 
 const DEPENDENCYNOT = {
     'line-color': '#FF4136',
     'target-arrow-shape': 'tee',
-    'opacity':0.7,
     'width': 2,
     'line-style': 'dashed',
     'target-arrow-color': '#FF4136',
@@ -83,7 +81,6 @@ const DEPENDENCYANY = {
         return COLORS[ele.data("dependencyID")]
     },
     'target-arrow-shape': 'circle-triangle',
-    'opacity':0.7,
     'width': 2,
 }
 
@@ -95,6 +92,5 @@ const DEPENDENCYONE = {
         return COLORS[ele.data("dependencyID")]
     },
     'target-arrow-shape': 'triangle-tee',
-    'opacity':0.7,
     'width': 2,
 }

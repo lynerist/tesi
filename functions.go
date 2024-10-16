@@ -150,12 +150,15 @@ func generateDependencyEdgeData(source, target featureName, dependencyID int, at
 							"dependencyID":dependencyID, "declaration":atom}
 }
 
-func cytoscapeJSON(state *State)([]byte, error){
+func extractCytoscapeJSON(state *State)([]byte, error){
 	var json []any
 	for name, feature := range state.features{
 		data := map[string]any{"id":ifEmptyThenRoot(name)} //, "parent":ifEmptyThenRoot(*feature.parent)} //REMOVE PARENT??
 		classes := []string{"node"}
-		if len(feature.artifacts) == 0 {classes = append(classes, "tag")}
+		if len(feature.artifacts) == 0 {
+			classes = append(classes, "tag")
+			data["abstract"]=true
+		}
 		if name == "" {classes = append(classes, "root")}
 		json = append(json, map[string]any{"group":"nodes", "data":data, "classes":classes})
 		
@@ -308,8 +311,8 @@ func getProviders(atom declaration, state *State, requier featureName)set[featur
 	return providers
 }
 
-func exportFeatureModelJson(path string, features map[featureName]Feature, state *State){
-	outJson, _ := cytoscapeJSON(state)
+func exportFeatureModelJson(path string, state *State){
+	outJson, _ := extractCytoscapeJSON(state)
 
 	f, err := os.Create(path)
 	if err != nil {

@@ -31,7 +31,7 @@ func handleJSONLoading(state *State) {
 
 		/* --- FEATURE TREE GENERATION --- */
 		generateFeatureTree("", state.features)
-		outJson, _ := cytoscapeJSON(state)
+		outJson, _ := extractCytoscapeJSON(state)
 		w.Write(outJson)
 	})
 }
