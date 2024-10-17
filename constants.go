@@ -7,6 +7,7 @@ const ANY 		string = "any"
 const ONE 		string = "one"
 const REQUIRES 	string = "requires"
 const PROVIDES 	string = "provides"
+const ROOT		featureName = ""
 
 const PORT = "60124"
 

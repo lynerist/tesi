@@ -11,7 +11,7 @@ func newGlobalContext()(newContext globalContext){
 	newContext.needs = make(map[artifactName]set[variableName])
 	return
 }
-func (gr globalContext)put(name variableName, value any, artifact artifactName){
+func (gr globalContext)put(name variableName, value variableValue, artifact artifactName){
 	if len(gr.proposed[name])==0{
 		gr.proposed[name] = make(map[variableValue]int)
 	} 
@@ -24,6 +24,6 @@ func (gr globalContext)put(name variableName, value any, artifact artifactName){
 	}
 	gr.needs[artifact][name]=true
 }
-func (gr globalContext)get(name variableName)any{
+func (gr globalContext)get(name variableName)variableValue{
 	return gr.elected[name]
 }

@@ -150,10 +150,38 @@ func generateDependencyEdgeData(source, target featureName, dependencyID int, at
 							"dependencyID":dependencyID, "declaration":atom}
 }
 
+func getVariables(feature *Feature, state *State)map[string]variableValue{
+	attributes := make(map[string]variableValue)
+	for _, artifact := range feature.artifacts{
+		if state.artifacts[artifact].isVariadic(){
+			for variable, value := range state.attributes[artifact][feature.name]{
+				attributes[fmt.Sprintf("%s%s", artifact,variable)] = value
+			}
+		}
+	}
+	return attributes	
+}
+
+func getGlobals(feature *Feature, state *State)map[string]variableValue{
+	globals := make(map[string]variableValue)
+	for _, artifact := range feature.artifacts{
+		if state.artifacts[artifact].isVariadic(){
+			for variable := range state.globals.needs[artifact]{
+				globals[fmt.Sprintf("%s%s", artifact,variable)] = state.globals.get(variable)
+			}
+		}
+	}
+	return globals	
+}
+
 func extractCytoscapeJSON(state *State)([]byte, error){
 	var json []any
 	for name, feature := range state.features{
-		data := map[string]any{"id":ifEmptyThenRoot(name)} //, "parent":ifEmptyThenRoot(*feature.parent)} //REMOVE PARENT??
+			
+		data := map[string]any{"id":ifEmptyThenRoot(name), 
+								"attributes":getVariables(&feature, state), 
+								"globals":getGlobals(&feature,state)}
+
 		classes := []string{"node"}
 		if len(feature.artifacts) == 0 {
 			classes = append(classes, "tag")

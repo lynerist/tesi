@@ -112,7 +112,7 @@ func printTree(root featureName, indent int, features map[featureName]Feature){
 
 func storeFeatures(json map[string]any, state *State){
 	for _, f := range json["features"].([]any){
-		feature := newFeature(newFeatureName(f, len(state.features)), getArtifactsFromFeatureJSON(f), state.artifacts, "")
+		feature := newFeature(newFeatureName(f, len(state.features)), getArtifactsFromFeatureJSON(f), state.artifacts, ROOT)
 		for _, thisArtifactName := range feature.artifacts{
 			artifact := state.artifacts[thisArtifactName]
 
@@ -127,7 +127,7 @@ func storeFeatures(json map[string]any, state *State){
 			/* ALL */
 			for _, required := range artifact.requires(ALL){
 				if artifact.isVariadic(){
-					feature.variadicRequirements.ALL[insertVariables(required, thisArtifactName, "", state)] = true
+					feature.variadicRequirements.ALL[insertVariables(required, thisArtifactName, ROOT, state)] = true
 				}else{
 					feature.requirements.ALL[declaration(fmt.Sprint(required))] = true
 				}
@@ -136,7 +136,7 @@ func storeFeatures(json map[string]any, state *State){
 			/* NOT */
 			for _, required := range artifact.requires(NOT){
 				if artifact.isVariadic(){
-					feature.variadicRequirements.NOT[insertVariables(required, thisArtifactName, "", state)] = true
+					feature.variadicRequirements.NOT[insertVariables(required, thisArtifactName, ROOT, state)] = true
 				}else{
 					feature.requirements.NOT[declaration(fmt.Sprint(required))] = true
 				}
@@ -149,7 +149,7 @@ func storeFeatures(json map[string]any, state *State){
 
 				for _, required := range group.([]any){
 					if artifact.isVariadic(){
-						variadicDeclarations[insertVariables(required, thisArtifactName, "", state)] = true
+						variadicDeclarations[insertVariables(required, thisArtifactName, ROOT, state)] = true
 					}else{
 						declarations[declaration(fmt.Sprint(required))] = true
 					}
@@ -165,7 +165,7 @@ func storeFeatures(json map[string]any, state *State){
 
 				for _, required := range group.([]any){
 					if artifact.isVariadic(){
-						variadicDeclarations[insertVariables(required, thisArtifactName, "", state)] = true
+						variadicDeclarations[insertVariables(required, thisArtifactName, ROOT, state)] = true
 					}else{
 						declarations[declaration(fmt.Sprint(required))] = true
 					}
@@ -188,6 +188,6 @@ func storeFeatures(json map[string]any, state *State){
 			}
 		}
 		state.features[feature.name] = feature
-		state.features[""].children[feature.name] = true //all features are root's children
+		state.features[ROOT].children[feature.name] = true 
 	}
 }
