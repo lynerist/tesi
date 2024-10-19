@@ -35,40 +35,98 @@ function displayModel(model){
 
     cy.elements().forEach(function(ele) {
         if (ele.group() == "edges"){
-            makePopper(ele);
+            popDeclaration(ele);
+        }else{
+            popVariables(ele)
         }
     });
-
-    cy.on('mouseover', '.dependency', (event) => {
+    // EDGES HOVER LISTENERS
+    cy.on('mouseover', 'edge', (event) => {
         if (event.target.tippy) {
             event.target.tippy.show();
         }
     });
 
-    cy.on('mouseout', '.dependency', (event) => {
+    cy.on('mouseout', 'edge', (event) => {
         if (event.target.tippy) {
             event.target.tippy.hide();
         }
     });
 
+    // NODES HOVER LISTENERS
+
+    cy.on('mouseover', 'node', (event) => {
+        if (event.target.tippy) {
+            event.target.tippy.show();
+        }
+    });
+    
+    cy.on('mouseout', 'node', (event) => {
+        if (event.target.tippy) {
+            event.target.tippy.hide();
+        }
+    });
+
+    
+
+    // NODES CLICK LISTENERS
+
     cy.on("click", "node", (event) => {
-        activation(event.target)
+        hundleActivation(event.target)
     })
     
     console.log("Grafo caricato con successo!");
 }
 
-function makePopper(ele) {
-    let ref = ele.popperRef(); // used only for positioning
+function popDeclaration(ele) {
+    if(! ele.data("declaration")){
+        ele.tippy = ""
+        return
+    }
+    let ref = ele.popperRef(); 
     
-    ele.tippy = tippy(ref, { // tippy options:
+    ele.tippy = tippy(ref, { 
         content: () => {
             let content = document.createElement('div');
+            
             content.innerHTML = ele.data("declaration");
             content.innerHTML = content.innerHTML.replace(/\n/g, "<br />")
             return content;
         },
         trigger: 'manual' 
+    });
+}
+
+function popVariables(ele) {
+    if(Object.keys(ele.data("variables")).length == 0){
+        ele.tippy = ""
+        return
+    }
+    let ref = ele.popperRef(); 
+
+    ele.tippy = tippy(ref, { 
+        content: () => {
+            let content = document.createElement('div');
+            
+            Object.entries(ele.data("variables")).forEach(([variableName, variableValue]) => {
+                content.innerHTML = content.innerHTML + `${variableName}:${variableValue}\n`
+            })
+
+            content.innerHTML = content.innerHTML.replace(/\n/g, "<br />")
+            return content;
+        },
+        interactive:true,
+        arrow:true,
+        allowHTML: true,
+        trigger: 'manual' 
+    });
+
+    ele.tippy.popper.addEventListener('mouseenter', () => {
+        ele.tippy.show();
+    });
+
+    ele.tippy.popper.addEventListener('mouseleave', () => {
+        ele.tippy.hide();
     });
 }
 
@@ -82,7 +140,7 @@ function unactivateDown(ele) {
     children.forEach((child)=>child.data("active", false) && unactivateDown(child))
 }
 
-function activation(ele){
+function hundleActivation(ele){
     ele.data("active", !ele.data("active"))     //activate or unactivate node
     if (ele.data("active")){                    //activate parent node
         activateUp(ele)

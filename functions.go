@@ -166,8 +166,8 @@ func getGlobals(feature *Feature, state *State)map[string]variableValue{
 	globals := make(map[string]variableValue)
 	for _, artifact := range feature.artifacts{
 		if state.artifacts[artifact].isVariadic(){
-			for variable := range state.globals.needs[artifact]{
-				globals[fmt.Sprintf("%s%s", artifact,variable)] = state.globals.get(variable)
+			for global := range state.globals.needs[artifact]{
+				globals[string(global)] = state.globals.get(global)
 			}
 		}
 	}
@@ -177,20 +177,25 @@ func getGlobals(feature *Feature, state *State)map[string]variableValue{
 func extractCytoscapeJSON(state *State)([]byte, error){
 	var json []any
 	for name, feature := range state.features{
-			
+		/* --- --> NODE <-- --- */
+		// node id && attributes
 		data := map[string]any{"id":ifEmptyThenRoot(name), 
-								"attributes":getVariables(&feature, state), 
+								"variables":getVariables(&feature, state), 
 								"globals":getGlobals(&feature,state)}
 
 		classes := []string{"node"}
 		if len(feature.artifacts) == 0 {
 			classes = append(classes, "tag")
 			data["abstract"]=true
+			if name == ROOT {classes = append(classes, "root")}
 		}
-		if name == "" {classes = append(classes, "root")}
+
+		// append new node
 		json = append(json, map[string]any{"group":"nodes", "data":data, "classes":classes})
 		
-		/* --- FEATURE MODEL TREE EDGES --- */
+		/* --- --> EDGES <-- --- */
+
+		/* --- FEATURE MODEL TREE --- */
 		for child := range feature.children{
 			json = append(json, map[string]any{"group":"edges", "data":generateEdgeData(name, child)})
 		}
