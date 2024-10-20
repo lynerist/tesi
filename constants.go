@@ -25,3 +25,7 @@ type Requirements struct {
 	ANY []set[declaration]
 	ONE []set[declaration]
 }
+
+var VARIABLESIMBLE 	rune = '$'
+var GLOBALSIMBLE 	rune = '@'
+

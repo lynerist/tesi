@@ -8,6 +8,7 @@ func main(){
 	//core := setupProlog()
 
 	handleJSONLoading(&state)
+	handleVariableUpdate(&state)
 
 	startLocalServer()
 

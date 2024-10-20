@@ -1,4 +1,5 @@
 const PORT = "60124"
+var MODEL 
 
 var cy = cytoscape({
     container: document.getElementById('cy'),
@@ -67,8 +68,6 @@ function displayModel(model){
         }
     });
 
-    
-
     // NODES CLICK LISTENERS
 
     cy.on("click", "node", (event) => {
@@ -109,7 +108,11 @@ function popVariables(ele) {
             let content = document.createElement('div');
             
             Object.entries(ele.data("variables")).forEach(([variableName, variableValue]) => {
-                content.innerHTML = content.innerHTML + `${variableName}:${variableValue}\n`
+                content.innerHTML = content.innerHTML + `${variableName}: <input type="text" id="${variableName}
+                                                                            placeholder="${variableValue}" 
+                                                                            onchange="updateVariable('${ele.data("id")}','${variableName}',value)"
+                                                                            value="${variableValue}"/>\n`
+
             })
 
             content.innerHTML = content.innerHTML.replace(/\n/g, "<br />")
@@ -155,13 +158,42 @@ function hundleActivation(ele){
 function loadJSON_GO(file){
     let formData = new FormData();
     formData.delete("json")
-    formData.append('json', file, file.name);
+    formData.append("json", file, file.name);
 
     fetch(`http://localhost:${PORT}/loadjson`, {  // Sostituisci con il tuo endpoint
-        method: 'POST',
-        body: formData,  // Qui passa il FormData con il file
+        method: "POST",
+        body: formData
     })
     .then(response => response.json())  // Converti la risposta in JSON (o altro formato, a seconda del server)
+    .then(data => {
+        displayModel(data)
+        model = data
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+function updateVariable(feature, name, value){
+    let formData = new FormData();
+    formData.delete("feature")
+    formData.delete("name")
+    formData.delete("value")
+    formData.delete("model")
+
+    formData.append("feature", feature)
+    formData.append("name", name)
+    formData.append("value", value)
+    
+    //formData.append("model", model)
+
+    console.log(model)
+
+    fetch(`http://localhost:${PORT}/updateVariable`,{
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
     .then(data => {
         displayModel(data)
     })

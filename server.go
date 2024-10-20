@@ -1,8 +1,9 @@
-package main 
+package main
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
+	"strings"
 )
 
 func startLocalServer(){
@@ -33,5 +34,30 @@ func handleJSONLoading(state *State) {
 		generateFeatureTree("", state.features)
 		outJson, _ := extractCytoscapeJSON(state)
 		w.Write(outJson)
+	})
+}
+
+func handleVariableUpdate(state *State){
+	http.HandleFunc("/updateVariable", func(w http.ResponseWriter, r *http.Request) {	
+		name := r.FormValue("name")
+		value := r.FormValue("value")
+
+		feature	 := featureName(r.FormValue("feature"))
+		artifact := artifactName(name[:strings.IndexRune(name, VARIABLESIMBLE)])
+		variable := variableName(name[strings.IndexRune(name, VARIABLESIMBLE):])
+
+		state.attributes[artifact][feature][variable] = value
+		fmt.Println(state.features[feature].variadicRequirements)
+		
+
+
+		for _, providers := range state.variadicProviders{
+			if providers[feature]{
+
+				//NON È DETTO CHE VENGA DA QUESTO ARTIFACT
+			}
+		}
+		
+		//TODO RESPONSE
 	})
 }

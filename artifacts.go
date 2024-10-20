@@ -36,7 +36,7 @@ func storeArtifacts(json map[string]any, state *State){
 
 		/* --- STORE ATTRIBUTES DEFAULTS---*/ 		
 		for _, attribute := range artifact.attributes(){
-			if name, ok := attribute.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='$'{
+			if name, ok := attribute.(map[string]any)["name"]; ok && []rune(name.(string))[0]==VARIABLESIMBLE{
 				if value, ok := attribute.(map[string]any)["default"]; ok{
 					state.attributes[artifact.name()] = make(map[featureName]map[variableName]variableValue)
 					state.attributes[artifact.name()][""] = make(map[variableName]variableValue) 
@@ -47,7 +47,7 @@ func storeArtifacts(json map[string]any, state *State){
 
 		/* --- STORE GLOBALS --- */ 		
 		for _, global := range artifact.globals(){
-			if name, ok := global.(map[string]any)["name"]; ok && []rune(name.(string))[0]=='@'{
+			if name, ok := global.(map[string]any)["name"]; ok && []rune(name.(string))[0]==GLOBALSIMBLE{
 				if value, ok := global.(map[string]any)["default"]; ok{
 					state.globals.put(variableName(name.(string)), value, artifact.name())
 				}
