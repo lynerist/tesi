@@ -11,8 +11,8 @@ type Feature struct {
 	tags set[tagName]
 	children set[featureName]
 	parent *featureName
-	requirements Requirements
-	variadicRequirements Requirements
+	requirements map[artifactName]Requirements
+	provisions map[artifactName]set[declaration] 
 }
 
 func newFeatureName(feature any, id int)featureName{
@@ -27,9 +27,7 @@ func (f featureName) String()string{
 }
 
 func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact, parent featureName)Feature{
-	feature := Feature{name, nil, make(set[tagName]), make(set[featureName]), &parent, 
-		Requirements{make(set[declaration]),make(set[declaration]), nil, nil}, 
-		Requirements{make(set[declaration]),make(set[declaration]), nil, nil}}
+	feature := Feature{name, nil, make(set[tagName]), make(set[featureName]), &parent, make(map[artifactName]Requirements), make(map[artifactName]set[declaration])}
 	
 	for _, artifact := range composingArtifacts {
 		feature.artifacts = append(feature.artifacts, artifactName(artifact.(string)))
@@ -41,7 +39,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 }
 
 func newAbstractFeature(name featureName)Feature{
-	return Feature{name, nil, nil, make(set[featureName]), new(featureName), Requirements{}, Requirements{}}
+	return Feature{name, nil, nil, make(set[featureName]), new(featureName), nil, nil}
 }
 
 func (f Feature) String()string {
@@ -115,6 +113,7 @@ func storeFeatures(json map[string]any, state *State){
 		feature := newFeature(newFeatureName(f, len(state.features)), getArtifactsFromFeatureJSON(f), state.artifacts, ROOT)
 		for _, thisArtifactName := range feature.artifacts{
 			artifact := state.artifacts[thisArtifactName]
+			feature.requirements[thisArtifactName]= newRequirements()
 
 			/* --- STORE ARTIFACT VARIABLES --- */
 			for variable, value := range state.attributes[thisArtifactName][""]{
@@ -126,57 +125,43 @@ func storeFeatures(json map[string]any, state *State){
 			
 			/* ALL */
 			for _, required := range artifact.requires(ALL){
-				if artifact.isVariadic(){
-					feature.variadicRequirements.ALL[insertVariables(required, thisArtifactName, ROOT, state)] = true
-				}else{
-					feature.requirements.ALL[declaration(fmt.Sprint(required))] = true
-				}
+				feature.requirements[thisArtifactName].ALL[declaration(fmt.Sprint(required))] = true
 			}
 
 			/* NOT */
-			for _, required := range artifact.requires(NOT){
-				if artifact.isVariadic(){
-					feature.variadicRequirements.NOT[insertVariables(required, thisArtifactName, ROOT, state)] = true
-				}else{
-					feature.requirements.NOT[declaration(fmt.Sprint(required))] = true
-				}
+			for _, required := range artifact.requires(NOT){	
+				feature.requirements[thisArtifactName].NOT[declaration(fmt.Sprint(required))] = true
 			}
 
 			/* ANY */
+			
 			for _, group := range artifact.requires(ANY){
 				declarations := make(set[declaration])
-				variadicDeclarations := make(set[declaration])
 
-				for _, required := range group.([]any){
-					if artifact.isVariadic(){
-						variadicDeclarations[insertVariables(required, thisArtifactName, ROOT, state)] = true
-					}else{
-						declarations[declaration(fmt.Sprint(required))] = true
-					}
+				for _, required := range group.([]any){					
+					declarations[declaration(fmt.Sprint(required))] = true
 				}
-				feature.requirements.ANY = append(feature.requirements.ANY, declarations)
-				feature.variadicRequirements.ANY = append(feature.variadicRequirements.ANY, variadicDeclarations)
+
+				*feature.requirements[thisArtifactName].ANY = append(*feature.requirements[thisArtifactName].ANY, declarations)
 			}
 
 			/* ONE */
 			for _, group := range artifact.requires(ONE){
 				declarations := make(set[declaration])
-				variadicDeclarations := make(set[declaration])
 
 				for _, required := range group.([]any){
-					if artifact.isVariadic(){
-						variadicDeclarations[insertVariables(required, thisArtifactName, ROOT, state)] = true
-					}else{
-						declarations[declaration(fmt.Sprint(required))] = true
-					}
+					declarations[declaration(fmt.Sprint(required))] = true
 				}
-				feature.requirements.ONE = append(feature.requirements.ONE, declarations)
-				feature.variadicRequirements.ONE = append(feature.variadicRequirements.ONE, variadicDeclarations)
+				*feature.requirements[thisArtifactName].ONE = append(*feature.requirements[thisArtifactName].ONE, declarations)
 			}
 
+			feature.provisions[thisArtifactName] = make(set[declaration])
 			/* --- STORE PROVIDED DECLARATIONS --- */
 			for _, provided := range artifact.provides(){
 				atom := declaration(fmt.Sprint(provided))
+				feature.provisions[thisArtifactName][atom] = true
+				state.possibleProviders[insertVariables(provided, thisArtifactName, feature.name, state)][feature.name] = true
+
 				if artifact.isVariadic(){
 					atom = insertVariables(provided, thisArtifactName, feature.name, state)
 					if len(state.variadicProviders[atom])==0{state.variadicProviders[atom] = make(set[featureName])}
@@ -190,4 +175,42 @@ func storeFeatures(json map[string]any, state *State){
 		state.features[feature.name] = feature
 		state.features[ROOT].children[feature.name] = true 
 	}
+}
+
+func (feature Feature)getRequirements(state *State) Requirements{
+	requirements := newRequirements()
+	for artifact, req := range feature.requirements{
+		for atom := range req.ALL{
+			requirements.ALL[insertVariables(atom, artifact, feature.name, state)] = true
+		}
+
+		for atom := range req.NOT{
+			requirements.NOT[insertVariables(atom, artifact, feature.name, state)] = true
+		}
+
+		for _, group := range *req.ANY{
+			declarations := make(set[declaration])
+			for atom := range group {		
+				declarations[insertVariables(atom, artifact, feature.name, state)] = true
+			}
+			*requirements.ANY = append(*requirements.ANY, declarations)
+		}
+
+		for _, group := range *req.ONE{
+			declarations := make(set[declaration])
+			for atom := range group {		
+				declarations[insertVariables(atom, artifact, feature.name, state)] = true
+			}
+			*requirements.ONE = append(*requirements.ONE, declarations)
+		}
+	}
+	return requirements
+}
+
+func (feature Feature) isProviding(atom Requirements)bool{
+	return false
+}
+
+func newRequirements()Requirements{
+	return Requirements{make(set[declaration]), make(set[declaration]),new([]set[declaration]),new([]set[declaration])}
 }

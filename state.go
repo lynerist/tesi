@@ -9,6 +9,7 @@ type State struct {
 	features 			map[featureName]Feature
 	providers 			map[declaration]set[featureName]
 	variadicProviders 	map[declaration]set[featureName]
+	possibleProviders	map[declaration]set[featureName]
 }
 
 func newState()(state State){

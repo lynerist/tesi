@@ -201,37 +201,22 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 		}
 
 		/* --- DEPENDENCIES --- */
+		requirements := feature.getRequirements(state)
 
 		/* ALL */
 		var	dependencyID int
-		for atom := range feature.requirements.ALL{
-			for requiredFeature := range getProviders(atom, state, feature.name){
-				json = append(json, map[string]any{"group":"edges", 
-													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
-													"classes":[]string{"dependency","dependencyAll"}})
-			}
-			dependencyID++
-		}
-		for atom := range feature.variadicRequirements.ALL{
-			if feature.requirements.ALL[atom] {continue}
-			for requiredFeature := range getProviders(atom, state, feature.name){
-				json = append(json, map[string]any{"group":"edges", 
-													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
-													"classes":[]string{"dependency","dependencyAll"}})
-			}
-			dependencyID++
-		}
 
-		/* NOT */
-		for atom := range feature.requirements.NOT{
+		for atom := range requirements.ALL{
 			for requiredFeature := range getProviders(atom, state, feature.name){
 				json = append(json, map[string]any{"group":"edges", 
-													"data":generateDependencyEdgeData(requiredFeature, name, 0, atom), 
-													"classes":[]string{"dependency","dependencyNot"}})
+													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+													"classes":[]string{"dependency","dependencyAll"}})
 			}
+			dependencyID++
 		}
-		for atom := range feature.variadicRequirements.NOT{
-			if feature.requirements.NOT[atom] {continue}
+		
+		/* NOT */
+		for atom := range requirements.NOT{
 			for requiredFeature := range getProviders(atom, state, feature.name){
 				json = append(json, map[string]any{"group":"edges", 
 													"data":generateDependencyEdgeData(requiredFeature, name, 0, atom), 
@@ -240,9 +225,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 		}
 
 		/* ANY */
-		done := make(set[string])
-		for _, group := range feature.requirements.ANY{
-			done[fmt.Sprint(map[declaration]bool(group))] = true
+		for _, group := range *requirements.ANY{
 			providers := make(map[featureName]map[string]any)
 			for atom := range group{
 				for requiredFeature := range getProviders(atom, state, feature.name){
@@ -254,29 +237,6 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
 																	"classes":[]string{"dependency","dependencyAny"}}
 					}
-
-				}
-			}
-			for _, edge := range providers{
-				json = append(json, edge)
-			}
-			dependencyID++
-		}
-
-		for _, group := range feature.variadicRequirements.ANY{
-			if done[fmt.Sprint(map[declaration]bool(group))]{continue}
-			providers := make(map[featureName]map[string]any)
-			for atom := range group{
-				for requiredFeature := range getProviders(atom, state, feature.name){
-					if _, ok := providers[requiredFeature]; ok{
-						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
-						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
-					}else{
-						providers[requiredFeature] = map[string]any{"group":"edges", 
-																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
-																	"classes":[]string{"dependency","dependencyAny"}}
-					}
-
 				}
 			}
 			for _, edge := range providers{
@@ -287,9 +247,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 
 		/* ONE */
 
-		done = make(set[string])
-		for _, group := range feature.requirements.ONE{
-			done[fmt.Sprint(map[declaration]bool(group))] = true
+		for _, group := range *requirements.ONE{
 			providers := make(map[featureName]map[string]any)
 			for atom := range group{
 				for requiredFeature := range getProviders(atom, state, feature.name){
@@ -301,7 +259,6 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
 																	"classes":[]string{"dependency","dependencyOne"}}
 					}
-
 				}
 			}
 			for _, edge := range providers{
@@ -309,29 +266,6 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 			}
 			dependencyID++
 		}
-
-		for _, group := range feature.variadicRequirements.ONE{
-			if done[fmt.Sprint(map[declaration]bool(group))]{continue}
-			providers := make(map[featureName]map[string]any)
-			for atom := range group{
-				for requiredFeature := range getProviders(atom, state, feature.name){
-					if _, ok := providers[requiredFeature]; ok{
-						providers[requiredFeature]["data"].(map[string]any)["declaration"] =
-						fmt.Sprintf("%s\n%s", providers[requiredFeature]["data"].(map[string]any)["declaration"].(declaration), atom)
-					}else{
-						providers[requiredFeature] = map[string]any{"group":"edges", 
-																	"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
-																	"classes":[]string{"dependency","dependencyOne"}}
-					}
-
-				}
-			}
-			for _, edge := range providers{
-				json = append(json, edge)
-			}
-			dependencyID++
-		}
-
 	}
 	return j.MarshalIndent(json, "", "\t")
 }

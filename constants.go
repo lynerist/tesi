@@ -22,8 +22,8 @@ type declaration 	string
 type Requirements struct {
 	ALL set[declaration]
 	NOT set[declaration]
-	ANY []set[declaration]
-	ONE []set[declaration]
+	ANY *[]set[declaration]
+	ONE *[]set[declaration]
 }
 
 var VARIABLESIMBLE 	rune = '$'

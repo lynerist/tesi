@@ -47,16 +47,8 @@ func handleVariableUpdate(state *State){
 		variable := variableName(name[strings.IndexRune(name, VARIABLESIMBLE):])
 
 		state.attributes[artifact][feature][variable] = value
-		fmt.Println(state.features[feature].variadicRequirements)
 		
-
-
-		for _, providers := range state.variadicProviders{
-			if providers[feature]{
-
-				//NON È DETTO CHE VENGA DA QUESTO ARTIFACT
-			}
-		}
+		//TODO PROVIDERS somehow
 		
 		//TODO RESPONSE
 	})
