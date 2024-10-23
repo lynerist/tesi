@@ -1,0 +1,307 @@
+{"artifacts" : [
+    {
+        "name": "left speaker",
+        "requires": {
+            "all": [
+                {"power":"on"}
+            ]
+        },
+        "provides": [
+            {"sound":"output"},
+            {"channel":"left"}
+        ],
+        "tags":["audio"]
+    },
+    {
+        "name": "right speaker",
+        "requires": {
+            "all": [
+                {"power":"on"}
+            ]
+        },
+        "provides": [
+            {"sound":"output"},
+            {"channel":"right"}
+        ],
+        "tags":["audio"]
+    },
+    {
+        "name": "port",
+        "provides": [
+            {"port":"predisposition"}
+        ],
+        "tags":["port"]
+    },
+    {
+        "name": "audio channel",
+        "provides": [
+            {"sound":"output"}
+        ],
+        "tags":["audio"]
+    },
+    {
+        "name": "audio central system",
+        "requires": {
+            "all": [
+                {"sound":"output"}
+            ]
+        },
+        "provides": [
+            {"feedback":"audio"}
+        ],
+        "tags":["audio", "feedback"]
+    },
+    {
+        "name": "stereo",
+        "requires": {
+            "all": [
+                {"channel":"right"},
+                {"channel":"left"}
+            ]
+        },
+        "provides": [
+            {"sound":"stereo"}
+        ],
+        "tags":["audio"]
+    },
+    {
+        "name": "battery hardware",
+        "requires": {
+            "all":[
+                {"power":"charger"}
+            ],
+            "one": [
+                [
+                    {"capacity":"high"},
+                    {"capacity":"low"}
+                ]
+            ]
+        },
+        "provides": [
+            {"power":"on"}
+        ],
+        "tags":["power"]
+    },
+    {
+        "name": "big capacitor",
+        "provides": [
+            {"capacity":"high"}
+        ],
+        "tags":["power"]
+    },
+    {
+        "name": "small capacitor",
+        "provides": [
+            {"capacity":"low"}
+        ],
+        "tags":["power"]
+    },
+    {
+        "name": "charging driver",
+        "requires": {
+            "any": [
+                [
+                    {"port":"usb-c"},
+                    {"port":"usb"},
+                    {"port":"i-port"}
+                ]
+            ]
+        },
+        "provides": [
+            {"power":"charger"}
+        ],
+        "tags":["power", "charger"]
+    },
+    {
+        "name": "port usb-c",
+        "provides": [
+            {"port":"usb-c"}
+        ],
+        "tags":["power", "charger"]
+    },
+    {
+        "name": "port usb",
+        "provides": [
+            {"port":"usb"}
+        ],
+        "tags":["power", "charger"]
+    },
+    {
+        "name": "port i-port",
+        "provides": [
+            {"port":"i-port"}
+        ],
+        "tags":["power", "charger"]
+    },
+    {
+        "name": "touch",
+        "requires": {
+            "all": [
+                {"display":"screen"}
+            ]
+        },
+        "provides": [
+            {"interface":"control"}
+        ],
+        "tags":["screen"]
+    },
+    {
+        "name": "color filter",
+        "requires": {
+            "all": [
+                {"display":"screen"}
+            ]
+        },
+        "provides": [
+            {"color":"change"}
+        ],
+        "tags":["screen"]
+    },
+    {
+        "name": "no blue light",
+        "provides": [
+            {"filter":"blue light"}
+        ],
+        "tags":["screen"]
+    },
+    {
+        "name": "colorblind mode",
+        "provides": [
+            {"filter":"colorblind"}
+        ],
+        "tags":["screen"]
+    },
+    {
+        "name": "interface",
+        "provides": [
+            {"interface":"input"}
+        ],
+        "tags":["interface", "screen"]
+    },
+    {
+        "name": "yellow color",
+        "provides": [
+            {"interface":"light"}
+        ],
+        "tags":["yellow"]
+    },
+    {
+        "name": "black color",
+        "provides": [
+            {"interface":"dark"}
+        ],
+        "tags":["black"]
+    },
+    {
+        "name": "white color",
+        "provides": [
+            {"interface":"light"}
+        ],
+        "tags":["white"]
+    },
+    {
+        "name": "purple color",
+        "provides": [
+            {"interface":"dark"}
+        ],
+        "tags":["purple"]
+    },
+    {
+        "name": "display concrete",
+        "requires": {
+            "all": [
+                {"interface":"@mode"},
+                {"power":"on"}
+            ]
+        },
+        "globals":[
+            {
+                "name":"@mode", "default":"dark"
+            }
+        ],
+        "provides": [
+            {"display":"screen"}
+        ],
+        "tags":["screen"]
+    }
+
+    ],
+    "features": [
+        {
+            "name":"speakers",
+            "artifacts":["left speaker", "right speaker"]
+        },
+        {
+            "name":"aux",
+            "artifacts":["port", "audio channel"]
+        },
+        {
+            "name":"audio system",
+            "artifacts":["audio central system"]
+        },
+        {
+            "name":"stereo mode",
+            "artifacts":["stereo"]
+        },
+        {
+            "name":"battery",
+            "artifacts":["battery hardware"]
+        },
+        {
+            "name":"big capacitor",
+            "artifacts":["big capacitor"]
+        },
+        {
+            "name":"small capacitor",
+            "artifacts":["small capacitor"]
+        },
+        {
+            "name":"charging port",
+            "artifacts":["port", "charging driver"]
+        },
+        {
+            "name":"usb-c",
+            "artifacts":["port usb-c"]
+        },
+        {
+            "name":"usb",
+            "artifacts":["port usb"]
+        },
+        {
+            "name":"i-port",
+            "artifacts":["port i-port"]
+        },
+        {
+            "name":"touchscreen",
+            "artifacts":["touch"]
+        },
+        {
+            "name":"blue light filter",
+            "artifacts":["color filter", "no blue light"]
+        },
+        {
+            "name":"colorblind mode",
+            "artifacts":["color filter", "colorblind mode"]
+        },
+        {
+            "name":"yellow interface",
+            "artifacts":["yellow color", "interface"]
+        },
+        {
+            "name":"black interface",
+            "artifacts":["black color", "interface"]
+        },
+        {
+            "name":"white interface",
+            "artifacts":["white color", "interface"]
+        },
+        {
+            "name":"purple interface",
+            "artifacts":["purple color", "interface"]
+        },
+        {
+            "name":"display",
+            "artifacts":["display concrete"]
+        }
+    ]
+}

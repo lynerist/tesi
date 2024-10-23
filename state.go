@@ -7,8 +7,6 @@ type State struct {
 	attributes 			map[artifactName]map[featureName]map[variableName]variableValue
 	globals 			globalContext
 	features 			map[featureName]Feature
-	providers 			map[declaration]set[featureName]
-	variadicProviders 	map[declaration]set[featureName]
 	possibleProviders	map[declaration]set[featureName]
 }
 
@@ -23,6 +21,5 @@ func (state *State) reset(){
 	state.attributes 		= make(map[artifactName]map[featureName]map[variableName]variableValue)
 	state.globals 			= newGlobalContext()
 	state.features 			= map[featureName]Feature{"":newAbstractFeature("")}
-	state.providers 		= make(map[declaration]set[featureName])
-	state.variadicProviders = make(map[declaration]set[featureName])
+	state.possibleProviders	= make(map[declaration]set[featureName])
 }

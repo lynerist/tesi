@@ -158,18 +158,13 @@ func storeFeatures(json map[string]any, state *State){
 			feature.provisions[thisArtifactName] = make(set[declaration])
 			/* --- STORE PROVIDED DECLARATIONS --- */
 			for _, provided := range artifact.provides(){
-				atom := declaration(fmt.Sprint(provided))
-				feature.provisions[thisArtifactName][atom] = true
-				state.possibleProviders[insertVariables(provided, thisArtifactName, feature.name, state)][feature.name] = true
+				feature.provisions[thisArtifactName][declaration(fmt.Sprint(provided))] = true
 
-				if artifact.isVariadic(){
-					atom = insertVariables(provided, thisArtifactName, feature.name, state)
-					if len(state.variadicProviders[atom])==0{state.variadicProviders[atom] = make(set[featureName])}
-					state.variadicProviders[atom][feature.name]=true
-				} else {
-					if len(state.providers[atom])==0{state.providers[atom] = make(set[featureName])}
-					state.providers[atom][feature.name]=true
+				atom := insertVariables(provided, thisArtifactName, feature.name, state)
+				if _, ok := state.possibleProviders[atom]; !ok {
+					state.possibleProviders[atom] = make(set[featureName])
 				}
+				state.possibleProviders[atom][feature.name] = true
 			}
 		}
 		state.features[feature.name] = feature
@@ -207,7 +202,15 @@ func (feature Feature)getRequirements(state *State) Requirements{
 	return requirements
 }
 
-func (feature Feature) isProviding(atom Requirements)bool{
+//return whenever this feature is actually providing the given declaration. (It may not provide it if its variables are changed)
+func (feature Feature) isProviding(atom declaration, state *State)bool{
+	for artifact, provideds := range feature.provisions{
+		for provided := range provideds{
+			if insertVariables(provided, artifact, feature.name, state) == atom{
+				return true
+			}
+		}
+	}
 	return false
 }
 

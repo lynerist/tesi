@@ -25,8 +25,13 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     }
 });
 
-function displayModel(model){
+function resetCy(){
     cy.elements().remove(); // Rimuovi elementi esistenti (se necessario)
+    cy.removeAllListeners()
+}
+
+function displayModel(model){
+    resetCy()
     cy.add(model); // Aggiungi i nuovi elementi direttamente dal file
 
     let layout = LAYOUT
@@ -41,6 +46,7 @@ function displayModel(model){
             popVariables(ele)
         }
     });
+
     // EDGES HOVER LISTENERS
     cy.on('mouseover', 'edge', (event) => {
         if (event.target.tippy) {
@@ -75,6 +81,31 @@ function displayModel(model){
     })
     
     console.log("Grafo caricato con successo!");
+}
+
+function updateEdges(model){
+    let edges = model.filter(element => element.group === 'edges');
+    cy.edges().remove()
+    cy.add(edges)
+    cy.elements().forEach(function(ele) {
+        if (ele.group() == "edges"){
+            popDeclaration(ele);
+        }
+    });
+
+    // EDGES HOVER LISTENERS
+    cy.on('mouseover', 'edge', (event) => {
+        if (event.target.tippy) {
+            event.target.tippy.show();
+        }
+    });
+
+    cy.on('mouseout', 'edge', (event) => {
+        if (event.target.tippy) {
+            event.target.tippy.hide();
+        }
+    });    
+    console.log("Grafo aggiornato con successo!");
 }
 
 function popDeclaration(ele) {
@@ -114,7 +145,6 @@ function popVariables(ele) {
                                                                             value="${variableValue}"/>\n`
 
             })
-
             content.innerHTML = content.innerHTML.replace(/\n/g, "<br />")
             return content;
         },
@@ -127,7 +157,6 @@ function popVariables(ele) {
     ele.tippy.popper.addEventListener('mouseenter', () => {
         ele.tippy.show();
     });
-
     ele.tippy.popper.addEventListener('mouseleave', () => {
         ele.tippy.hide();
     });
@@ -167,7 +196,7 @@ function loadJSON_GO(file){
     .then(response => response.json())  // Converti la risposta in JSON (o altro formato, a seconda del server)
     .then(data => {
         displayModel(data)
-        model = data
+        MODEL = data
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -187,7 +216,7 @@ function updateVariable(feature, name, value){
     
     //formData.append("model", model)
 
-    console.log(model)
+    console.log(MODEL)
 
     fetch(`http://localhost:${PORT}/updateVariable`,{
         method: "POST",
@@ -195,9 +224,14 @@ function updateVariable(feature, name, value){
     })
     .then(response => response.json())
     .then(data => {
-        displayModel(data)
+        updateEdges(data)
     })
     .catch((error) => {
         console.error('Error:', error);
     });
 }
+
+
+
+// TODO MISSING REQUIREMENTS dead features
+// TODO GLOBALS

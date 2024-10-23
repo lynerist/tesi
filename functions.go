@@ -272,10 +272,25 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 
 func getProviders(atom declaration, state *State, requier featureName)set[featureName]{
 	providers := make(set[featureName])
-	providers.add(state.providers[atom])
-	providers.add(state.variadicProviders[atom])
+	
+	for possibleProvider := range state.possibleProviders[atom]{
+		if state.features[possibleProvider].isProviding(atom, state){
+			providers[possibleProvider] = true
+		}
+	}
+
 	delete(providers, requier)
 	return providers
+}
+
+func updatePossibleProviders(artifact artifactName, feature featureName, state *State){
+	for provided := range state.features[feature].provisions[artifact]{
+		atom := insertVariables(provided, artifact, feature, state)
+		if _, ok := state.possibleProviders[atom]; !ok {
+			state.possibleProviders[atom] = make(set[featureName])
+		}
+		state.possibleProviders[atom][feature] = true
+	}
 }
 
 func exportFeatureModelJson(path string, state *State){

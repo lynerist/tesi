@@ -47,9 +47,10 @@ func handleVariableUpdate(state *State){
 		variable := variableName(name[strings.IndexRune(name, VARIABLESIMBLE):])
 
 		state.attributes[artifact][feature][variable] = value
-		
-		//TODO PROVIDERS somehow
-		
+		updatePossibleProviders(artifact, feature, state)
+				
 		//TODO RESPONSE
+		outJson, _ := extractCytoscapeJSON(state)
+		w.Write(outJson)
 	})
 }
