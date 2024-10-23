@@ -143,7 +143,7 @@
         "provides": [
             {"interface":"control"}
         ],
-        "tags":["screen"]
+        "tags":["screen", "controls"]
     },
     {
         "name": "color filter",
@@ -220,9 +220,114 @@
             }
         ],
         "provides": [
-            {"display":"screen"}
+            {"display":"screen"},
+            {"feedback":"video"}
         ],
         "tags":["screen"]
+    },
+    {
+        "name": "buttons",
+        "provides": [
+            {"interface":"control"}
+        ],
+        "tags":["controls"]
+    },
+    {
+        "name": "light power switcher",
+        "provides": [
+            {"switch":"lights"}
+        ],
+        "tags":["lights"]
+    },
+    {
+        "name": "lights automation",
+        "requires":{
+            "not":[
+                {"lights":"manual"}
+            ]
+        },
+        "provides": [
+            {"lights":"automation"},
+            {"lights":"control"}
+        ],
+        "tags":["controls"]
+    },
+    {
+        "name": "manual lights",
+        "requires":{
+            "all":[
+                {"interface":"control"}
+            ],
+            "not":[
+                {"lights":"automation"}
+            ]
+        },
+        "provides": [
+            {"lights":"manual"},
+            {"lights":"control"}
+        ],
+        "tags":["controls"]
+    },
+    {
+        "name": "light central system",
+        "requires": {
+            "all": [
+                {"lights":"control"},
+                {"interface":"feedback"},
+                {"power":"on"}
+            ]
+        },
+        "tags":["lights", "controls"]
+    },
+    {
+        "name": "feedback handler",
+        "requires": {
+            "any": [
+                [
+                    {"feedback":"audio"},
+                    {"feedback":"video"}
+                ]
+            ]
+        },
+        "provides": [
+            {"interface":"feedback"}
+        ],
+        "tags":["feedback"]
+    },
+    {
+        "name": "temperature controller",
+        "requires": {
+            "all": [
+                {"interface":"control"},
+                {"interface":"feedback"},
+                {"termometer":"$temperature"}
+            ]
+        },
+        "attributes":[
+            {"name":"$temperature", "default":"low"}
+        ],
+        "tags":["temperature", "controls"]
+    },
+    {
+        "name": "low termometer",
+        "provides": [
+            {"termometer":"low"}
+        ],
+        "tags":["controls", "temperature"]
+    },
+    {
+        "name": "medium termometer",
+        "provides": [
+            {"termometer":"medium"}
+        ],
+        "tags":["controls", "temperature"]
+    },
+    {
+        "name": "high termometer",
+        "provides": [
+            {"termometer":"high"}
+        ],
+        "tags":["controls", "temperature"]
     }
 
     ],
@@ -302,6 +407,42 @@
         {
             "name":"display",
             "artifacts":["display concrete"]
+        },
+        {
+            "name":"switch",
+            "artifacts":["buttons"]
+        },
+        {
+            "name":"automatic lights",
+            "artifacts":["lights automation", "light power switcher"]
+        },
+        {
+            "name":"manual lights",
+            "artifacts":["manual lights", "light power switcher"]
+        },
+        {
+            "name":"light central system",
+            "artifacts":["light central system"]
+        },
+        {
+            "name":"feedback",
+            "artifacts":["feedback handler"]
+        },
+        {
+            "name":"temperature controller",
+            "artifacts":["temperature controller"]
+        },
+        {
+            "name":"low termometer",
+            "artifacts":["low termometer"]
+        },
+        {
+            "name":"medium termometer",
+            "artifacts":["medium termometer"]
+        },
+        {
+            "name":"high termometer",
+            "artifacts":["high termometer"]
         }
     ]
 }
