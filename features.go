@@ -32,7 +32,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 	for _, artifact := range composingArtifacts {
 		feature.artifacts = append(feature.artifacts, artifactName(artifact.(string)))
 		for _, tag := range artifacts[stringToAN(artifact)].tags(){
-			feature.tags[tagName(tag.(string))] = true
+			feature.tags.add(tagName(tag.(string)))
 		}
 	}
 	return feature
@@ -77,7 +77,7 @@ func generateFeatureTree(root featureName, features map[featureName]Feature){
 		newTagNode := newAbstractFeature(featureName(fmt.Sprintf("%s::%d",mostPresentTag, len(features))))
 		for child := range features[root].children{
 			if features[child].tags[mostPresentTag]{
-				newTagNode.children[child] = true
+				newTagNode.children.add(child)
 			}
 		}
 		for child := range newTagNode.children{
@@ -88,7 +88,7 @@ func generateFeatureTree(root featureName, features map[featureName]Feature){
 			delete(features[child].tags, mostPresentTag)
 			delete(features[root].children, child)
 		}
-		features[root].children[newTagNode.name] = true
+		features[root].children.add(newTagNode.name)
 		features[newTagNode.name] = newTagNode
 	}
 	for child := range features[root].children{
@@ -117,8 +117,10 @@ func storeFeatures(json map[string]any, state *State){
 
 			/* --- STORE FEATURES USING GLOBALS --- */
 			for global := range state.globals.neededByArtifact[thisArtifactName]{
-				if len(state.globals.usedBy[global])==0 {state.globals.usedBy[global]=make(set[featureName])}
-				state.globals.usedBy[global][feature.name]=true
+				if state.globals.usedBy[global] == nil {
+					state.globals.usedBy[global] = make(set[featureName])
+				}
+				state.globals.usedBy[global].add(feature.name)
 			}
 
 			/* --- STORE ARTIFACT VARIABLES --- */
@@ -131,12 +133,12 @@ func storeFeatures(json map[string]any, state *State){
 			
 			/* ALL */
 			for _, required := range artifact.requires(ALL){
-				feature.requirements[thisArtifactName].ALL[declaration(fmt.Sprint(required))] = true
+				feature.requirements[thisArtifactName].ALL.add(declaration(fmt.Sprint(required)))
 			}
 
 			/* NOT */
 			for _, required := range artifact.requires(NOT){	
-				feature.requirements[thisArtifactName].NOT[declaration(fmt.Sprint(required))] = true
+				feature.requirements[thisArtifactName].NOT.add(declaration(fmt.Sprint(required)))
 			}
 
 			/* ANY */
@@ -145,7 +147,7 @@ func storeFeatures(json map[string]any, state *State){
 				declarations := make(set[declaration])
 
 				for _, required := range group.([]any){					
-					declarations[declaration(fmt.Sprint(required))] = true
+					declarations.add(declaration(fmt.Sprint(required)))
 				}
 
 				*feature.requirements[thisArtifactName].ANY = append(*feature.requirements[thisArtifactName].ANY, declarations)
@@ -156,7 +158,7 @@ func storeFeatures(json map[string]any, state *State){
 				declarations := make(set[declaration])
 
 				for _, required := range group.([]any){
-					declarations[declaration(fmt.Sprint(required))] = true
+					declarations.add(declaration(fmt.Sprint(required)))
 				}
 				*feature.requirements[thisArtifactName].ONE = append(*feature.requirements[thisArtifactName].ONE, declarations)
 			}
@@ -165,17 +167,17 @@ func storeFeatures(json map[string]any, state *State){
 
 			/* --- STORE PROVIDED DECLARATIONS --- */
 			for _, provided := range artifact.provides(){
-				feature.provisions[thisArtifactName][declaration(fmt.Sprint(provided))] = true
+				feature.provisions[thisArtifactName].add(declaration(fmt.Sprint(provided)))
 
 				atom := insertVariables(provided, thisArtifactName, feature.name, state)
-				if _, ok := state.possibleProviders[atom]; !ok {
+				if state.possibleProviders[atom] == nil {
 					state.possibleProviders[atom] = make(set[featureName])
 				}
-				state.possibleProviders[atom][feature.name] = true
+				state.possibleProviders[atom].add(feature.name)
 			}
 		}
 		state.features[feature.name] = feature
-		state.features[ROOT].children[feature.name] = true 
+		state.features[ROOT].children.add(feature.name)
 	}
 }
 
@@ -183,17 +185,17 @@ func (feature Feature)getRequirements(state *State) Requirements{
 	requirements := newRequirements()
 	for artifact, req := range feature.requirements{
 		for atom := range req.ALL{
-			requirements.ALL[insertVariables(atom, artifact, feature.name, state)] = true
+			requirements.ALL.add(insertVariables(atom, artifact, feature.name, state))
 		}
 
 		for atom := range req.NOT{
-			requirements.NOT[insertVariables(atom, artifact, feature.name, state)] = true
+			requirements.NOT.add(insertVariables(atom, artifact, feature.name, state))
 		}
 
 		for _, group := range *req.ANY{
 			declarations := make(set[declaration])
 			for atom := range group {		
-				declarations[insertVariables(atom, artifact, feature.name, state)] = true
+				declarations.add(insertVariables(atom, artifact, feature.name, state))
 			}
 			*requirements.ANY = append(*requirements.ANY, declarations)
 		}
@@ -201,7 +203,7 @@ func (feature Feature)getRequirements(state *State) Requirements{
 		for _, group := range *req.ONE{
 			declarations := make(set[declaration])
 			for atom := range group {		
-				declarations[insertVariables(atom, artifact, feature.name, state)] = true
+				declarations.add(insertVariables(atom, artifact, feature.name, state))
 			}
 			*requirements.ONE = append(*requirements.ONE, declarations)
 		}

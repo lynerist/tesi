@@ -24,7 +24,7 @@ func (gr globalContext)put(name variableName, value variableValue, artifact arti
 	if len(gr.neededByArtifact[artifact])==0{
 		gr.neededByArtifact[artifact] = make(set[variableName])
 	}
-	gr.neededByArtifact[artifact][name]=true
+	gr.neededByArtifact[artifact].add(name)
 }
 func (gr globalContext)get(name variableName)variableValue{
 	return gr.elected[name]

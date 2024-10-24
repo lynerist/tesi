@@ -10,12 +10,19 @@ import (
 )
 
 type set[T comparable] map[T]bool
+type valueOrSet[T comparable] interface{}
 
-// TODO func append????? GET RID OF IF EMPTY
-
-func (s set[T])add(o set[T]){
-	for k := range o{
-		s[k]=true
+func (s set[T]) add (toAdd valueOrSet[T]){
+	if len(s) == 0 {
+		panic("insert in nil set")
+	}
+	switch toAdd := toAdd.(type) {
+	case T:
+		s[toAdd]=true
+	case set[T]:
+		for k := range toAdd{
+			s[k]=true
+		}
 	}
 }
 
@@ -273,11 +280,11 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 }
 
 func getProviders(atom declaration, state *State, requier featureName)set[featureName]{
-	providers := make(set[featureName])
+	var providers set[featureName]
 	
 	for possibleProvider := range state.possibleProviders[atom]{
 		if state.features[possibleProvider].isProviding(atom, state){
-			providers[possibleProvider] = true
+			providers.add(possibleProvider)
 		}
 	}
 
@@ -285,16 +292,18 @@ func getProviders(atom declaration, state *State, requier featureName)set[featur
 	return providers
 }
 
+
 func updatePossibleProvidersByVariableChange(artifact artifactName, feature featureName, state *State){
 	for provided := range state.features[feature].provisions[artifact]{
 		atom := insertVariables(provided, artifact, feature, state)
 		if _, ok := state.possibleProviders[atom]; !ok {
 			state.possibleProviders[atom] = make(set[featureName])
 		}
-		state.possibleProviders[atom][feature] = true
+		state.possibleProviders[atom].add(feature)
 	}
 }
 
+// TODO URGENTE BUG AGGIORNARE I NODI CHE CONTENGONO QUELLA GLOBALE nel display
 func updatePossibleProvidersByGlobalChange(global variableName, state *State){
 	for feature := range state.globals.usedBy[global]{
 		for _, artifact := range state.features[feature].artifacts{
@@ -303,7 +312,7 @@ func updatePossibleProvidersByGlobalChange(global variableName, state *State){
 				if _, ok := state.possibleProviders[atom]; !ok {
 					state.possibleProviders[atom] = make(set[featureName])
 				}
-				state.possibleProviders[atom][feature] = true
+				state.possibleProviders[atom].add(feature)
 			}
 		}
 	}
