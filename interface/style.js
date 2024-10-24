@@ -15,7 +15,7 @@ const EDGE = {
     'target-arrow-shape': 'triangle-backcurve',
     'target-arrow-color': '#000000',
     'opacity': function(ele){
-        return ele.source().data("active") ? 0.9 : 0.2
+        return ele.source().data("active") ? 0.9 : 0.3
     },
     'curve-style': 'bezier'
 }

@@ -13,7 +13,7 @@ type set[T comparable] map[T]bool
 type valueOrSet[T comparable] interface{}
 
 func (s set[T]) add (toAdd valueOrSet[T]){
-	if len(s) == 0 {
+	if s == nil {
 		panic("insert in nil set")
 	}
 	switch toAdd := toAdd.(type) {
@@ -280,7 +280,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 }
 
 func getProviders(atom declaration, state *State, requier featureName)set[featureName]{
-	var providers set[featureName]
+	providers := make(set[featureName])
 	
 	for possibleProvider := range state.possibleProviders[atom]{
 		if state.features[possibleProvider].isProviding(atom, state){

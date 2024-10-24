@@ -14,14 +14,14 @@ func newGlobalContext()(newContext globalContext){
 	return
 }
 func (gr globalContext)put(name variableName, value variableValue, artifact artifactName){
-	if len(gr.proposed[name])==0{
+	if gr.proposed[name] == nil{
 		gr.proposed[name] = make(map[variableValue]int)
 	} 
 	gr.proposed[name][value]++
 	if gr.proposed[name][value] > gr.proposed[name][gr.elected[name]] || len(gr.proposed)==1{
 		gr.elected[name]=value
 	}
-	if len(gr.neededByArtifact[artifact])==0{
+	if gr.neededByArtifact[artifact] == nil {
 		gr.neededByArtifact[artifact] = make(set[variableName])
 	}
 	gr.neededByArtifact[artifact].add(name)
