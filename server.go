@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -38,17 +39,22 @@ func handleJSONLoading(state *State) {
 }
 
 func handleVariableUpdate(state *State){
-	http.HandleFunc("/updateVariable", func(w http.ResponseWriter, r *http.Request) {	
+	http.HandleFunc("/updateAttribute", func(w http.ResponseWriter, r *http.Request) {	
 		name := r.FormValue("name")
 		value := r.FormValue("value")
-
 		feature	 := featureName(r.FormValue("feature"))
-		artifact := artifactName(name[:strings.IndexRune(name, VARIABLESIMBLE)])
-		variable := variableName(name[strings.IndexRune(name, VARIABLESIMBLE):])
 
-		state.attributes[artifact][feature][variable] = value
-		updatePossibleProviders(artifact, feature, state)
-				
+		if isGlobal, _ := strconv.ParseBool(r.URL.Query().Get("isglobal")); isGlobal{
+			global := variableName(name[strings.IndexRune(name, GLOBALSIMBLE):])
+			state.globals.elected[global] = value
+			updatePossibleProvidersByGlobalChange(global, state)
+		}else{
+			artifact := artifactName(name[:strings.IndexRune(name, VARIABLESIMBLE)])
+			variable := variableName(name[strings.IndexRune(name, VARIABLESIMBLE):])
+			state.variables[artifact][feature][variable] = value
+			updatePossibleProvidersByVariableChange(artifact, feature, state)
+		}
+
 		//TODO RESPONSE
 		outJson, _ := extractCytoscapeJSON(state)
 		w.Write(outJson)

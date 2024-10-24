@@ -7,7 +7,7 @@ import (
 
 type Feature struct {
 	name featureName
-	artifacts []artifactName
+	artifacts []artifactName //TODO MAKE IT SET???
 	tags set[tagName]
 	children set[featureName]
 	parent *featureName
@@ -115,10 +115,16 @@ func storeFeatures(json map[string]any, state *State){
 			artifact := state.artifacts[thisArtifactName]
 			feature.requirements[thisArtifactName]= newRequirements()
 
+			/* --- STORE FEATURES USING GLOBALS --- */
+			for global := range state.globals.neededByArtifact[thisArtifactName]{
+				if len(state.globals.usedBy[global])==0 {state.globals.usedBy[global]=make(set[featureName])}
+				state.globals.usedBy[global][feature.name]=true
+			}
+
 			/* --- STORE ARTIFACT VARIABLES --- */
-			for variable, value := range state.attributes[thisArtifactName][""]{
-				state.attributes[thisArtifactName][feature.name] = make(map[variableName]variableValue) 
-				state.attributes[thisArtifactName][feature.name][variable] = value
+			for variable, value := range state.variables[thisArtifactName][""]{
+				state.variables[thisArtifactName][feature.name] = make(map[variableName]variableValue) 
+				state.variables[thisArtifactName][feature.name][variable] = value
 			}
 
 			/* --- STORE REQUIRED DECLARATIONS --- */
@@ -156,6 +162,7 @@ func storeFeatures(json map[string]any, state *State){
 			}
 
 			feature.provisions[thisArtifactName] = make(set[declaration])
+
 			/* --- STORE PROVIDED DECLARATIONS --- */
 			for _, provided := range artifact.provides(){
 				feature.provisions[thisArtifactName][declaration(fmt.Sprint(provided))] = true

@@ -43,7 +43,7 @@ function displayModel(model){
         if (ele.group() == "edges"){
             popDeclaration(ele);
         }else{
-            popVariables(ele)
+            popAttributes(ele)
         }
     });
 
@@ -127,8 +127,8 @@ function popDeclaration(ele) {
     });
 }
 
-function popVariables(ele) {
-    if(Object.keys(ele.data("variables")).length == 0){
+function popAttributes(ele) {
+    if(Object.keys(ele.data("variables")).length==0 && ele.data("globals").length==0){
         ele.tippy = ""
         return
     }
@@ -141,8 +141,16 @@ function popVariables(ele) {
             Object.entries(ele.data("variables")).forEach(([variableName, variableValue]) => {
                 content.innerHTML = content.innerHTML + `${variableName}: <input type="text" id="${variableName}
                                                                             placeholder="${variableValue}" 
-                                                                            onchange="updateVariable('${ele.data("id")}','${variableName}',value)"
+                                                                            onchange="updateAttribute('${ele.data("id")}','${variableName}',value)"
                                                                             value="${variableValue}"/>\n`
+
+            })
+
+            Object.entries(ele.data("globals")).forEach(([globalName, globalValue]) => {
+                content.innerHTML = content.innerHTML + `${globalName}: <input type="text" id="${globalName}
+                                                                            placeholder="${globalValue}" 
+                                                                            onchange="updateAttribute('${ele.data("id")}','${globalName}',value, true)"
+                                                                            value="${globalValue}"/>\n`
 
             })
             content.innerHTML = content.innerHTML.replace(/\n/g, "<br />")
@@ -203,7 +211,7 @@ function loadJSON_GO(file){
     });
 }
 
-function updateVariable(feature, name, value){
+function updateAttribute(feature, name, value, isGlobal=false){
     let formData = new FormData();
     formData.delete("feature")
     formData.delete("name")
@@ -218,7 +226,7 @@ function updateVariable(feature, name, value){
 
     console.log(MODEL)
 
-    fetch(`http://localhost:${PORT}/updateVariable`,{
+    fetch(`http://localhost:${PORT}/updateAttribute?isglobal=${isGlobal}`,{
         method: "POST",
         body: formData
     })

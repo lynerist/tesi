@@ -11,6 +11,8 @@ import (
 
 type set[T comparable] map[T]bool
 
+// TODO func append????? GET RID OF IF EMPTY
+
 func (s set[T])add(o set[T]){
 	for k := range o{
 		s[k]=true
@@ -123,10 +125,10 @@ func log(s ...any){
 
 func insertVariables(atom any, artifact artifactName, feature featureName, state *State)declaration{
 	stringAtom := fmt.Sprint(atom)
-	for name, value := range state.attributes[artifact][feature] {
+	for name, value := range state.variables[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(value))
 	}
-	for name := range state.globals.needs[artifact]{
+	for name := range state.globals.neededByArtifact[artifact]{
 		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(state.globals.get(name)))
 	}
 	return declaration(stringAtom)
@@ -154,7 +156,7 @@ func getVariables(feature *Feature, state *State)map[string]variableValue{
 	attributes := make(map[string]variableValue)
 	for _, artifact := range feature.artifacts{
 		if state.artifacts[artifact].isVariadic(){
-			for variable, value := range state.attributes[artifact][feature.name]{
+			for variable, value := range state.variables[artifact][feature.name]{
 				attributes[fmt.Sprintf("%s%s", artifact,variable)] = value
 			}
 		}
@@ -166,7 +168,7 @@ func getGlobals(feature *Feature, state *State)map[string]variableValue{
 	globals := make(map[string]variableValue)
 	for _, artifact := range feature.artifacts{
 		if state.artifacts[artifact].isVariadic(){
-			for global := range state.globals.needs[artifact]{
+			for global := range state.globals.neededByArtifact[artifact]{
 				globals[string(global)] = state.globals.get(global)
 			}
 		}
@@ -283,13 +285,27 @@ func getProviders(atom declaration, state *State, requier featureName)set[featur
 	return providers
 }
 
-func updatePossibleProviders(artifact artifactName, feature featureName, state *State){
+func updatePossibleProvidersByVariableChange(artifact artifactName, feature featureName, state *State){
 	for provided := range state.features[feature].provisions[artifact]{
 		atom := insertVariables(provided, artifact, feature, state)
 		if _, ok := state.possibleProviders[atom]; !ok {
 			state.possibleProviders[atom] = make(set[featureName])
 		}
 		state.possibleProviders[atom][feature] = true
+	}
+}
+
+func updatePossibleProvidersByGlobalChange(global variableName, state *State){
+	for feature := range state.globals.usedBy[global]{
+		for _, artifact := range state.features[feature].artifacts{
+			for provided := range state.features[feature].provisions[artifact]{
+				atom := insertVariables(provided, artifact, feature, state)
+				if _, ok := state.possibleProviders[atom]; !ok {
+					state.possibleProviders[atom] = make(set[featureName])
+				}
+				state.possibleProviders[atom][feature] = true
+			}
+		}
 	}
 }
 
