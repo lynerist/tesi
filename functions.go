@@ -303,7 +303,7 @@ func updatePossibleProvidersByVariableChange(artifact artifactName, feature feat
 	}
 }
 
-// TODO URGENTE BUG AGGIORNARE I NODI CHE CONTENGONO QUELLA GLOBALE nel display
+// TODO URGENTE BUG AGGIORNARE tutti I NODI CHE CONTENGONO QUELLA GLOBALE nel display
 func updatePossibleProvidersByGlobalChange(global variableName, state *State){
 	for feature := range state.globals.usedBy[global]{
 		for artifact := range state.features[feature].artifacts{

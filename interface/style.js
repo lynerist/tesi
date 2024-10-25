@@ -2,7 +2,7 @@ const LAYOUT = {
     name: "cose-bilkent",
     directed: true,             // Makes the layout directed
     spacingFactor: 0.9,        // Reduce spacing to keep nodes closer
-    nodeDistance: 50,          // Ideal distance between nodes at the same depth
+    nodeDistance: 20,          // Ideal distance between nodes at the same depth
     idealEdgeLength: 250,
     avoidOverlap: true,        // Attempt to prevent node overlap
     animate: true,             // Optional: enables animations
@@ -49,11 +49,11 @@ const ROOT = {
     'background-color': '#002129',
 }
 
-const COLORS = [];
+var COLORS = [];
 for (let i = 0; i < 300; i++) {
     COLORS.push("#" + Math.floor(Math.random() * 16777215).toString(16)); //16777215 is ffffff
 }
-COLORS.filter((color) => !/^#5[0-9A-F]5[0-9A-F]5[0-9A-F]$/.test(color)) //REMOVE colors similar to background (#585855)
+COLORS = COLORS.filter((color) => ! /^#5[0-9A-F]5[0-9A-F]5[0-9A-F]$/.test(color) && color.length==7) //REMOVE colors similar to background (#585855)
 
 const DEPENDENCYALL = {
     'line-color': function(ele) {

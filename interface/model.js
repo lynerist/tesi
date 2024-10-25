@@ -35,7 +35,7 @@ function displayModel(model){
     cy.add(model); // Aggiungi i nuovi elementi direttamente dal file
 
     let layout = LAYOUT
-    layout.idealEdgeLength = 50 + 5*cy.edges().length
+    layout.idealEdgeLength = 50 + 3*cy.edges().length //for each edge 3px more in distance
     console.log(layout.idealEdgeLength)
     cy.layout(layout).run();
 
@@ -128,7 +128,7 @@ function popDeclaration(ele) {
 }
 
 function popAttributes(ele) {
-    if(Object.keys(ele.data("variables")).length==0 && ele.data("globals").length==0){
+    if(Object.keys(ele.data("variables")).length==0 && Object.keys(ele.data("globals")).length==0){
         ele.tippy = ""
         return
     }
@@ -139,7 +139,7 @@ function popAttributes(ele) {
             let content = document.createElement('div');
             
             Object.entries(ele.data("variables")).forEach(([variableName, variableValue]) => {
-                content.innerHTML = content.innerHTML + `${variableName}: <input type="text" id="${variableName}
+                content.innerHTML = content.innerHTML + `${variableName}: <input type="text" id="${variableName}"
                                                                             placeholder="${variableValue}" 
                                                                             onchange="updateAttribute('${ele.data("id")}','${variableName}',value)"
                                                                             value="${variableValue}"/>\n`
@@ -147,7 +147,7 @@ function popAttributes(ele) {
             })
 
             Object.entries(ele.data("globals")).forEach(([globalName, globalValue]) => {
-                content.innerHTML = content.innerHTML + `${globalName}: <input type="text" id="${globalName}
+                content.innerHTML = content.innerHTML + `${globalName}: <input type="text" id="${globalName}"
                                                                             placeholder="${globalValue}" 
                                                                             onchange="updateAttribute('${ele.data("id")}','${globalName}',value, true)"
                                                                             value="${globalValue}"/>\n`
@@ -201,7 +201,7 @@ function loadJSON_GO(file){
         method: "POST",
         body: formData
     })
-    .then(response => response.json())  // Converti la risposta in JSON (o altro formato, a seconda del server)
+    .then(response => response.json())  
     .then(data => {
         displayModel(data)
         MODEL = data
@@ -224,7 +224,7 @@ function updateAttribute(feature, name, value, isGlobal=false){
     
     //formData.append("model", model)
 
-    console.log(MODEL)
+    //console.log(MODEL)
 
     fetch(`http://localhost:${PORT}/updateAttribute?isglobal=${isGlobal}`,{
         method: "POST",
@@ -233,6 +233,16 @@ function updateAttribute(feature, name, value, isGlobal=false){
     .then(response => response.json())
     .then(data => {
         updateEdges(data)
+        
+        //Update all nodes with that global
+        if (isGlobal){
+            cy.nodes().filter((e) => e.data('globals')[name]!= undefined).forEach((node) => {
+                let updatedGlobals = node.data('globals')
+                updatedGlobals[name]=value
+                node.data("globals", updatedGlobals)
+                node.tippy.popper.querySelector("#\\"+name).value = value
+            })
+        }
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -240,6 +250,4 @@ function updateAttribute(feature, name, value, isGlobal=false){
 }
 
 
-
-// TODO MISSING REQUIREMENTS dead features
-// TODO GLOBALS
+// TODO 'MISSING REQUIREMENTS' => dead features
