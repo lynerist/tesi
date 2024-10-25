@@ -7,7 +7,7 @@ import (
 
 type Feature struct {
 	name featureName
-	artifacts []artifactName //TODO MAKE IT SET???
+	artifacts set[artifactName] 
 	tags set[tagName]
 	children set[featureName]
 	parent *featureName
@@ -27,10 +27,10 @@ func (f featureName) String()string{
 }
 
 func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact, parent featureName)Feature{
-	feature := Feature{name, nil, make(set[tagName]), make(set[featureName]), &parent, make(map[artifactName]Requirements), make(map[artifactName]set[declaration])}
+	feature := Feature{name, make(set[artifactName]), make(set[tagName]), make(set[featureName]), &parent, make(map[artifactName]Requirements), make(map[artifactName]set[declaration])}
 	
 	for _, artifact := range composingArtifacts {
-		feature.artifacts = append(feature.artifacts, artifactName(artifact.(string)))
+		feature.artifacts.add(artifactName(artifact.(string)))
 		for _, tag := range artifacts[stringToAN(artifact)].tags(){
 			feature.tags.add(tagName(tag.(string)))
 		}
@@ -111,7 +111,7 @@ func printTree(root featureName, indent int, features map[featureName]Feature){
 func storeFeatures(json map[string]any, state *State){
 	for _, f := range json["features"].([]any){
 		feature := newFeature(newFeatureName(f, len(state.features)), getArtifactsFromFeatureJSON(f), state.artifacts, ROOT)
-		for _, thisArtifactName := range feature.artifacts{
+		for thisArtifactName := range feature.artifacts{
 			artifact := state.artifacts[thisArtifactName]
 			feature.requirements[thisArtifactName]= newRequirements()
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type set[T comparable] map[T]bool
+type set[T comparable] map[T]bool //TODO MAKE IT to struct{}???
 type valueOrSet[T comparable] interface{}
 
 func (s set[T]) add (toAdd valueOrSet[T]){
@@ -161,7 +161,7 @@ func generateDependencyEdgeData(source, target featureName, dependencyID int, at
 
 func getVariables(feature *Feature, state *State)map[string]variableValue{
 	attributes := make(map[string]variableValue)
-	for _, artifact := range feature.artifacts{
+	for artifact := range feature.artifacts{
 		if state.artifacts[artifact].isVariadic(){
 			for variable, value := range state.variables[artifact][feature.name]{
 				attributes[fmt.Sprintf("%s%s", artifact,variable)] = value
@@ -173,7 +173,7 @@ func getVariables(feature *Feature, state *State)map[string]variableValue{
 
 func getGlobals(feature *Feature, state *State)map[string]variableValue{
 	globals := make(map[string]variableValue)
-	for _, artifact := range feature.artifacts{
+	for artifact := range feature.artifacts{
 		if state.artifacts[artifact].isVariadic(){
 			for global := range state.globals.neededByArtifact[artifact]{
 				globals[string(global)] = state.globals.get(global)
@@ -306,7 +306,7 @@ func updatePossibleProvidersByVariableChange(artifact artifactName, feature feat
 // TODO URGENTE BUG AGGIORNARE I NODI CHE CONTENGONO QUELLA GLOBALE nel display
 func updatePossibleProvidersByGlobalChange(global variableName, state *State){
 	for feature := range state.globals.usedBy[global]{
-		for _, artifact := range state.features[feature].artifacts{
+		for artifact := range state.features[feature].artifacts{
 			for provided := range state.features[feature].provisions[artifact]{
 				atom := insertVariables(provided, artifact, feature, state)
 				if _, ok := state.possibleProviders[atom]; !ok {

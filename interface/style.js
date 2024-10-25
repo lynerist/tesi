@@ -15,7 +15,7 @@ const EDGE = {
     'target-arrow-shape': 'triangle-backcurve',
     'target-arrow-color': '#000000',
     'opacity': function(ele){
-        return ele.source().data("active") ? 0.9 : 0.3
+        return ele.source().data("active") ? 0.95 : 0.3
     },
     'curve-style': 'bezier'
 }
@@ -50,9 +50,10 @@ const ROOT = {
 }
 
 const COLORS = [];
-for (let i = 0; i < 1000; i++) {
-  COLORS.push("#" + Math.floor(Math.random() * 16777215).toString(16));
+for (let i = 0; i < 300; i++) {
+    COLORS.push("#" + Math.floor(Math.random() * 16777215).toString(16)); //16777215 is ffffff
 }
+COLORS.filter((color) => !/^#5[0-9A-F]5[0-9A-F]5[0-9A-F]$/.test(color)) //REMOVE colors similar to background (#585855)
 
 const DEPENDENCYALL = {
     'line-color': function(ele) {
@@ -75,10 +76,10 @@ const DEPENDENCYNOT = {
 
 const DEPENDENCYANY = {
     'line-color': function(ele) {
-        return COLORS[ele.data("dependencyID")]
+        return COLORS[ele.data("dependencyID")+50]
     },
     'target-arrow-color': function(ele) {
-        return COLORS[ele.data("dependencyID")]
+        return COLORS[ele.data("dependencyID")+50]
     },
     'target-arrow-shape': 'circle-triangle',
     'width': 2,
@@ -86,10 +87,10 @@ const DEPENDENCYANY = {
 
 const DEPENDENCYONE = {
     'line-color': function(ele) {
-        return COLORS[ele.data("dependencyID")]
+        return COLORS[ele.data("dependencyID")+100]
     },
     'target-arrow-color': function(ele) {
-        return COLORS[ele.data("dependencyID")]
+        return COLORS[ele.data("dependencyID")+100]
     },
     'target-arrow-shape': 'triangle-tee',
     'width': 2,

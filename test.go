@@ -100,7 +100,7 @@ func mainn(){
 		feature := newFeature(newFeatureName(f, len(features)), getArtifactsFromFeatureJSON(f), artifacts, "")
 		features[feature.name] = feature
 		featureModelRoot.children[feature.name] = true
-		for _, artifact := range feature.artifacts{
+		for artifact := range feature.artifacts{
 			for variable, value := range attributes[artifact][""]{
 				attributes[artifact][feature.name] = make(map[variableName]any) 
 				attributes[artifact][feature.name][variable] = value
