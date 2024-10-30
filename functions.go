@@ -171,21 +171,31 @@ func getVariables(feature *Feature, state *State)map[string]variableValue{
 	return attributes	
 }
 
-func getGlobals(feature *Feature, state *State)map[string]variableValue{
-	globals := make(map[string]variableValue)
+func getGlobals(feature *Feature, state *State)map[variableName]variableValue{
+	globals := make(map[variableName]variableValue)
 	for artifact := range feature.artifacts{
 		if state.artifacts[artifact].isVariadic(){
 			for global := range state.globals.neededByArtifact[artifact]{
-				globals[string(global)] = state.globals.get(global)
+				globals[global] = state.globals.get(global)
 			}
 		}
 	}
 	return globals	
 }
 
+func countLevels(feature featureName, level int, levels map[int]set[featureName], state *State){
+	if levels[level] == nil {levels[level] = make(set[featureName])}
+	levels[level].add(feature)
+	for child := range state.features[feature].children{
+		countLevels(child, level+1, levels, state)
+	}
+}
+
 func extractCytoscapeJSON(state *State)([]byte, error){
-	var json []any
+	featuresIndexes := make(map[featureName]int)
+	var json []map[string]any 
 	for name, feature := range state.features{
+		featuresIndexes[feature.name] = len(json)
 		/* --- --> NODE <-- --- */
 		// node id && attributes
 		data := map[string]any{"id":ifEmptyThenRoot(name), 
@@ -276,6 +286,34 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 			dependencyID++
 		}
 	}
+
+	// MOVE GLOBALS IN MOST UPPER COMMON ANCESTOR
+
+	levels := make(map[int]set[featureName])
+	countLevels(ROOT, 0, levels, state)
+
+	for level := len(levels)-1; level >=0; level--{
+		// Count how many times each global appears. If one appear more then one time it has to be moved to the upper node.
+		globalsCount := make(map[variableName]int)
+		for feature := range state.features{
+			for global := range json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[variableName]variableValue) {
+				globalsCount[global]++
+			}
+		}
+		for feature := range levels[level]{
+			toMove := make(set[variableName])
+			for global := range json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[variableName]variableValue) {
+				if globalsCount[global]>1{
+					toMove.add(global)
+				}
+			}
+			for global := range toMove{
+				json[featuresIndexes[*state.features[feature].parent]]["data"].(map[string]any)["globals"].(map[variableName]variableValue)[global] = state.globals.get(global)
+				delete(json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[variableName]variableValue), global)
+			}
+		}
+	}
+
 	return j.MarshalIndent(json, "", "\t")
 }
 
@@ -303,7 +341,6 @@ func updatePossibleProvidersByVariableChange(artifact artifactName, feature feat
 	}
 }
 
-// TODO URGENTE BUG AGGIORNARE tutti I NODI CHE CONTENGONO QUELLA GLOBALE nel display
 func updatePossibleProvidersByGlobalChange(global variableName, state *State){
 	for feature := range state.globals.usedBy[global]{
 		for artifact := range state.features[feature].artifacts{

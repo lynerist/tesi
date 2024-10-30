@@ -328,6 +328,18 @@
             {"termometer":"high"}
         ],
         "tags":["controls", "temperature"]
+    },
+    {
+        "name": "variable interface",
+        "globals":[
+            {
+                "name":"@mode", "default":"dark"
+            }
+        ],
+        "provides": [
+            {"interface":"@mode"}
+        ],
+        "tags":["screen", "interface"]
     }
 
     ],
@@ -443,6 +455,10 @@
         {
             "name":"high termometer",
             "artifacts":["high termometer"]
+        },
+        {
+            "name":"variable interface",
+            "artifacts":["variable interface"]
         }
     ]
 }

@@ -75,6 +75,7 @@ func generateFeatureTree(root featureName, features map[featureName]Feature){
 		}
 
 		newTagNode := newAbstractFeature(featureName(fmt.Sprintf("%s::%d",mostPresentTag, len(features))))
+		newTagNode.parent = &root
 		for child := range features[root].children{
 			if features[child].tags[mostPresentTag]{
 				newTagNode.children.add(child)
