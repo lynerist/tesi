@@ -191,8 +191,12 @@ func countLevels(feature featureName, level int, levels map[int]set[featureName]
 	}
 }
 
+func addClassInExtractedJSON(json []map[string]any, index int, class string){
+	json[index]["classes"]=append(json[index]["classes"].([]string),class)
+}
+
 func extractCytoscapeJSON(state *State)([]byte, error){
-	featuresIndexes := make(map[featureName]int)
+	featuresIndexes := make(map[featureName]int) //to get the index of a specific feature in the json
 	var json []map[string]any 
 	for name, feature := range state.features{
 		featuresIndexes[feature.name] = len(json)
@@ -226,10 +230,14 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 		var	dependencyID int
 
 		for atom := range requirements.ALL{
-			for requiredFeature := range getProviders(atom, state, feature.name){
-				json = append(json, map[string]any{"group":"edges", 
-													"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
-													"classes":[]string{"dependency","dependencyAll"}})
+			if providers := getProviders(atom, state, feature.name); len(providers)>0{
+				for requiredFeature := range providers{
+					json = append(json, map[string]any{"group":"edges", 
+														"data":generateDependencyEdgeData(requiredFeature, name, dependencyID, atom), 
+														"classes":[]string{"dependency","dependencyAll"}})
+				}
+			}else{
+				addClassInExtractedJSON(json, featuresIndexes[feature.name], "deadFeature")
 			}
 			dependencyID++
 		}
@@ -261,6 +269,9 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 			for _, edge := range providers{
 				json = append(json, edge)
 			}
+			if len(providers)==0{
+				addClassInExtractedJSON(json, featuresIndexes[feature.name], "deadFeature")
+			}
 			dependencyID++
 		}
 
@@ -282,6 +293,9 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 			}
 			for _, edge := range providers{
 				json = append(json, edge)
+			}
+			if len(providers)==0{
+				addClassInExtractedJSON(json, featuresIndexes[feature.name], "deadFeature")
 			}
 			dependencyID++
 		}

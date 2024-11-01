@@ -12,8 +12,8 @@ var cy = cytoscape({
         {selector: ".dependencyAll", style:DEPENDENCYALL},
         {selector: ".dependencyNot", style:DEPENDENCYNOT},
         {selector: ".dependencyAny", style:DEPENDENCYANY},
-        {selector: ".dependencyOne", style:DEPENDENCYONE}
-
+        {selector: ".dependencyOne", style:DEPENDENCYONE},
+        {selector: ".deadFeature", style:DEADFEATURE}
     ],
     layout: LAYOUT
 });
@@ -81,6 +81,13 @@ function displayModel(model){
     })
     
     console.log("Grafo caricato con successo!");
+}
+
+function updateNodeClasses(model){
+    model.filter(element => element.group === 'nodes').forEach((node)=>{
+        cy.getElementById(node.data.id).classes(node.classes)
+    })
+    cy.style().update()
 }
 
 function updateEdges(model){
@@ -233,7 +240,8 @@ function updateAttribute(feature, name, value, isGlobal=false){
     .then(response => response.json())
     .then(data => {
         updateEdges(data)
-        
+        updateNodeClasses(data)      
+
         //Update all nodes with that global
         if (isGlobal){
             cy.nodes().filter((e) => e.data('globals')[name]!= undefined).forEach((node) => {

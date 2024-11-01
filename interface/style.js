@@ -95,3 +95,8 @@ const DEPENDENCYONE = {
     'target-arrow-shape': 'triangle-tee',
     'width': 2,
 }
+
+const DEADFEATURE = {
+    "background-color":"#F94449",
+    'opacity': 0.2,
+}
