@@ -13,7 +13,6 @@ var cy = cytoscape({
         {selector: ".dependencyNot", style:DEPENDENCYNOT},
         {selector: ".dependencyAny", style:DEPENDENCYANY},
         {selector: ".dependencyOne", style:DEPENDENCYONE},
-        {selector: ".deadFeature", style:DEADFEATURE}
     ],
     layout: LAYOUT
 });
@@ -77,15 +76,16 @@ function displayModel(model){
     // NODES CLICK LISTENERS
 
     cy.on("click", "node", (event) => {
-        hundleActivation(event.target)
+        handleActivation(event.target)
     })
     
     console.log("Grafo caricato con successo!");
 }
 
-function updateNodeClasses(model){
+function updateNodesData(model){
     model.filter(element => element.group === 'nodes').forEach((node)=>{
-        cy.getElementById(node.data.id).classes(node.classes)
+        cy.getElementById(node.data.id).data("deadFeature", false)
+        cy.getElementById(node.data.id).data(node.data)
     })
     cy.style().update()
 }
@@ -187,7 +187,8 @@ function unactivateDown(ele) {
     children.forEach((child)=>child.data("active", false) && unactivateDown(child))
 }
 
-function hundleActivation(ele){
+function handleActivation(ele){
+    if (ele.data("deadFeature")) return
     ele.data("active", !ele.data("active"))     //activate or unactivate node
     if (ele.data("active")){                    //activate parent node
         activateUp(ele)
@@ -240,14 +241,11 @@ function updateAttribute(feature, name, value, isGlobal=false){
     .then(response => response.json())
     .then(data => {
         updateEdges(data)
-        updateNodeClasses(data)      
+        updateNodesData(data)      
 
-        //Update all nodes with that global
+        //Update all poppers with that global
         if (isGlobal){
             cy.nodes().filter((e) => e.data('globals')[name]!= undefined).forEach((node) => {
-                let updatedGlobals = node.data('globals')
-                updatedGlobals[name]=value
-                node.data("globals", updatedGlobals)
                 node.tippy.popper.querySelector("#\\"+name).value = value
             })
         }
@@ -256,6 +254,3 @@ function updateAttribute(feature, name, value, isGlobal=false){
         console.error('Error:', error);
     });
 }
-
-
-// TODO 'MISSING REQUIREMENTS' => dead features

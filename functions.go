@@ -191,8 +191,9 @@ func countLevels(feature featureName, level int, levels map[int]set[featureName]
 	}
 }
 
-func addClassInExtractedJSON(json []map[string]any, index int, class string){
-	json[index]["classes"]=append(json[index]["classes"].([]string),class)
+func handleDeadFeature(json []map[string]any, index int){
+	json[index]["data"].(map[string]any)["deadFeature"] = true
+	json[index]["data"].(map[string]any)["active"]=false
 }
 
 func extractCytoscapeJSON(state *State)([]byte, error){
@@ -237,7 +238,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 														"classes":[]string{"dependency","dependencyAll"}})
 				}
 			}else{
-				addClassInExtractedJSON(json, featuresIndexes[feature.name], "deadFeature")
+				handleDeadFeature(json, featuresIndexes[feature.name])
 			}
 			dependencyID++
 		}
@@ -270,7 +271,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 				json = append(json, edge)
 			}
 			if len(providers)==0{
-				addClassInExtractedJSON(json, featuresIndexes[feature.name], "deadFeature")
+				handleDeadFeature(json, featuresIndexes[feature.name])
 			}
 			dependencyID++
 		}
@@ -295,7 +296,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 				json = append(json, edge)
 			}
 			if len(providers)==0{
-				addClassInExtractedJSON(json, featuresIndexes[feature.name], "deadFeature")
+				handleDeadFeature(json, featuresIndexes[feature.name])
 			}
 			dependencyID++
 		}

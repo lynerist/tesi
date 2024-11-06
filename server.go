@@ -55,7 +55,6 @@ func handleVariableUpdate(state *State){
 			updatePossibleProvidersByVariableChange(artifact, feature, state)
 		}
 
-		//TODO RESPONSE
 		outJson, _ := extractCytoscapeJSON(state)
 		w.Write(outJson)
 	})

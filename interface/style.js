@@ -24,13 +24,15 @@ const NODE = {
     'label': function(ele) {
         return ele.data("id").split("::")[0];          //Remove node incremental id
     },
-    'background-color': '#1074D9',
+    'background-color': function(ele){
+        return ele.data("deadFeature")?'#F94449':'#1074D9'
+    },
     'color': '#fff',
     'text-valign': 'center',
     'text-halign': 'center',
     'height': '50px',
     'opacity': function(ele){
-        return ele.data("active") ? 0.9 : 0.2          //Higher opacity for active nodes  
+        return ele.data("active") && !ele.data("deadFeature") ? 0.9 : 0.2          //Higher opacity for active nodes  
     },
     'width': function(ele) {
         return Math.max(ele.data("id").length * 10, 50); // 10px for each char, min length 50px
@@ -94,9 +96,4 @@ const DEPENDENCYONE = {
     },
     'target-arrow-shape': 'triangle-tee',
     'width': 2,
-}
-
-const DEADFEATURE = {
-    "background-color":"#F94449",
-    'opacity': 0.2,
 }
