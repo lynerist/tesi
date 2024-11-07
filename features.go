@@ -27,7 +27,8 @@ func (f featureName) String()string{
 }
 
 func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact, parent featureName)Feature{
-	feature := Feature{name, make(set[artifactName]), make(set[tagName]), make(set[featureName]), &parent, make(map[artifactName]Requirements), make(map[artifactName]set[declaration])}
+	feature := Feature{name, make(set[artifactName]), make(set[tagName]), make(set[featureName]), 
+		&parent, make(map[artifactName]Requirements), make(map[artifactName]set[declaration])}
 	
 	for _, artifact := range composingArtifacts {
 		feature.artifacts.add(artifactName(artifact.(string)))
@@ -77,7 +78,7 @@ func generateFeatureTree(root featureName, features map[featureName]Feature){
 		newTagNode := newAbstractFeature(featureName(fmt.Sprintf("%s::%d",mostPresentTag, len(features))))
 		newTagNode.parent = &root
 		for child := range features[root].children{
-			if features[child].tags[mostPresentTag]{
+			if _, ok := features[child].tags[mostPresentTag]; ok{
 				newTagNode.children.add(child)
 			}
 		}

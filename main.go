@@ -9,7 +9,7 @@ func main(){
 
 	handleJSONLoading(&state)
 	handleVariableUpdate(&state)
+	handleActivation(&state)
 
 	startLocalServer()
-
 }

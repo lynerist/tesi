@@ -76,7 +76,7 @@ function displayModel(model){
     // NODES CLICK LISTENERS
 
     cy.on("click", "node", (event) => {
-        handleActivation(event.target)
+        handleActivation(event.target, event.target.id())
     })
     
     console.log("Grafo caricato con successo!");
@@ -187,18 +187,33 @@ function unactivateDown(ele) {
     children.forEach((child)=>child.data("active", false) && unactivateDown(child))
 }
 
-function handleActivation(ele){
-    if (ele.data("deadFeature")) return
-    ele.data("active", !ele.data("active"))     //activate or unactivate node
-    if (ele.data("active")){                    //activate parent node
-        activateUp(ele)
-    }else{
-        unactivateDown(ele)
-    }
-    cy.style().update()
+function handleActivation(ele, feature){
+    let formData = new FormData();
+    formData.delete("feature")
+    formData.append("feature", feature)
+
+
+    fetch(`http://localhost:${PORT}/activation`, {  
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())  
+    .then(activeNodes => {
+        console.log(activeNodes)
+        cy.nodes().forEach((node)=> node.data("active",false))
+        activeNodes.forEach((id) => cy.getElementById(id).data("active",true))
+        cy.style().update()
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
 }
 
 /* BACKEND */
+
+function translateGoJSONtoCytoscapeJSON(file){
+    return file 
+}
 
 function loadJSON_GO(file){
     let formData = new FormData();
@@ -211,7 +226,7 @@ function loadJSON_GO(file){
     })
     .then(response => response.json())  
     .then(data => {
-        displayModel(data)
+        displayModel(translateGoJSONtoCytoscapeJSON(data))
         MODEL = data
     })
     .catch((error) => {
@@ -229,10 +244,6 @@ function updateAttribute(feature, name, value, isGlobal=false){
     formData.append("feature", feature)
     formData.append("name", name)
     formData.append("value", value)
-    
-    //formData.append("model", model)
-
-    //console.log(MODEL)
 
     fetch(`http://localhost:${PORT}/updateAttribute?isglobal=${isGlobal}`,{
         method: "POST",

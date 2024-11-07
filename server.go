@@ -59,3 +59,25 @@ func handleVariableUpdate(state *State){
 		w.Write(outJson)
 	})
 }
+
+//Return list of activated nodes
+func handleActivation(state *State){
+	http.HandleFunc("/activation", func(w http.ResponseWriter, r *http.Request) {	
+		feature	 := featureName(r.FormValue("feature"))
+
+		if _, isDead := state.deadFeatures[feature]; !isDead{
+			if _, isActive := state.activeFeatures[feature]; isActive{
+				state.activeFeatures.remove(feature)
+			}else{
+				state.activeFeatures.add(feature)
+			}
+		}
+		w.Write(state.activeFeatures.jsonFormat())
+	})
+
+    // if (ele.data("active")){                    
+    //     activateUp(ele)
+    // }else{
+    //     unactivateDown(ele)
+    // }
+}

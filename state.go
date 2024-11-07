@@ -8,6 +8,8 @@ type State struct {
 	globals 			globalContext
 	features 			map[featureName]Feature
 	possibleProviders	map[declaration]set[featureName]
+	activeFeatures		set[featureName]
+	deadFeatures		set[featureName]
 }
 
 func newState()(state State){
@@ -22,4 +24,6 @@ func (state *State) reset(){
 	state.globals 			= newGlobalContext()
 	state.features 			= map[featureName]Feature{"":newAbstractFeature("")}
 	state.possibleProviders	= make(map[declaration]set[featureName])
+	state.activeFeatures 	= make(set[featureName])
+	state.deadFeatures		= make(set[featureName])
 }

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type set[T comparable] map[T]bool //TODO MAKE IT to struct{}???
+type set[T comparable] map[T]struct{} 
 type valueOrSet[T comparable] interface{}
 
 func (s set[T]) add (toAdd valueOrSet[T]){
@@ -18,10 +18,24 @@ func (s set[T]) add (toAdd valueOrSet[T]){
 	}
 	switch toAdd := toAdd.(type) {
 	case T:
-		s[toAdd]=true
+		s[toAdd]=struct{}{}
 	case set[T]:
 		for k := range toAdd{
-			s[k]=true
+			s[k]=struct{}{}
+		}
+	}
+}
+
+func (s set[T]) remove (toDel valueOrSet[T]){
+	if s == nil {
+		return
+	}
+	switch toDel := toDel.(type) {
+	case T:
+		delete(s, toDel)
+	case set[T]:
+		for k := range toDel{
+			delete(s,k)
 		}
 	}
 }
@@ -35,6 +49,15 @@ func (s set[T]) String()string {
 		out += fmt.Sprintf("%v ", e)
 	}
 	return out[:len(out)-1]+"}"
+}
+
+func (s set[T]) jsonFormat()[]byte{
+	var list []T = make([]T,0, len(s))
+	for element := range s{
+		list = append(list, element)
+	}
+	json, _ := j.Marshal(list)
+	return json
 }
 
 func (t tagName) String()string{
@@ -191,9 +214,11 @@ func countLevels(feature featureName, level int, levels map[int]set[featureName]
 	}
 }
 
-func handleDeadFeature(json []map[string]any, index int){
+func handleDeadFeature(json []map[string]any, index int, state *State, feature featureName){
+	state.deadFeatures.add(feature)
+	state.activeFeatures.remove(feature)  
 	json[index]["data"].(map[string]any)["deadFeature"] = true
-	json[index]["data"].(map[string]any)["active"]=false
+	json[index]["data"].(map[string]any)["active"] = false
 }
 
 func extractCytoscapeJSON(state *State)([]byte, error){
@@ -238,7 +263,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 														"classes":[]string{"dependency","dependencyAll"}})
 				}
 			}else{
-				handleDeadFeature(json, featuresIndexes[feature.name])
+				handleDeadFeature(json, featuresIndexes[feature.name], state, feature.name)
 			}
 			dependencyID++
 		}
@@ -271,7 +296,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 				json = append(json, edge)
 			}
 			if len(providers)==0{
-				handleDeadFeature(json, featuresIndexes[feature.name])
+				handleDeadFeature(json, featuresIndexes[feature.name], state, feature.name)
 			}
 			dependencyID++
 		}
@@ -296,7 +321,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 				json = append(json, edge)
 			}
 			if len(providers)==0{
-				handleDeadFeature(json, featuresIndexes[feature.name])
+				handleDeadFeature(json, featuresIndexes[feature.name], state, feature.name)
 			}
 			dependencyID++
 		}
