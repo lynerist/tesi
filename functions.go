@@ -9,57 +9,6 @@ import (
 	"strings"
 )
 
-type set[T comparable] map[T]struct{} 
-type valueOrSet[T comparable] interface{}
-
-func (s set[T]) add (toAdd valueOrSet[T]){
-	if s == nil {
-		panic("insert in nil set")
-	}
-	switch toAdd := toAdd.(type) {
-	case T:
-		s[toAdd]=struct{}{}
-	case set[T]:
-		for k := range toAdd{
-			s[k]=struct{}{}
-		}
-	}
-}
-
-func (s set[T]) remove (toDel valueOrSet[T]){
-	if s == nil {
-		return
-	}
-	switch toDel := toDel.(type) {
-	case T:
-		delete(s, toDel)
-	case set[T]:
-		for k := range toDel{
-			delete(s,k)
-		}
-	}
-}
-
-func (s set[T]) String()string {
-	if len(s)==0{
-		return "empty"
-	}
-	out := "set{"
-	for e := range s{
-		out += fmt.Sprintf("%v ", e)
-	}
-	return out[:len(out)-1]+"}"
-}
-
-func (s set[T]) jsonFormat()[]byte{
-	var list []T = make([]T,0, len(s))
-	for element := range s{
-		list = append(list, element)
-	}
-	json, _ := j.Marshal(list)
-	return json
-}
-
 func (t tagName) String()string{
 	return fmt.Sprintf("T::%s", string(t))
 }
@@ -86,6 +35,7 @@ func parseJSON(jsonFile io.Reader)(json map[string]any){
 	return
 }
 
+//fill missing keys in the json with empty value to prevent wrong type assertions
 func fillMissingKeys(artifact map[string]any){
 	if _, ok := artifact[REQUIRES]; !ok {artifact[REQUIRES]=make(map[string]any)}
 	if _, ok := artifact[REQUIRES].(map[string]any)[ALL]; !ok {
@@ -177,6 +127,7 @@ func generateDependencyEdgeData(source, target featureName, dependencyID int, at
 							"dependencyID":dependencyID, "declaration":atom}
 }
 
+//get all the couples variable-value used by a feature
 func getVariables(feature *Feature, state *State)map[string]variableValue{
 	attributes := make(map[string]variableValue)
 	for artifact := range feature.artifacts{
@@ -189,6 +140,7 @@ func getVariables(feature *Feature, state *State)map[string]variableValue{
 	return attributes	
 }
 
+//get all the couples global-value used by a feature
 func getGlobals(feature *Feature, state *State)map[variableName]variableValue{
 	globals := make(map[variableName]variableValue)
 	for artifact := range feature.artifacts{
@@ -201,6 +153,7 @@ func getGlobals(feature *Feature, state *State)map[variableName]variableValue{
 	return globals	
 }
 
+//recursive function to count the deepness of a feature in the feature model tree
 func countLevels(feature featureName, level int, levels map[int]set[featureName], state *State){
 	if levels[level] == nil {levels[level] = make(set[featureName])}
 	levels[level].add(feature)
@@ -217,6 +170,8 @@ func handleDeadFeature(json []map[string]any, index int, state *State, feature f
 }
 
 func extractCytoscapeJSON(state *State)([]byte, error){
+	state.deadFeatures = make(set[featureName])
+
 	featuresIndexes := make(map[featureName]int) //to get the index of a specific feature in the json
 	var json []map[string]any 
 	for name, feature := range state.features{
@@ -323,7 +278,6 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 	}
 
 	// MOVE GLOBALS IN MOST UPPER COMMON ANCESTOR
-
 	levels := make(map[int]set[featureName])
 	countLevels(ROOT, 0, levels, state)
 
@@ -365,7 +319,7 @@ func getProviders(atom declaration, state *State, requier featureName)set[featur
 	return providers
 }
 
-
+//Whenever a variable change value, declarations provided by the feature that's using that variable may change so we have to update them
 func updatePossibleProvidersByVariableChange(artifact artifactName, feature featureName, state *State){
 	for provided := range state.features[feature].provisions[artifact]{
 		atom := insertVariables(provided, artifact, feature, state)
@@ -376,6 +330,7 @@ func updatePossibleProvidersByVariableChange(artifact artifactName, feature feat
 	}
 }
 
+//Whenever a global change value, declarations provided by the features that are using that global may change so we have to update them
 func updatePossibleProvidersByGlobalChange(global variableName, state *State){
 	for feature := range state.globals.usedBy[global]{
 		for artifact := range state.features[feature].artifacts{

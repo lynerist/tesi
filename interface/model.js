@@ -177,11 +177,6 @@ function popAttributes(ele) {
     });
 }
 
-function unactivateDown(ele) {
-    children = ele.data("abstract")?ele.edgesTo(cy.nodes()).targets():[]
-    children.forEach((child)=>child.data("active", false) && unactivateDown(child))
-}
-
 function colorGivenNodes(nodes){
     cy.nodes().forEach((node)=> node.data("active",false))
     nodes.forEach((id) => cy.getElementById(id).data("active",true))
