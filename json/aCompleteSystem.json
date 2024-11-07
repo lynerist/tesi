@@ -300,7 +300,7 @@
             "all": [
                 {"interface":"control"},
                 {"interface":"feedback"},
-                {"termometer":"$temperature"}
+                {"thermometer":"$temperature"}
             ]
         },
         "attributes":[
@@ -309,23 +309,23 @@
         "tags":["temperature", "controls"]
     },
     {
-        "name": "low termometer",
+        "name": "low thermometer",
         "provides": [
-            {"termometer":"low"}
+            {"thermometer":"low"}
         ],
         "tags":["controls", "temperature"]
     },
     {
-        "name": "medium termometer",
+        "name": "medium thermometer",
         "provides": [
-            {"termometer":"medium"}
+            {"thermometer":"medium"}
         ],
         "tags":["controls", "temperature"]
     },
     {
-        "name": "high termometer",
+        "name": "high thermometer",
         "provides": [
-            {"termometer":"high"}
+            {"thermometer":"high"}
         ],
         "tags":["controls", "temperature"]
     },
@@ -445,16 +445,16 @@
             "artifacts":["temperature controller"]
         },
         {
-            "name":"low termometer",
-            "artifacts":["low termometer"]
+            "name":"low thermometer",
+            "artifacts":["low thermometer"]
         },
         {
-            "name":"medium termometer",
-            "artifacts":["medium termometer"]
+            "name":"medium thermometer",
+            "artifacts":["medium thermometer"]
         },
         {
-            "name":"high termometer",
-            "artifacts":["high termometer"]
+            "name":"high thermometer",
+            "artifacts":["high thermometer"]
         },
         {
             "name":"variable interface",

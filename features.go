@@ -227,3 +227,10 @@ func activateUp(feature featureName, state *State){
 		activateUp(*parent, state)
 	}
 }
+
+func unactivateDown(feature featureName, state *State) {
+	state.activeFeatures.remove(feature)
+	for child := range state.features[feature].children {
+		unactivateDown(child, state)
+	}
+}

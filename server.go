@@ -65,20 +65,13 @@ func handleVariableUpdate(state *State){
 func handleActivation(state *State){
 	http.HandleFunc("/activation", func(w http.ResponseWriter, r *http.Request) {	
 		feature	 := featureName(r.FormValue("feature"))
-
 		if _, isDead := state.deadFeatures[feature]; !isDead{
 			if _, isActive := state.activeFeatures[feature]; isActive{
-				state.activeFeatures.remove(feature)
+				unactivateDown(feature, state)
 			}else{
 				activateUp(feature, state)
 			}
 		}
 		w.Write(state.activeFeatures.jsonFormat())
 	})
-
-    // if (ele.data("active")){                    
-    //     activateUp(ele)
-    // }else{
-    //     unactivateDown(ele)
-    // }
 }
