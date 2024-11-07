@@ -168,17 +168,12 @@ func getArtifactsFromFeatureJSON(f any)[]any{
 	return f.(map[string]any)["artifacts"].([]any)
 }
 
-func ifEmptyThenRoot(s featureName)string{
-	if s == "" {return "root"}
-	return string(s)
-}
-
 func generateEdgeData(source, target featureName)map[string]any{
-	return map[string]any{"source":ifEmptyThenRoot(source), "target":ifEmptyThenRoot(target)}
+	return map[string]any{"source":source, "target":target}
 }
 
 func generateDependencyEdgeData(source, target featureName, dependencyID int, atom declaration)map[string]any{
-	return map[string]any{"source":ifEmptyThenRoot(source), "target":ifEmptyThenRoot(target), 
+	return map[string]any{"source":source, "target":target, 
 							"dependencyID":dependencyID, "declaration":atom}
 }
 
@@ -228,7 +223,7 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 		featuresIndexes[feature.name] = len(json)
 		/* --- --> NODE <-- --- */
 		// node id && attributes
-		data := map[string]any{"id":ifEmptyThenRoot(name), 
+		data := map[string]any{"id":name, 
 								"variables":getVariables(&feature, state), 
 								"globals":getGlobals(&feature,state)}
 

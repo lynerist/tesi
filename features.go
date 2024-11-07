@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Feature struct {
@@ -20,8 +19,8 @@ func newFeatureName(feature any, id int)featureName{
 }
 
 func (f featureName) String()string{
-	if f=="" {
-		return "Feature Model Root"
+	if f == ROOT {
+		return "root"
 	}
 	return string(f)
 }
@@ -40,7 +39,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 }
 
 func newAbstractFeature(name featureName)Feature{
-	return Feature{name, nil, nil, make(set[featureName]), new(featureName), nil, nil}
+	return Feature{name, nil, nil, make(set[featureName]), nil, nil, nil}
 }
 
 func (f Feature) String()string {
@@ -53,7 +52,12 @@ func (f Feature) String()string {
 		children = append(children, child)
 	}
 
-	return fmt.Sprintf("'%s' --> artifacts:%v tags: %v children: %v parent: %s", f.name, f.artifacts, tags, children, *f.parent)
+	var parent any = ROOT
+	if f.parent != nil {
+		parent = *f.parent
+	}
+
+	return fmt.Sprintf("'%s' --> artifacts:%v tags: %v children: %v parent: %s", f.name, f.artifacts, tags, children, parent)
 }
 
 func generateFeatureTree(root featureName, features map[featureName]Feature){
@@ -96,18 +100,6 @@ func generateFeatureTree(root featureName, features map[featureName]Feature){
 	for child := range features[root].children{
 		generateFeatureTree(child, features)
 	}
-}
-
-func printTree(root featureName, indent int, features map[featureName]Feature){
-	if len(features[root].children)==0{
-		fmt.Printf("%s%s\n", strings.Repeat("\t", indent), root)
-		return
-	}
-	fmt.Printf("%s%s -> [\n", strings.Repeat("\t", indent), root)
-	for child := range features[root].children{
-		printTree(child, indent+1, features)
-	}
-	fmt.Printf("%s]\n", strings.Repeat("\t", indent))
 }
 
 func storeFeatures(json map[string]any, state *State){
@@ -227,4 +219,11 @@ func (feature Feature) isProviding(atom declaration, state *State)bool{
 
 func newRequirements()Requirements{
 	return Requirements{make(set[declaration]), make(set[declaration]),new([]set[declaration]),new([]set[declaration])}
+}
+
+func activateUp(feature featureName, state *State){
+	state.activeFeatures.add(feature)
+	if parent := state.features[feature].parent; parent != nil {
+		activateUp(*parent, state)
+	}
 }

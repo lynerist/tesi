@@ -177,21 +177,20 @@ function popAttributes(ele) {
     });
 }
 
-function activateUp(ele){
-    parents = cy.nodes().edgesTo(ele).sources().filter((e)=> e.data('abstract'))
-    parents.forEach((parent)=>parent.data("active", true) && activateUp(parent))
-}
-
 function unactivateDown(ele) {
     children = ele.data("abstract")?ele.edgesTo(cy.nodes()).targets():[]
     children.forEach((child)=>child.data("active", false) && unactivateDown(child))
 }
 
+function colorGivenNodes(nodes){
+    cy.nodes().forEach((node)=> node.data("active",false))
+    nodes.forEach((id) => cy.getElementById(id).data("active",true))
+    cy.style().update()
+}
+
 function handleActivation(ele, feature){
     let formData = new FormData();
-    formData.delete("feature")
-    formData.append("feature", feature)
-
+    formData.set("feature", feature)
 
     fetch(`http://localhost:${PORT}/activation`, {  
         method: "POST",
@@ -199,10 +198,7 @@ function handleActivation(ele, feature){
     })
     .then(response => response.json())  
     .then(activeNodes => {
-        console.log(activeNodes)
-        cy.nodes().forEach((node)=> node.data("active",false))
-        activeNodes.forEach((id) => cy.getElementById(id).data("active",true))
-        cy.style().update()
+        colorGivenNodes(activeNodes)
     })
     .catch((error) => {
         console.error('Error:', error);

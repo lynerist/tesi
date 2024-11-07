@@ -32,12 +32,13 @@ func handleJSONLoading(state *State) {
 		storeFeatures(json, state)
 
 		/* --- FEATURE TREE GENERATION --- */
-		generateFeatureTree("", state.features)
+		generateFeatureTree(ROOT, state.features)
 		outJson, _ := extractCytoscapeJSON(state)
 		w.Write(outJson)
 	})
 }
 
+//Response full output json
 func handleVariableUpdate(state *State){
 	http.HandleFunc("/updateAttribute", func(w http.ResponseWriter, r *http.Request) {	
 		name := r.FormValue("name")
@@ -60,7 +61,7 @@ func handleVariableUpdate(state *State){
 	})
 }
 
-//Return list of activated nodes
+//Response active nodes list
 func handleActivation(state *State){
 	http.HandleFunc("/activation", func(w http.ResponseWriter, r *http.Request) {	
 		feature	 := featureName(r.FormValue("feature"))
@@ -69,7 +70,7 @@ func handleActivation(state *State){
 			if _, isActive := state.activeFeatures[feature]; isActive{
 				state.activeFeatures.remove(feature)
 			}else{
-				state.activeFeatures.add(feature)
+				activateUp(feature, state)
 			}
 		}
 		w.Write(state.activeFeatures.jsonFormat())
