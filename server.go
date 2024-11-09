@@ -11,7 +11,6 @@ func startLocalServer(){
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "interface/" + r.URL.Path[1:])
 	})
-
 	fmt.Println(http.ListenAndServe(":"+PORT, nil))
 }
 

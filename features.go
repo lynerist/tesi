@@ -124,42 +124,24 @@ func storeFeatures(json map[string]any, state *State){
 			}
 
 			/* --- STORE REQUIRED DECLARATIONS --- */
-			
-			/* ALL */
-			for required := range artifact.requiresALL(){
-				feature.requirements[thisArtifactName].ALL.add(required) //TODO ONELINE
-			}
+			feature.requirements[thisArtifactName].ALL.add(artifact.requiresALL())
+			feature.requirements[thisArtifactName].NOT.add(artifact.requiresNOT())
 
-			/* NOT */
-			for required := range artifact.requiresNOT(){	
-				feature.requirements[thisArtifactName].NOT.add(required)
-			}
-
-			/* ANY */
-			
 			for _, group := range artifact.requiresANY(){
 				declarations := make(set[declaration])
-
-				for required := range group{					
-					declarations.add(required)
-				}
-
+				declarations.add(group)
 				*feature.requirements[thisArtifactName].ANY = append(*feature.requirements[thisArtifactName].ANY, declarations)
 			}
 
-			/* ONE */
 			for _, group := range artifact.requiresONE(){
 				declarations := make(set[declaration])
-
-				for required := range group{
-					declarations.add(required)
-				}
+				declarations.add(group)
 				*feature.requirements[thisArtifactName].ONE = append(*feature.requirements[thisArtifactName].ONE, declarations)
 			}
 
-			feature.provisions[thisArtifactName] = make(set[declaration])
-
 			/* --- STORE PROVIDED DECLARATIONS --- */
+			feature.provisions[thisArtifactName] = make(set[declaration])
+			
 			for _, provided := range artifact.provides{
 				feature.provisions[thisArtifactName].add(declaration(fmt.Sprint(provided)))
 
