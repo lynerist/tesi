@@ -222,6 +222,7 @@ func newRequirements()Requirements{
 }
 
 func activateUp(feature featureName, state *State){
+	//HANDLE DEAD FEATURES SOMEHOW
 	state.activeFeatures.add(feature)
 	if parent := state.features[feature].parent; parent != nil {
 		activateUp(*parent, state)

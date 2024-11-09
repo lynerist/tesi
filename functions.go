@@ -169,11 +169,12 @@ func handleDeadFeature(json []map[string]any, index int, state *State, feature f
 	json[index]["data"].(map[string]any)["active"] = false
 }
 
-func extractCytoscapeJSON(state *State)([]byte, error){
+func checkDeadFeaturesANDextractInterfaceJSON(state *State)([]byte, error){
 	state.deadFeatures = make(set[featureName])
 
 	featuresIndexes := make(map[featureName]int) //to get the index of a specific feature in the json
 	var json []map[string]any 
+
 	for name, feature := range state.features{
 		featuresIndexes[feature.name] = len(json)
 		/* --- --> NODE <-- --- */
@@ -220,10 +221,13 @@ func extractCytoscapeJSON(state *State)([]byte, error){
 		
 		/* NOT */
 		for atom := range requirements.NOT{
-			for requiredFeature := range getProviders(atom, state, feature.name){
+			for requiredNotFeature := range getProviders(atom, state, feature.name){
 				json = append(json, map[string]any{"group":"edges", 
-													"data":generateDependencyEdgeData(requiredFeature, name, 0, atom), 
+													"data":generateDependencyEdgeData(requiredNotFeature, name, 0, atom), 
 													"classes":[]string{"dependency","dependencyNot"}})
+				if state.isActive(requiredNotFeature) {
+					handleDeadFeature(json, featuresIndexes[feature.name], state, feature.name)
+				}
 			}
 		}
 
@@ -346,7 +350,7 @@ func updatePossibleProvidersByGlobalChange(global variableName, state *State){
 }
 
 func exportFeatureModelJson(path string, state *State){
-	outJson, _ := extractCytoscapeJSON(state)
+	outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
 
 	f, err := os.Create(path)
 	if err != nil {

@@ -15,6 +15,7 @@ func startLocalServer(){
 	fmt.Println(http.ListenAndServe(":"+PORT, nil))
 }
 
+//Response with interface json
 func handleJSONLoading(state *State) {
 	http.HandleFunc("/loadjson", func(w http.ResponseWriter, r *http.Request) {	
 		/* --- RESET STATE --- */
@@ -33,12 +34,12 @@ func handleJSONLoading(state *State) {
 
 		/* --- FEATURE TREE GENERATION --- */
 		generateFeatureTree(ROOT, state.features)
-		outJson, _ := extractCytoscapeJSON(state)
+		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
 		w.Write(outJson)
 	})
 }
 
-//Response full output json
+//Response with full interface json
 func handleVariableUpdate(state *State){
 	http.HandleFunc("/updateAttribute", func(w http.ResponseWriter, r *http.Request) {	
 		name := r.FormValue("name")
@@ -56,12 +57,12 @@ func handleVariableUpdate(state *State){
 			updatePossibleProvidersByVariableChange(artifact, feature, state)
 		}
 
-		outJson, _ := extractCytoscapeJSON(state)
+		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
 		w.Write(outJson)
 	})
 }
 
-//Response active nodes list
+//Response with active nodes list
 func handleActivation(state *State){
 	http.HandleFunc("/activation", func(w http.ResponseWriter, r *http.Request) {	
 		feature	 := featureName(r.FormValue("feature"))

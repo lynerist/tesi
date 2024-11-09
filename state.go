@@ -27,3 +27,8 @@ func (state *State) reset(){
 	state.activeFeatures 	= make(set[featureName])
 	state.deadFeatures		= make(set[featureName])
 }
+
+func (state *State) isActive (feature featureName)bool{
+	_, active := state.activeFeatures[feature]
+	return active
+}
