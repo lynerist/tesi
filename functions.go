@@ -52,7 +52,7 @@ func fillMissingKeys(artifact map[string]any){
 	}
 
 	if _, ok := artifact[PROVIDES]; !ok {artifact[PROVIDES]=[]any{}}
-	if _, ok := artifact["attributes"]; !ok {artifact["attributes"]=[]any{}}
+	if _, ok := artifact["variables"]; !ok {artifact["variables"]=[]any{}}
 	if _, ok := artifact["globals"]; !ok {artifact["globals"]=[]any{}}
 	if _, ok := artifact["tags"]; !ok {artifact["tags"]=[]string{}}
 
@@ -128,26 +128,22 @@ func generateDependencyEdgeData(source, target featureName, dependencyID int, at
 }
 
 //get all the couples variable-value used by a feature
-func getVariables(feature *Feature, state *State)map[string]variableValue{
-	attributes := make(map[string]variableValue)
+func getVariables(feature *Feature, state *State)map[string]attributeValue{
+	attributes := make(map[string]attributeValue)
 	for artifact := range feature.artifacts{
-		if state.artifacts[artifact].isVariadic(){
-			for variable, value := range state.variables[artifact][feature.name]{
-				attributes[fmt.Sprintf("%s%s", artifact,variable)] = value
-			}
+		for variable, value := range state.variables[artifact][feature.name]{
+			attributes[fmt.Sprintf("%s%s", artifact,variable)] = value
 		}
 	}
 	return attributes	
 }
 
 //get all the couples global-value used by a feature
-func getGlobals(feature *Feature, state *State)map[variableName]variableValue{
-	globals := make(map[variableName]variableValue)
+func getGlobals(feature *Feature, state *State)map[attributeName]attributeValue{
+	globals := make(map[attributeName]attributeValue)
 	for artifact := range feature.artifacts{
-		if state.artifacts[artifact].isVariadic(){
-			for global := range state.globals.neededByArtifact[artifact]{
-				globals[global] = state.globals.get(global)
-			}
+		for global := range state.globals.neededByArtifact[artifact]{
+			globals[global] = state.globals.get(global)
 		}
 	}
 	return globals	
@@ -287,22 +283,22 @@ func checkDeadFeaturesANDextractInterfaceJSON(state *State)([]byte, error){
 
 	for level := len(levels)-1; level >=0; level--{
 		// Count how many times each global appears. If one appear more then one time it has to be moved to the upper node.
-		globalsCount := make(map[variableName]int)
+		globalsCount := make(map[attributeName]int)
 		for feature := range state.features{
-			for global := range json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[variableName]variableValue) {
+			for global := range json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[attributeName]attributeValue) {
 				globalsCount[global]++
 			}
 		}
 		for feature := range levels[level]{
-			toMove := make(set[variableName])
-			for global := range json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[variableName]variableValue) {
+			toMove := make(set[attributeName])
+			for global := range json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[attributeName]attributeValue) {
 				if globalsCount[global]>1{
 					toMove.add(global)
 				}
 			}
 			for global := range toMove{
-				json[featuresIndexes[*state.features[feature].parent]]["data"].(map[string]any)["globals"].(map[variableName]variableValue)[global] = state.globals.get(global)
-				delete(json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[variableName]variableValue), global)
+				json[featuresIndexes[*state.features[feature].parent]]["data"].(map[string]any)["globals"].(map[attributeName]attributeValue)[global] = state.globals.get(global)
+				delete(json[featuresIndexes[feature]]["data"].(map[string]any)["globals"].(map[attributeName]attributeValue), global)
 			}
 		}
 	}
@@ -335,7 +331,7 @@ func updatePossibleProvidersByVariableChange(artifact artifactName, feature feat
 }
 
 //Whenever a global change value, declarations provided by the features that are using that global may change so we have to update them
-func updatePossibleProvidersByGlobalChange(global variableName, state *State){
+func updatePossibleProvidersByGlobalChange(global attributeName, state *State){
 	for feature := range state.globals.usedBy[global]{
 		for artifact := range state.features[feature].artifacts{
 			for provided := range state.features[feature].provisions[artifact]{

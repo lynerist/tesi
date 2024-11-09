@@ -7,7 +7,7 @@
                 {"tokens": "$token_set"},
                 {"system": "@language_system"}
             ],
-            "attributes": [
+            "variables": [
                 {
                     "name": "$token_set",
                     "default": "default_tokens"
@@ -68,7 +68,7 @@
                 {"feature": "code_generation"},
                 {"target_code": "$target_lang"}
             ],
-            "attributes": [
+            "variables": [
                 {
                     "name": "$target_lang",
                     "default": "C"
@@ -144,7 +144,7 @@
                 {"feature": "basic_optimization"},
                 {"optimized_code": "optimized_code_basic"}
             ],
-            "attributes": [
+            "variables": [
                 {
                     "name": "$target_lang",
                     "default": "C"
@@ -165,7 +165,7 @@
                 {"feature": "advanced_optimization"},
                 {"optimized_code": "optimized_code_advanced"}
             ],
-            "attributes": [
+            "variables": [
                 {
                     "name": "$target_lang",
                     "default": "LLVM_IR"

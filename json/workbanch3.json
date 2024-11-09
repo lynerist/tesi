@@ -17,7 +17,7 @@
             "provides": [
                 {"feature": "JVM_syntax_analysis"}
             ],
-            "attributes": [
+            "variables": [
                 {"name": "$targetVersion", "default": "8"}
             ],
             "globals": [
@@ -35,7 +35,7 @@
             "provides": [
                 {"feature": "LLVM_syntax_analysis"}
             ],
-            "attributes": [
+            "variables": [
                 {"name": "$optimizationLevel", "default": "O2"}
             ],
             "globals": [
@@ -56,7 +56,7 @@
             "provides": [
                 {"feature": "WebAssembly_syntax_analysis"}
             ],
-            "attributes": [
+            "variables": [
                 {"name": "$WasmVersion", "default": "1.0"}
             ],
             "globals": [
@@ -113,7 +113,7 @@
             "provides": [
                 {"feature": "JVM_code"}
             ],
-            "attributes": [
+            "variables": [
                 {"name": "$bytecodeVersion", "default": "52.0"}
             ],
             "globals": [
@@ -131,7 +131,7 @@
             "provides": [
                 {"feature": "LLVM_code"}
             ],
-            "attributes": [
+            "variables": [
                 {"name": "$bitWidth", "default": "64"}
             ],
             "globals": [
@@ -149,7 +149,7 @@
             "provides": [
                 {"feature": "WebAssembly_code"}
             ],
-            "attributes": [
+            "variables": [
                 {"name": "$memoryPages", "default": "256"}
             ],
             "globals": [

@@ -31,9 +31,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 	
 	for _, artifact := range composingArtifacts {
 		feature.artifacts.add(artifactName(artifact.(string)))
-		for _, tag := range artifacts[stringToAN(artifact)].tags{
-			feature.tags.add(tagName(tag.(string)))
-		}
+		feature.tags.add(artifacts[artifactName(artifact.(string))].tags)
 	}
 	return feature
 }
@@ -119,7 +117,7 @@ func storeFeatures(json map[string]any, state *State){
 
 			/* --- STORE ARTIFACT VARIABLES --- */
 			for variable, value := range state.variables[thisArtifactName][""]{
-				state.variables[thisArtifactName][feature.name] = make(map[variableName]variableValue) 
+				state.variables[thisArtifactName][feature.name] = make(map[attributeName]attributeValue) 
 				state.variables[thisArtifactName][feature.name][variable] = value
 			}
 

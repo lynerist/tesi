@@ -4,7 +4,7 @@ type State struct {
 	hashesToText 		map[hash]string
 	core 				prologCore
 	artifacts 			map[artifactName]Artifact
-	variables 			map[artifactName]map[featureName]map[variableName]variableValue
+	variables 			map[artifactName]map[featureName]map[attributeName]attributeValue
 	globals 			globalContext
 	features 			map[featureName]Feature
 	possibleProviders	map[declaration]set[featureName]
@@ -20,7 +20,7 @@ func newState()(state State){
 func (state *State) reset(){
 	state.hashesToText 		= make(map[hash]string)
 	state.artifacts 		= make(map[artifactName]Artifact)
-	state.variables 		= make(map[artifactName]map[featureName]map[variableName]variableValue)
+	state.variables 		= make(map[artifactName]map[featureName]map[attributeName]attributeValue)
 	state.globals 			= newGlobalContext()
 	state.features 			= map[featureName]Feature{ROOT:newAbstractFeature(ROOT)}
 	state.possibleProviders	= make(map[declaration]set[featureName])

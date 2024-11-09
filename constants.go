@@ -14,9 +14,9 @@ const PORT = "60124"
 type artifactName 	string
 type featureName	string
 type tagName		string
-type variableName	string
+type attributeName	string
 type hash 			string
-type variableValue	any
+type attributeValue	any
 type declaration 	string
 
 type Requirements struct {

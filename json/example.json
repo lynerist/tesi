@@ -49,7 +49,7 @@
 }],
     "features":[
         {"name":"featureName",
-        "attributes":{
+        "variables":{
             "renames":[{"affects":["provides"], "from":"A","to": "B"}]
         },
         "artifacts":["first", "second"]

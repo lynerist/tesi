@@ -303,7 +303,7 @@
                 {"thermometer":"$temperature"}
             ]
         },
-        "attributes":[
+        "variables":[
             {"name":"$temperature", "default":"low"}
         ],
         "tags":["temperature", "controls"]

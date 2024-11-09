@@ -6,9 +6,9 @@ type Artifact struct{
 	name artifactName
 	requirements map[string]any //map[string]<set[declaration] | []set[declaration]>
 	provides []any
-	attributes []any
-	globals []any
-	tags []any
+	variablesDefault map[attributeName]attributeValue
+	globalsDefault map[attributeName]attributeValue
+	tags set[tagName]
 }
 
 func newArtifact(artifactFields map[string]any)(artifact Artifact){
@@ -16,40 +16,14 @@ func newArtifact(artifactFields map[string]any)(artifact Artifact){
 	artifact.provides = artifactFields[PROVIDES].([]any)
 
 	//Store requirements in a map from string to set[declaration] (for ALL and NOT) or []set[declaration] (for ANY and ONE)
-	artifact.requirements = make(map[string]any)
-	
-	/* ALL */
-	artifact.requirements[ALL] = make(set[declaration])
-	for _, required := range artifactFields[REQUIRES].(map[string]any)[ALL].([]any) {
-		artifact.requirements[ALL].(set[declaration]).add(declaration(fmt.Sprint(required)))
-	}
-	/* NOT */
-	artifact.requirements[NOT] = make(set[declaration])
-	for _, required := range artifactFields[REQUIRES].(map[string]any)[NOT].([]any) {
-		artifact.requirements[NOT].(set[declaration]).add(declaration(fmt.Sprint(required)))
-	}
-	/* ANY */
-	artifact.requirements[ANY] = make([]set[declaration], 0)
-	for _, group := range artifactFields[REQUIRES].(map[string]any)[ANY].([]any) {
-		declarations := make(set[declaration])
-		for _, required := range group.([]any) {
-			declarations.add(declaration(fmt.Sprint(required)))
-		}
-		artifact.requirements[ANY]=append(artifact.requirements[ANY].([]set[declaration]), declarations)
-	}
-	/* ONE */
-	artifact.requirements[ONE] = make([]set[declaration], 0)
-	for _, group := range artifactFields[REQUIRES].(map[string]any)[ONE].([]any) {
-		declarations := make(set[declaration])
-		for _, required := range group.([]any) {
-			declarations.add(declaration(fmt.Sprint(required)))
-		}
-		artifact.requirements[ONE]=append(artifact.requirements[ONE].([]set[declaration]), declarations)
-	}
+	artifact.requirements = map[string]any{	ALL:make(set[declaration]), 
+											NOT:make(set[declaration]),
+											ANY:make([]set[declaration], 0),
+											ONE:make([]set[declaration], 0)}
 
-	artifact.attributes = artifactFields["attributes"].([]any)
-	artifact.globals = artifactFields["globals"].([]any)
-	artifact.tags = artifactFields["tags"].([]any)
+	artifact.variablesDefault = make(map[attributeName]attributeValue)
+	artifact.globalsDefault = make(map[attributeName]attributeValue)
+	artifact.tags = make(set[tagName])
 	
 	return artifact
 }
@@ -67,39 +41,64 @@ func (a Artifact) requiresONE()[]set[declaration]{
 	return a.requirements[ONE].([]set[declaration])
 } 
 
-func stringToAN(s any)artifactName{
-	return artifactName(s.(string))
-}
-
-func (a Artifact) isVariadic()bool{
-	return len(a.attributes) + len(a.globals) > 0
-}
-
 func storeArtifacts(json map[string]any, state *State){ 
 	for _, a := range json["artifacts"].([]any){
 		artifact := newArtifact(a.(map[string]any))
-		state.artifacts[artifact.name] = artifact
+		artifactFields := a.(map[string]any)
 
-		/* --- STORE ATTRIBUTES DEFAULTS---*/ 		
-		for _, attribute := range artifact.attributes{
-			if name, ok := attribute.(map[string]any)["name"]; ok && []rune(name.(string))[0]==VARIABLESIMBLE{
-				if value, ok := attribute.(map[string]any)["default"]; ok{
-					state.variables[artifact.name] = make(map[featureName]map[variableName]variableValue)
-					state.variables[artifact.name][""] = make(map[variableName]variableValue) 
-					state.variables[artifact.name][""][variableName(name.(string))] = value
+		/* --- STORE REQUIREMENTS --- */
+
+		/* ALL */
+		for _, required := range artifactFields[REQUIRES].(map[string]any)[ALL].([]any) {
+			artifact.requirements[ALL].(set[declaration]).add(declaration(fmt.Sprint(required)))
+		}
+		/* NOT */
+		for _, required := range artifactFields[REQUIRES].(map[string]any)[NOT].([]any) {
+			artifact.requirements[NOT].(set[declaration]).add(declaration(fmt.Sprint(required)))
+		}
+		/* ANY */
+		for _, group := range artifactFields[REQUIRES].(map[string]any)[ANY].([]any) {
+			declarations := make(set[declaration])
+			for _, required := range group.([]any) {
+				declarations.add(declaration(fmt.Sprint(required)))
+			}
+			artifact.requirements[ANY]=append(artifact.requirements[ANY].([]set[declaration]), declarations)
+		}
+		/* ONE */
+		for _, group := range artifactFields[REQUIRES].(map[string]any)[ONE].([]any) {
+			declarations := make(set[declaration])
+			for _, required := range group.([]any) {
+				declarations.add(declaration(fmt.Sprint(required)))
+			}
+			artifact.requirements[ONE]=append(artifact.requirements[ONE].([]set[declaration]), declarations)
+		}
+
+		/* --- STORE VARIABLES DEFAULTS---*/ 		
+		for _, variable := range artifactFields["variables"].([]any){
+			if name, ok := variable.(map[string]any)["name"]; ok && []rune(name.(string))[0]==VARIABLESIMBLE{
+				if value, ok := variable.(map[string]any)["default"]; ok{
+					state.variables[artifact.name] = make(map[featureName]map[attributeName]attributeValue)
+					state.variables[artifact.name][""] = make(map[attributeName]attributeValue) 
+					state.variables[artifact.name][""][attributeName(name.(string))] = value
 				}
 			}
 		}
 
 		/* --- STORE GLOBALS --- */ 		
-		for _, global := range artifact.globals{
+		for _, global := range artifactFields["globals"].([]any){	
 			if name, ok := global.(map[string]any)["name"]; ok && []rune(name.(string))[0]==GLOBALSIMBLE{
 				if value, ok := global.(map[string]any)["default"]; ok{
-					state.globals.put(variableName(name.(string)), value, artifact.name)
+					artifact.globalsDefault[attributeName(name.(string))] = attributeValue(value)
+					state.globals.put(attributeName(name.(string)), value, artifact.name)
 				}
 			}
 		}
 
-		log(artifact.name)	
+		/* --- STORE TAGS --- */
+		for _, tag := range artifactFields["tags"].([]any){
+			artifact.tags.add(tagName(fmt.Sprint(tag)))
+		}
+
+		state.artifacts[artifact.name] = artifact
 	}
 }

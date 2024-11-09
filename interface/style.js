@@ -55,7 +55,7 @@ var COLORS = [];
 for (let i = 0; i < 300; i++) {
     COLORS.push("#" + Math.floor(Math.random() * 16777215).toString(16)); //16777215 is ffffff
 }
-COLORS = COLORS.filter((color) => ! /^#5[0-9A-F]5[0-9A-F]5[0-9A-F]$/.test(color) && color.length==7) //REMOVE colors similar to background (#585855)
+COLORS = COLORS.filter((color) => ! /^#[0-3][0-9A-F][0-3][0-9A-F][0-3][0-9A-F]$/.test(color) && color.length==7) //REMOVE dark colors
 
 const DEPENDENCYALL = {
     'line-color': function(ele) {

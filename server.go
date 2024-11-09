@@ -46,12 +46,12 @@ func handleVariableUpdate(state *State){
 		feature	 := featureName(r.FormValue("feature"))
 
 		if isGlobal, _ := strconv.ParseBool(r.URL.Query().Get("isglobal")); isGlobal{
-			global := variableName(name[strings.IndexRune(name, GLOBALSIMBLE):])
+			global := attributeName(name[strings.IndexRune(name, GLOBALSIMBLE):])
 			state.globals.elected[global] = value
 			updatePossibleProvidersByGlobalChange(global, state)
 		}else{
 			artifact := artifactName(name[:strings.IndexRune(name, VARIABLESIMBLE)])
-			variable := variableName(name[strings.IndexRune(name, VARIABLESIMBLE):])
+			variable := attributeName(name[strings.IndexRune(name, VARIABLESIMBLE):])
 			state.variables[artifact][feature][variable] = value
 			updatePossibleProvidersByVariableChange(artifact, feature, state)
 		}

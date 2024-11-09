@@ -6,7 +6,7 @@
                 {"sensor_type": "$sensor"},
                 {"system": "@sys"}
             ],
-            "attributes": [
+            "variables": [
                 {
                     "name": "$sensor",
                     "default": "motion"
