@@ -33,10 +33,15 @@ function displayModel(model){
     resetCy()
     cy.add(model); // Aggiungi i nuovi elementi direttamente dal file
 
+    let dependencies = cy.edges().filter((e) => e.source().data("abstract")==undefined) //to apply the layout considering just the feature model tree
+    cy.remove(dependencies)
+
     let layout = LAYOUT
     layout.idealEdgeLength = 50 + 3*cy.edges().length //for each edge 3px more in distance
     console.log(layout.idealEdgeLength)
     cy.layout(layout).run();
+    cy.add(dependencies)
+    
 
     cy.elements().forEach(function(ele) {
         if (ele.group() == "edges"){

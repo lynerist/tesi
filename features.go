@@ -31,7 +31,7 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 	
 	for _, artifact := range composingArtifacts {
 		feature.artifacts.add(artifactName(artifact.(string)))
-		for _, tag := range artifacts[stringToAN(artifact)].tags(){
+		for _, tag := range artifacts[stringToAN(artifact)].tags{
 			feature.tags.add(tagName(tag.(string)))
 		}
 	}
@@ -126,33 +126,33 @@ func storeFeatures(json map[string]any, state *State){
 			/* --- STORE REQUIRED DECLARATIONS --- */
 			
 			/* ALL */
-			for _, required := range artifact.requires(ALL){
-				feature.requirements[thisArtifactName].ALL.add(declaration(fmt.Sprint(required)))
+			for required := range artifact.requiresALL(){
+				feature.requirements[thisArtifactName].ALL.add(required) //TODO ONELINE
 			}
 
 			/* NOT */
-			for _, required := range artifact.requires(NOT){	
-				feature.requirements[thisArtifactName].NOT.add(declaration(fmt.Sprint(required)))
+			for required := range artifact.requiresNOT(){	
+				feature.requirements[thisArtifactName].NOT.add(required)
 			}
 
 			/* ANY */
 			
-			for _, group := range artifact.requires(ANY){
+			for _, group := range artifact.requiresANY(){
 				declarations := make(set[declaration])
 
-				for _, required := range group.([]any){					
-					declarations.add(declaration(fmt.Sprint(required)))
+				for required := range group{					
+					declarations.add(required)
 				}
 
 				*feature.requirements[thisArtifactName].ANY = append(*feature.requirements[thisArtifactName].ANY, declarations)
 			}
 
 			/* ONE */
-			for _, group := range artifact.requires(ONE){
+			for _, group := range artifact.requiresONE(){
 				declarations := make(set[declaration])
 
-				for _, required := range group.([]any){
-					declarations.add(declaration(fmt.Sprint(required)))
+				for required := range group{
+					declarations.add(required)
 				}
 				*feature.requirements[thisArtifactName].ONE = append(*feature.requirements[thisArtifactName].ONE, declarations)
 			}
@@ -160,7 +160,7 @@ func storeFeatures(json map[string]any, state *State){
 			feature.provisions[thisArtifactName] = make(set[declaration])
 
 			/* --- STORE PROVIDED DECLARATIONS --- */
-			for _, provided := range artifact.provides(){
+			for _, provided := range artifact.provides{
 				feature.provisions[thisArtifactName].add(declaration(fmt.Sprint(provided)))
 
 				atom := insertVariables(provided, thisArtifactName, feature.name, state)
