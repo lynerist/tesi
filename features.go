@@ -108,7 +108,7 @@ func storeFeatures(json map[string]any, state *State){
 			feature.requirements[thisArtifactName]= newRequirements()
 
 			/* --- STORE FEATURES USING GLOBALS --- */
-			for global := range state.globals.neededByArtifact[thisArtifactName]{
+			for global := range state.artifacts[thisArtifactName].globalsDefault{
 				if state.globals.usedBy[global] == nil {
 					state.globals.usedBy[global] = make(set[featureName])
 				}
@@ -116,7 +116,7 @@ func storeFeatures(json map[string]any, state *State){
 			}
 
 			/* --- STORE ARTIFACT VARIABLES --- */
-			for variable, value := range state.variables[thisArtifactName][""]{
+			for variable, value := range state.artifacts[thisArtifactName].variablesDefault{
 				state.variables[thisArtifactName][feature.name] = make(map[attributeName]attributeValue) 
 				state.variables[thisArtifactName][feature.name][variable] = value
 			}
@@ -140,10 +140,12 @@ func storeFeatures(json map[string]any, state *State){
 			/* --- STORE PROVIDED DECLARATIONS --- */
 			feature.provisions[thisArtifactName] = make(set[declaration])
 			
-			for _, provided := range artifact.provides{
-				feature.provisions[thisArtifactName].add(declaration(fmt.Sprint(provided)))
+			for provided := range artifact.provides{
+				//I store the untouched declaration with variables and globals
+				feature.provisions[thisArtifactName].add(provided)
 
-				atom := insertVariables(provided, thisArtifactName, feature.name, state)
+				//I insert the actual values of the attributes and store the provided atom
+				atom := insertAttributes(provided, thisArtifactName, feature.name, state)
 				if state.possibleProviders[atom] == nil {
 					state.possibleProviders[atom] = make(set[featureName])
 				}
@@ -159,17 +161,17 @@ func (feature Feature)getRequirements(state *State) Requirements{
 	requirements := newRequirements()
 	for artifact, req := range feature.requirements{
 		for atom := range req.ALL{
-			requirements.ALL.add(insertVariables(atom, artifact, feature.name, state))
+			requirements.ALL.add(insertAttributes(atom, artifact, feature.name, state))
 		}
 
 		for atom := range req.NOT{
-			requirements.NOT.add(insertVariables(atom, artifact, feature.name, state))
+			requirements.NOT.add(insertAttributes(atom, artifact, feature.name, state))
 		}
 
 		for _, group := range *req.ANY{
 			declarations := make(set[declaration])
 			for atom := range group {		
-				declarations.add(insertVariables(atom, artifact, feature.name, state))
+				declarations.add(insertAttributes(atom, artifact, feature.name, state))
 			}
 			*requirements.ANY = append(*requirements.ANY, declarations)
 		}
@@ -177,7 +179,7 @@ func (feature Feature)getRequirements(state *State) Requirements{
 		for _, group := range *req.ONE{
 			declarations := make(set[declaration])
 			for atom := range group {		
-				declarations.add(insertVariables(atom, artifact, feature.name, state))
+				declarations.add(insertAttributes(atom, artifact, feature.name, state))
 			}
 			*requirements.ONE = append(*requirements.ONE, declarations)
 		}
@@ -189,7 +191,7 @@ func (feature Feature)getRequirements(state *State) Requirements{
 func (feature Feature) isProviding(atom declaration, state *State)bool{
 	for artifact, provideds := range feature.provisions{
 		for provided := range provideds{
-			if insertVariables(provided, artifact, feature.name, state) == atom{
+			if insertAttributes(provided, artifact, feature.name, state) == atom{
 				return true
 			}
 		}
@@ -202,7 +204,7 @@ func newRequirements()Requirements{
 }
 
 func activateUp(feature featureName, state *State){
-	//HANDLE DEAD FEATURES SOMEHOW
+	//TODO HANDLE DEAD FEATURES SOMEHOW
 	state.activeFeatures.add(feature)
 	if parent := state.features[feature].parent; parent != nil {
 		activateUp(*parent, state)

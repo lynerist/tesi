@@ -10,6 +10,7 @@ func main(){
 	handleJSONLoading(&state)
 	handleVariableUpdate(&state)
 	handleActivation(&state)
+	handleValidation(&state)
 
 	startLocalServer()
 }

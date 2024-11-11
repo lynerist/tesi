@@ -97,18 +97,12 @@ func provides(who, what any, hashes map[string]string)string{
 	return fmt.Sprintf("provides(%s,%s).", providingHash,providedHash)
 }
 
-func log(s ...any){
-	if (VERBOSE){
-		fmt.Println(s...)
-	}
-}
-
-func insertVariables(atom any, artifact artifactName, feature featureName, state *State)declaration{
+func insertAttributes(atom any, artifact artifactName, feature featureName, state *State)declaration{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range state.variables[artifact][feature] {
 		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(value))
 	}
-	for name := range state.globals.neededByArtifact[artifact]{
+	for name := range state.artifacts[artifact].globalsDefault{
 		stringAtom = strings.ReplaceAll(stringAtom, string(name), fmt.Sprint(state.globals.get(name)))
 	}
 	return declaration(stringAtom)
@@ -142,7 +136,7 @@ func getVariables(feature *Feature, state *State)map[string]attributeValue{
 func getGlobals(feature *Feature, state *State)map[attributeName]attributeValue{
 	globals := make(map[attributeName]attributeValue)
 	for artifact := range feature.artifacts{
-		for global := range state.globals.neededByArtifact[artifact]{
+		for global := range state.artifacts[artifact].globalsDefault{
 			globals[global] = state.globals.get(global)
 		}
 	}
@@ -322,7 +316,7 @@ func getProviders(atom declaration, state *State, requier featureName)set[featur
 //Whenever a variable change value, declarations provided by the feature that's using that variable may change so we have to update them
 func updatePossibleProvidersByVariableChange(artifact artifactName, feature featureName, state *State){
 	for provided := range state.features[feature].provisions[artifact]{
-		atom := insertVariables(provided, artifact, feature, state)
+		atom := insertAttributes(provided, artifact, feature, state)
 		if _, ok := state.possibleProviders[atom]; !ok {
 			state.possibleProviders[atom] = make(set[featureName])
 		}
@@ -335,7 +329,7 @@ func updatePossibleProvidersByGlobalChange(global attributeName, state *State){
 	for feature := range state.globals.usedBy[global]{
 		for artifact := range state.features[feature].artifacts{
 			for provided := range state.features[feature].provisions[artifact]{
-				atom := insertVariables(provided, artifact, feature, state)
+				atom := insertAttributes(provided, artifact, feature, state)
 				if _, ok := state.possibleProviders[atom]; !ok {
 					state.possibleProviders[atom] = make(set[featureName])
 				}

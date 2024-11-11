@@ -20,7 +20,7 @@ var cy = cytoscape({
 document.getElementById('fileInput').addEventListener('change', function(event) {
     const file = event.target.files[0]; 
     if (file) {
-        loadJSON_GO(file)
+        handleJSONloading(file)
     }
 });
 
@@ -153,7 +153,7 @@ function popAttributes(ele) {
             Object.entries(ele.data("variables")).forEach(([variableName, variableValue]) => {
                 content.innerHTML = content.innerHTML + `${variableName}: <input type="text" id="${variableName}"
                                                                             placeholder="${variableValue}" 
-                                                                            onchange="updateAttribute('${ele.data("id")}','${variableName}',value)"
+                                                                            onchange="handleAttributeUpdate('${ele.data("id")}','${variableName}',value)"
                                                                             value="${variableValue}"/>\n`
 
             })
@@ -161,7 +161,7 @@ function popAttributes(ele) {
             Object.entries(ele.data("globals")).forEach(([globalName, globalValue]) => {
                 content.innerHTML = content.innerHTML + `${globalName}: <input type="text" id="${globalName}"
                                                                             placeholder="${globalValue}" 
-                                                                            onchange="updateAttribute('${ele.data("id")}','${globalName}',value, true)"
+                                                                            onchange="handleAttributeUpdate('${ele.data("id")}','${globalName}',value, true)"
                                                                             value="${globalValue}"/>\n`
 
             })
@@ -211,7 +211,7 @@ function translateGoJSONtoCytoscapeJSON(file){
     return file 
 }
 
-function loadJSON_GO(file){
+function handleJSONloading(file){
     let formData = new FormData();
     formData.delete("json")
     formData.append("json", file, file.name);
@@ -230,7 +230,7 @@ function loadJSON_GO(file){
     });
 }
 
-function updateAttribute(feature, name, value, isGlobal=false){
+function handleAttributeUpdate(feature, name, value, isGlobal=false){
     let formData = new FormData();
     formData.delete("feature")
     formData.delete("name")
@@ -256,6 +256,19 @@ function updateAttribute(feature, name, value, isGlobal=false){
                 node.tippy.popper.querySelector("#\\"+name).value = value
             })
         }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+function handleValidation () {
+    fetch(`http://localhost:${PORT}/validation`,{
+        method: "POST",
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
     })
     .catch((error) => {
         console.error('Error:', error);

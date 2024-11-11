@@ -75,3 +75,11 @@ func handleActivation(state *State){
 		w.Write(state.activeFeatures.jsonFormat())
 	})
 }
+
+//Response with ???
+func handleValidation(state *State){
+	http.HandleFunc("/validation", func(w http.ResponseWriter, r *http.Request) {	
+		
+		w.Write([]byte("ciao"))
+	})
+}

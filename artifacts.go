@@ -5,7 +5,7 @@ import "fmt"
 type Artifact struct{
 	name artifactName
 	requirements map[string]any //map[string]<set[declaration] | []set[declaration]>
-	provides []any
+	provides set[declaration]
 	variablesDefault map[attributeName]attributeValue
 	globalsDefault map[attributeName]attributeValue
 	tags set[tagName]
@@ -13,7 +13,7 @@ type Artifact struct{
 
 func newArtifact(artifactFields map[string]any)(artifact Artifact){
 	artifact.name = artifactName(artifactFields["name"].(string))
-	artifact.provides = artifactFields[PROVIDES].([]any)
+	artifact.provides = make(set[declaration])
 
 	//Store requirements in a map from string to set[declaration] (for ALL and NOT) or []set[declaration] (for ANY and ONE)
 	artifact.requirements = map[string]any{	ALL:make(set[declaration]), 
@@ -73,13 +73,17 @@ func storeArtifacts(json map[string]any, state *State){
 			artifact.requirements[ONE]=append(artifact.requirements[ONE].([]set[declaration]), declarations)
 		}
 
+		/* --- STORE PROVIDED DECLARATIONS --- */
+		for _, atom := range artifactFields[PROVIDES].([]any){
+			artifact.provides.add(declaration(fmt.Sprint(atom)))
+		}
+
 		/* --- STORE VARIABLES DEFAULTS---*/ 		
 		for _, variable := range artifactFields["variables"].([]any){
 			if name, ok := variable.(map[string]any)["name"]; ok && []rune(name.(string))[0]==VARIABLESIMBLE{
 				if value, ok := variable.(map[string]any)["default"]; ok{
 					state.variables[artifact.name] = make(map[featureName]map[attributeName]attributeValue)
-					state.variables[artifact.name][""] = make(map[attributeName]attributeValue) 
-					state.variables[artifact.name][""][attributeName(name.(string))] = value
+					artifact.variablesDefault[attributeName(name.(string))] = value
 				}
 			}
 		}
@@ -89,7 +93,7 @@ func storeArtifacts(json map[string]any, state *State){
 			if name, ok := global.(map[string]any)["name"]; ok && []rune(name.(string))[0]==GLOBALSIMBLE{
 				if value, ok := global.(map[string]any)["default"]; ok{
 					artifact.globalsDefault[attributeName(name.(string))] = attributeValue(value)
-					state.globals.put(attributeName(name.(string)), value, artifact.name)
+					state.globals.put(attributeName(name.(string)), value)
 				}
 			}
 		}
