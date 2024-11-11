@@ -79,7 +79,6 @@ func handleActivation(state *State){
 //Response with ???
 func handleValidation(state *State){
 	http.HandleFunc("/validation", func(w http.ResponseWriter, r *http.Request) {	
-		
 		w.Write([]byte("ciao"))
 	})
 }
