@@ -63,14 +63,6 @@ func md5hash(s string)hash{
 	return hash(fmt.Sprintf("'%x'", md5.Sum([]byte(s))))
 }
 
-func provides(who, what any, hashes map[hash]string)string{
-	providedHash := md5hash(fmt.Sprint(what))
-	hashes[providedHash] = fmt.Sprint(what)
-	providingHash := md5hash(fmt.Sprint(who))
-	hashes[providingHash] = fmt.Sprint(who)
-	return fmt.Sprintf("provides(%s,%s).", providingHash,providedHash)
-}
-
 func insertAttributes(atom any, artifact artifactName, feature featureName, state *State)declaration{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range state.variables[artifact][feature] {

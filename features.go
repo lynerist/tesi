@@ -58,6 +58,10 @@ func (f Feature) String()string {
 	return fmt.Sprintf("'%s' --> artifacts:%v tags: %v children: %v parent: %s", f.name, f.artifacts, tags, children, parent)
 }
 
+func (f Feature) isAbstract()bool{
+	return len(f.artifacts)==0
+}
+
 func generateFeatureTree(root featureName, features map[featureName]Feature){
 	tagCount := make(map[tagName]int)
 	for child := range features[root].children{

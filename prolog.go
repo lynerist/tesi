@@ -36,10 +36,11 @@ func (core prologCore) runProgram(){
 }
 
 func (core *prologCore) reset(){
-	delete(core.code, ALL)
-	delete(core.code, NOT)
-	delete(core.code, ANY)
-	delete(core.code, ONE)
+	core.code[ALL] = "requiresAll(foo,foo)."
+	core.code[NOT] = "requiresNot(foo,foo)."
+	core.code[ANY] = "requiresAny(foo,foo,0)."
+	core.code[ONE] = "requiresOne(foo,foo,0)."
+	core.code[PROVIDES] = fmt.Sprintf("provides(%s,root).",md5hash("root"))
 }
 
 func setupProlog() prologCore{
@@ -59,7 +60,7 @@ func setupProlog() prologCore{
 											}}
 }
 
-func prologQueryConsole(core prologCore, hashes map[string]string){
+func prologQueryConsole(state *State){
 	var prologErrorsMeaning = map[string]string {
 		"EOF":"Missing end of the query.",
 	}
@@ -67,11 +68,15 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 	sc := bufio.NewScanner(os.Stdin)
 	for fmt.Print("?- "); sc.Scan(); fmt.Print("?- "){
 		query := sc.Text()
-		for hash, fullName := range hashes{
-			query = strings.ReplaceAll(query, fullName, hash)
+		if query == "q" || query == "exit" {break}
+		for hash, fullName := range state.hashesToFeature{
+			query = strings.ReplaceAll(query, string(fullName), string(hash))
+		}
+		for hash, fullName := range state.hashesToDeclaration{
+			query = strings.ReplaceAll(query, string(fullName), string(hash))
 		}
 
-		solutions, err := core.interpreter.Query(query)
+		solutions, err := state.core.interpreter.Query(query)
 		if err != nil{
 			if meaning, ok := prologErrorsMeaning[fmt.Sprint(err)]; ok{
 				fmt.Printf("Errore in '%s': %s\n\n", query, meaning)
@@ -90,8 +95,15 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 			}
 			toPrint := make([]string,0,len(output))
 			for k,v := range variables{
-				answer, ok := hashes["'"+fmt.Sprint(v)+"'"]
-				if !ok {answer = fmt.Sprint(v)}
+				hashedVar := hash("'"+fmt.Sprint(v)+"'")
+				var answer any
+				answer, ok := state.hashesToDeclaration[hashedVar]
+				if !ok {
+					answer, ok = state.hashesToFeature[hashedVar]
+					if !ok{
+						answer = fmt.Sprint(v)
+					}
+				}
 				toPrint = append(toPrint, fmt.Sprintf("%s:%s\t",k,answer))
 			}
 			sort.Strings(toPrint)
@@ -115,6 +127,16 @@ func hashDeclaration(atom declaration, state *State)hash{
 	hashed := md5hash(string(atom))
 	state.hashesToDeclaration[hashed] = atom
 	return hashed
+}
+
+func isFeatureValid(feature featureName, state *State)bool{
+	query := fmt.Sprintf("valid(%s).", hashFeature(feature, state))
+	solutions, err := state.core.interpreter.Query(query)
+	if err != nil{
+		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
+		return false
+	}
+	return solutions.Next()
 }
 
 func validate(state *State){
@@ -150,6 +172,20 @@ func validate(state *State){
 				}
 			}
 		}
+
+		for artifact, provisions := range state.features[feature].provisions{
+			for genericAtom := range provisions {
+				atom := insertAttributes(genericAtom, artifact, feature, state)
+				state.core.addLine(fmt.Sprintf("provides(%s,%s).", featureHash, hashDeclaration(atom, state)), 
+									PROVIDES)
+			}
+		}
 	}
-	fmt.Println(state.core.code)
+	state.core.runProgram()
+
+	for feature := range state.activeFeatures{
+		if ! state.features[feature].isAbstract(){
+			fmt.Println(feature, isFeatureValid(feature, state))
+		}
+	}
 }
