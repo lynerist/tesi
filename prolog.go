@@ -11,21 +11,21 @@ import(
 
 type prologCore struct{
 	interpreter *prolog.Interpreter
-	program map[string]string
+	code map[string]string
 }
 
-func (core *prologCore) addLine(s, where string){
-	core.program[where] += "\n"+s
+func (core *prologCore) addLine(line, where string){
+	core.code[where] += "\n"+line
 }
 
 func (core *prologCore)getProgram()string{
 	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s", 
-						core.program["start"],
-						core.program["requiresAll"],
-						core.program["requiresNot"],
-						core.program["requiresAny"],
-						core.program["requiresOne"],
-						core.program[PROVIDES])
+						core.code["start"],
+						core.code[ALL],
+						core.code[NOT],
+						core.code[ANY],
+						core.code[ONE],
+						core.code[PROVIDES])
 }
 
 func (core prologCore) runProgram(){
@@ -35,8 +35,16 @@ func (core prologCore) runProgram(){
 	}
 }
 
+func (core *prologCore) reset(){
+	delete(core.code, ALL)
+	delete(core.code, NOT)
+	delete(core.code, ANY)
+	delete(core.code, ONE)
+}
+
 func setupProlog() prologCore{
 	file, _ := os.Open("core.pl")
+	defer file.Close()
 	sc := bufio.NewScanner(file)
 	var program string
 	for sc.Scan(){
@@ -44,10 +52,10 @@ func setupProlog() prologCore{
 	}
 	return prologCore{prolog.New(nil,nil), map[string]string{
 											"start":program, 
-											"requiresAll":"requiresAll(foo,foo).",
-											"requiresNot":"requiresNot(foo,foo).",
-											"requiresAny":"requiresAny(foo,foo,0).",
-											"requiresOne":"requiresOne(foo,foo,0).",
+											ALL:"requiresAll(foo,foo).",
+											NOT:"requiresNot(foo,foo).",
+											ANY:"requiresAny(foo,foo,0).",
+											ONE:"requiresOne(foo,foo,0).",
 											}}
 }
 
@@ -95,4 +103,53 @@ func prologQueryConsole(core prologCore, hashes map[string]string){
 		}
 		fmt.Println(output)
 	}
+}
+
+func hashFeature(feature featureName, state *State)hash{
+	hashed := md5hash(string(feature))
+	state.hashesToFeature[hashed] = feature
+	return hashed
+}
+
+func hashDeclaration(atom declaration, state *State)hash{
+	hashed := md5hash(string(atom))
+	state.hashesToDeclaration[hashed] = atom
+	return hashed
+}
+
+func validate(state *State){
+	state.core.reset()
+	for feature := range state.activeFeatures{
+		featureHash := hashFeature(feature, state)
+		for artifact, requirements := range state.features[feature].requirements{
+			for genericAtom := range requirements.ALL{
+				atom := insertAttributes(genericAtom, artifact, feature, state)
+				state.core.addLine(fmt.Sprintf("requiresAll(%s,%s).", featureHash, hashDeclaration(atom, state)), 
+									ALL)
+			}
+
+			for genericAtom := range requirements.NOT{
+				atom := insertAttributes(genericAtom, artifact, feature, state)
+				state.core.addLine(fmt.Sprintf("requiresNot(%s,%s).",featureHash,hashDeclaration(atom, state)), 
+									NOT)
+			}
+
+			for groupID, group := range *requirements.ANY{
+				for genericAtom := range group{
+					atom := insertAttributes(genericAtom, artifact, feature, state)
+					state.core.addLine(fmt.Sprintf("requiresAny(%s,%s,%d).", featureHash, hashDeclaration(atom, state), groupID), 
+									ANY)
+				}
+			}
+
+			for groupID, group := range *requirements.ONE{
+				for genericAtom := range group{
+					atom := insertAttributes(genericAtom, artifact, feature, state)
+					state.core.addLine(fmt.Sprintf("requiresOne(%s,%s,%d).", featureHash, hashDeclaration(atom, state), groupID), 
+									ONE)
+				}
+			}
+		}
+	}
+	fmt.Println(state.core.code)
 }

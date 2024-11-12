@@ -59,37 +59,11 @@ func fillMissingKeys(artifact map[string]any){
 	if _, ok := artifact["conditionalProvides"]; !ok {artifact["conditionalProvides"]=[]any{}}
 }
 
-func md5hash(s string)string{
-	return fmt.Sprintf("'%x'", md5.Sum([]byte(s)))
+func md5hash(s string)hash{
+	return hash(fmt.Sprintf("'%x'", md5.Sum([]byte(s))))
 }
 
-func calculateAndAddHashes(who, what any, hashes map[string]string)(string, string){
-	requiredHash := md5hash(fmt.Sprint(what)); hashes[requiredHash] = fmt.Sprint(what)
-	requiringHash := md5hash(fmt.Sprint(who)); hashes[requiringHash] = fmt.Sprint(who)
-	return requiringHash, requiredHash
-}
-
-func requiresAll(who, what any, hashes map[string]string)string{
-	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
-	return fmt.Sprintf("requiresAll(%s,%s).", requiringHash,requiredHash)
-}
-
-func requiresNot(who, what any, hashes map[string]string)string{
-	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
-	return fmt.Sprintf("requiresNot(%s,%s).", requiringHash,requiredHash)
-}
-
-func requiresAny(who, what any, groupID int, hashes map[string]string)string{
-	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
-	return fmt.Sprintf("requiresAny(%s,%s,%d).", requiringHash,requiredHash, groupID)
-}
-
-func requiresOne(who, what any, groupID int, hashes map[string]string)string{
-	requiringHash,requiredHash := calculateAndAddHashes(who,what,hashes)
-	return fmt.Sprintf("requiresOne(%s,%s,%d).", requiringHash,requiredHash, groupID)
-}
-
-func provides(who, what any, hashes map[string]string)string{
+func provides(who, what any, hashes map[hash]string)string{
 	providedHash := md5hash(fmt.Sprint(what))
 	hashes[providedHash] = fmt.Sprint(what)
 	providingHash := md5hash(fmt.Sprint(who))
