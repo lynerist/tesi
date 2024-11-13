@@ -139,7 +139,7 @@ func isFeatureValid(feature featureName, state *State)bool{
 	return solutions.Next()
 }
 
-func findMissingRequirements(feature featureName, state *State)Requirements{
+func findMissingRequirements(feature featureName, state *State)Requirements{ //TODO NOT ANY ONE
 	requirements := newRequirements()
 
 	query := fmt.Sprintf("requiresAll(%s, What), \\+ exists(What).", hashFeature(feature, state))
@@ -161,8 +161,8 @@ func findMissingRequirements(feature featureName, state *State)Requirements{
 	return requirements
 }
 
-func validate(state *State){
-	//Populate knowledge base
+func validate(state *State)map[featureName]Requirements{
+	//Populate knowledge base with active features
 	state.core.reset()
 	for feature := range state.activeFeatures{
 		featureHash := hashFeature(feature, state)
@@ -207,8 +207,6 @@ func validate(state *State){
 	// Compile knowledge base
 	state.core.runProgram()
 
-	prologQueryConsole(state)
-
 	//Check for feature validity
 	invalids := make(map[featureName]Requirements)
 	for feature := range state.activeFeatures{
@@ -217,5 +215,5 @@ func validate(state *State){
 		}
 	}
 
-	fmt.Println(invalids)
+	return invalids
 }

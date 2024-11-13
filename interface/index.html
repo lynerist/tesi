@@ -1,23 +1,29 @@
 <html>
-  <head>
-    
-    <script src="cytoscape.min.js"></script>
-    <script src="cytoscape-cose-bilkent.js"></script>
-    <script src="https://unpkg.com/popper.js@1.14.7/dist/umd/popper.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cytoscape-popper@1.0.4/cytoscape-popper.min.js"></script>
-    <script src="https://unpkg.com/tippy.js@4.0.1/umd/index.all.min.js"></script>
-    <script src="style.js"></script>
+	<head>
+		<script src="cytoscape.min.js"></script>
+		<script src="cytoscape-cose-bilkent.js"></script>
+		<script src="https://unpkg.com/popper.js@1.14.7/dist/umd/popper.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/cytoscape-popper@1.0.4/cytoscape-popper.min.js"></script>
+		<script src="https://unpkg.com/tippy.js@4.0.1/umd/index.all.min.js"></script>
+		<script src="style.js"></script>
 
-    <title>Interface</title>
-    <link rel="stylesheet" href="css/style.css">
-  </head>
-  <body class="page">
-    <h2>Carica il json</h2>
-    <div>
-      <input type="file" id="fileInput" accept=".json"/>
-      <button id="validate" onclick="handleValidation()">Validate</button>
-    </div>
-    <div id="cy"></div>
-  </body>
-  <script src="model.js"></script>
+		<title>Interface</title>
+		<link rel="stylesheet" href="css/style.css">
+	</head>
+	<body class="page">
+		<h2>Carica il json</h2>
+		<div>
+			<div id="upperBlock">
+				<div id="cy"></div>
+				<div id="rightColumn">
+					<input class="inputButton" type="file" id="fileInput" accept=".json"/>
+					<button class="inputButton" id="validate" onclick="handleValidation()">Validate</button>
+				</div>
+			</div>
+			<div id="outMessages">
+				<span class="invalidFeature">temperature controller</span> is missing <span class="declaration">map[power:on]</span>. It can be provided by <span class="providerFeature">battery</span>
+			</div>
+		</div>
+	</body>
+	<script src="model.js"></script>
 </html>

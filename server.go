@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	j "encoding/json"
+
 )
 
 func startLocalServer(){
@@ -76,9 +78,12 @@ func handleActivation(state *State){
 	})
 }
 
-//Response with ???
+//Response with a map from invalid features to not fullfilled requirements and a map from declarations(the ones in the previous map) to providers
 func handleValidation(state *State){
 	http.HandleFunc("/validation", func(w http.ResponseWriter, r *http.Request) {	
-		validate(state)
+		invalidFeatureRequirements := validate(state)
+		providers := findProvidersForSelectedDeclarations(invalidFeatureRequirements, state)
+		response,_ :=j.Marshal(map[string]any{"invalids":invalidFeatureRequirements, "providers":providers})
+		w.Write(response)
 	})
 }

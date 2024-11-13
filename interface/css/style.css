@@ -1,6 +1,6 @@
 #cy {
     width: 100%;
-    height: 90%;  /* Definisci una buona altezza per assicurarti che il grafo sia visibile */
+    height: 100%;  /* Definisci una buona altezza per assicurarti che il grafo sia visibile */
     border: 1px solid #ccc;
 }
 
@@ -8,6 +8,34 @@
     background: #303030;
 }
 
-#validate {
-    float: right;
+#upperBlock{
+    display: flex;
+    height: 90%;
 }
+
+#rightColumn{
+    display: flex;
+    flex-direction: column;
+    text-align-last: center;
+    padding-block: 20%;
+}
+
+#outMessages{
+    color:white
+}
+
+.inputButton{
+    margin: auto;
+    font-size: large;
+}
+
+.invalidFeature{
+    color:coral
+}
+.providerFeature{
+    color:aquamarine
+}
+.declaration{
+    color:khaki
+}
+

@@ -327,3 +327,30 @@ func exportFeatureModelJson(path string, state *State){
 	defer f.Close()
 	f.Write(outJson)
 }
+
+func findProvidersForSelectedDeclarations(invalidFeatureRequirements map[featureName]Requirements, state *State)map[declaration]set[featureName]{
+	providers := make(map[declaration]set[featureName])
+	for feature, requirements := range invalidFeatureRequirements{
+		for atom := range requirements.ALL{
+			if _, exists := providers[atom]; !exists {providers[atom]=make(set[featureName])}
+			providers[atom].add(getProviders(atom, state, feature))
+		}
+		for atom := range requirements.NOT{
+			if _, exists := providers[atom]; !exists {providers[atom]=make(set[featureName])}
+			providers[atom].add(getProviders(atom, state, feature))
+		}
+		for _, group := range *requirements.ANY{
+			for atom := range group {
+				if _, exists := providers[atom]; !exists {providers[atom]=make(set[featureName])}
+				providers[atom].add(getProviders(atom, state, feature))
+			}
+		}
+		for _, group := range *requirements.ONE{
+			for atom := range group {
+				if _, exists := providers[atom]; !exists {providers[atom]=make(set[featureName])}
+				providers[atom].add(getProviders(atom, state, feature))
+			}
+		}
+	}
+	return providers
+}
