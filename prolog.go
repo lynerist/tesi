@@ -149,7 +149,6 @@ func findMissingRequirements(feature featureName, state *State)Requirements{ //T
 		return Requirements{}
 	}
 
-	
 	for solutions.Next(){
 		variables := make(map[string]any)
 		solutions.Scan(variables)
@@ -157,7 +156,21 @@ func findMissingRequirements(feature featureName, state *State)Requirements{ //T
 			requirements.ALL.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
 		}
 	}
+	query = fmt.Sprintf("requiresNot(%s, What).", hashFeature(feature, state))
+	solutions, err = state.core.interpreter.Query(query)
+	if err != nil{
+		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
+		return Requirements{}
+	}
 
+	for solutions.Next(){
+		variables := make(map[string]any)
+		solutions.Scan(variables)
+		for _,v := range variables{			
+			requirements.NOT.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
+		}
+	}
+	fmt.Println(requirements)
 	return requirements
 }
 
@@ -206,6 +219,7 @@ func validate(state *State)map[featureName]Requirements{
 	}
 	// Compile knowledge base
 	state.core.runProgram()
+	//prologQueryConsole(state)
 
 	//Check for feature validity
 	invalids := make(map[featureName]Requirements)

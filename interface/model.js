@@ -268,7 +268,36 @@ function handleValidation () {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data)
+        let messages = ""
+        Object.entries(data.invalids).forEach(pair =>{
+            const [invalidFeature, requirements] = pair
+            //ALL
+            Object.keys(requirements.ALL).forEach((declaration)=>{
+                messages += `<span class="invalidFeature">${invalidFeature.split("::")[0]}</span> is missing <span class="declaration">${declaration}</span>. `
+                if (Object.keys(data.providers[declaration]).length>0){
+                    messages += `Should be solved activating: `
+                    Object.keys(data.providers[declaration]).forEach((provider)=>{
+                        messages += `<span class="providerFeature">${provider.split("::")[0]}</span>, `
+                    })
+                    messages = messages.substring(0, messages.length-2) + "."
+                }
+                messages += "<br>"
+            })
+
+            //NOT
+            Object.keys(requirements.NOT).forEach((declaration)=>{
+                messages += `<span class="invalidFeature">${invalidFeature.split("::")[0]}</span> can't live with <span class="declaration">${declaration}</span>. `
+                if (Object.keys(data.providers[declaration]).length>0){
+                    messages += `Should be solved unactivating: `
+                    Object.keys(data.providers[declaration]).forEach((provider)=>{
+                        messages += `<span class="providerFeature">${provider.split("::")[0]}</span>, `
+                    })
+                    messages = messages.substring(0, messages.length-2) + "."
+                }
+                messages += "<br>"
+            })
+        })
+        document.getElementById("outMessages").innerHTML = messages
     })
     .catch((error) => {
         console.error('Error:', error);
