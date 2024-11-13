@@ -63,6 +63,18 @@ func md5hash(s string)hash{
 	return hash(fmt.Sprintf("'%x'", md5.Sum([]byte(s))))
 }
 
+func unHash(hashedVar hash, state *State)any{
+	var answer any
+	answer, ok := state.hashesToDeclaration[hashedVar]
+	if !ok {
+		answer, ok = state.hashesToFeature[hashedVar]
+		if !ok{
+			answer = fmt.Sprint(hashedVar)
+		}
+	}
+	return answer
+}
+
 func insertAttributes(atom any, artifact artifactName, feature featureName, state *State)declaration{
 	stringAtom := fmt.Sprint(atom)
 	for name, value := range state.variables[artifact][feature] {

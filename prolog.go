@@ -139,7 +139,30 @@ func isFeatureValid(feature featureName, state *State)bool{
 	return solutions.Next()
 }
 
+func findMissingRequirements(feature featureName, state *State)Requirements{
+	requirements := newRequirements()
+
+	query := fmt.Sprintf("requiresAll(%s, What), \\+ exists(What).", hashFeature(feature, state))
+	solutions, err := state.core.interpreter.Query(query)
+	if err != nil{
+		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
+		return Requirements{}
+	}
+
+	
+	for solutions.Next(){
+		variables := make(map[string]any)
+		solutions.Scan(variables)
+		for _,v := range variables{			
+			requirements.ALL.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
+		}
+	}
+
+	return requirements
+}
+
 func validate(state *State){
+	//Populate knowledge base
 	state.core.reset()
 	for feature := range state.activeFeatures{
 		featureHash := hashFeature(feature, state)
@@ -181,11 +204,18 @@ func validate(state *State){
 			}
 		}
 	}
+	// Compile knowledge base
 	state.core.runProgram()
 
+	prologQueryConsole(state)
+
+	//Check for feature validity
+	invalids := make(map[featureName]Requirements)
 	for feature := range state.activeFeatures{
-		if ! state.features[feature].isAbstract(){
-			fmt.Println(feature, isFeatureValid(feature, state))
+		if !state.features[feature].isAbstract() && !isFeatureValid(feature, state){
+			invalids[feature] = findMissingRequirements(feature, state)
 		}
 	}
+
+	fmt.Println(invalids)
 }

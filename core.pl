@@ -37,7 +37,7 @@ exists(Thing) :-
 exists(CantProvide, Thing) :-
     provides(Provider, Thing), 
     \+ member(Provider, CantProvide),
-    valid(Provider, CantProvide),!.
+    valid(Provider, CantProvide).
 
 valid(ToCheck, CantProvide) :-
     provides(ToCheck, _),
