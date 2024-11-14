@@ -104,6 +104,10 @@
                     {"port":"usb-c"},
                     {"port":"usb"},
                     {"port":"i-port"}
+                ],
+                [
+                    {"capacity":"high"},
+                    {"capacity":"low"}
                 ]
             ]
         },

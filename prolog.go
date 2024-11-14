@@ -141,14 +141,13 @@ func isFeatureValid(feature featureName, state *State)bool{
 
 func findMissingRequirements(feature featureName, state *State)Requirements{ //TODO NOT ANY ONE
 	requirements := newRequirements()
-
+	//ALL
 	query := fmt.Sprintf("requiresAll(%s, What), \\+ exists(What).", hashFeature(feature, state))
 	solutions, err := state.core.interpreter.Query(query)
 	if err != nil{
 		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
 		return Requirements{}
 	}
-
 	for solutions.Next(){
 		variables := make(map[string]any)
 		solutions.Scan(variables)
@@ -156,21 +155,41 @@ func findMissingRequirements(feature featureName, state *State)Requirements{ //T
 			requirements.ALL.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
 		}
 	}
-	query = fmt.Sprintf("requiresNot(%s, What).", hashFeature(feature, state))
+
+	//NOT
+	query = fmt.Sprintf("requiresNot(%s, Atom).", hashFeature(feature, state))
+	solutions, err = state.core.interpreter.Query(query)
+	if err != nil{
+		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
+		return Requirements{}
+	}
+	for solutions.Next(){
+		variables := make(map[string]any)
+		solutions.Scan(variables)
+		for _,v := range variables{	 //TODO REMOVE FOR YOU HAVE ONE VARIABLE		
+			requirements.NOT.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
+		}
+	}
+
+	//ANY
+	query = fmt.Sprintf("requiresAny(%s,Atom,IDGroup), \\+ (requiresAny(%s,OtherAtom,IDGroup), exists(OtherAtom)).", hashFeature(feature, state), hashFeature(feature, state))
 	solutions, err = state.core.interpreter.Query(query)
 	if err != nil{
 		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
 		return Requirements{}
 	}
 
+	//I don't assume groupIDs to be ordered or grouped
+	IDGrouptoIndex := make(map[int]int)
 	for solutions.Next(){
 		variables := make(map[string]any)
 		solutions.Scan(variables)
-		for _,v := range variables{			
-			requirements.NOT.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
+		if _, present := IDGrouptoIndex[variables["IDGroup"].(int)]; !present{
+			IDGrouptoIndex[variables["IDGroup"].(int)] = len(IDGrouptoIndex)
+			*requirements.ANY = append(*requirements.ANY, make(set[declaration]))
 		}
+		(*requirements.ANY)[IDGrouptoIndex[variables["IDGroup"].(int)]].add(unHash(hash(fmt.Sprintf("'%s'", variables["Atom"])), state).(declaration))		
 	}
-	fmt.Println(requirements)
 	return requirements
 }
 
