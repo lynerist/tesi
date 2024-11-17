@@ -139,10 +139,15 @@ func isFeatureValid(feature featureName, state *State)bool{
 	return solutions.Next()
 }
 
-func findMissingRequirements(feature featureName, state *State)Requirements{ //TODO NOT ANY ONE
+func findMissingRequirements(feature featureName, state *State)Requirements{ 
 	requirements := newRequirements()
 	//ALL
-	query := fmt.Sprintf("requiresAll(%s, What), \\+ exists(What).", hashFeature(feature, state))
+	
+	query := fmt.Sprintf("requiresAll(%s, What), \\+ couldExist(What).", hashFeature(feature, state))
+	if VERBOSEVALIDATION {
+		query = fmt.Sprintf("requiresAll(%s, What), \\+ exists(What).", hashFeature(feature, state))
+	}
+
 	solutions, err := state.core.interpreter.Query(query)
 	if err != nil{
 		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
@@ -172,7 +177,10 @@ func findMissingRequirements(feature featureName, state *State)Requirements{ //T
 	}
 
 	//ANY
-	query = fmt.Sprintf("requiresAny(%s,Atom,IDGroup), \\+ (requiresAny(%s,OtherAtom,IDGroup), exists(OtherAtom)).", hashFeature(feature, state), hashFeature(feature, state))
+	query = fmt.Sprintf("requiresAny(%s,Atom,IDGroup), \\+ (requiresAny(%s,OtherAtom,IDGroup), couldExist(OtherAtom)).", hashFeature(feature, state), hashFeature(feature, state))
+	if VERBOSEVALIDATION{
+		query = fmt.Sprintf("requiresAny(%s,Atom,IDGroup), \\+ (requiresAny(%s,OtherAtom,IDGroup), exists(OtherAtom)).", hashFeature(feature, state), hashFeature(feature, state))
+	}
 	solutions, err = state.core.interpreter.Query(query)
 	if err != nil{
 		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
@@ -194,6 +202,10 @@ func findMissingRequirements(feature featureName, state *State)Requirements{ //T
 	//ONE
 	query = fmt.Sprintf("requiresOne(%s, Atom, IDGroup), (\\+ (requiresOne(%s, OtherAtom, IDGroup), exists(OtherAtom)); (requiresOne(%s, OtherAtom, IDGroup), exists(OtherAtom), exists(Atom), Atom \\= OtherAtom)).",
 						 hashFeature(feature, state), hashFeature(feature, state), hashFeature(feature, state))
+	if (VERBOSEVALIDATION){
+		query = fmt.Sprintf("requiresOne(%s, Atom, IDGroup), (\\+ (requiresOne(%s, OtherAtom, IDGroup), couldExist(OtherAtom)); (requiresOne(%s, OtherAtom, IDGroup), couldExist(OtherAtom), couldExist(Atom), Atom \\= OtherAtom)).",
+							 hashFeature(feature, state), hashFeature(feature, state), hashFeature(feature, state))
+	}
 	solutions, err = state.core.interpreter.Query(query)
 	if err != nil{
 		fmt.Printf("Errore in '%s': %v\n\n", query, err)	

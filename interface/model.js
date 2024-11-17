@@ -200,6 +200,7 @@ function handleActivation(ele, feature){
     .then(response => response.json())  
     .then(activeNodes => {
         colorGivenNodes(activeNodes)
+        handleValidation()
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -340,7 +341,10 @@ function handleValidation () {
                     messages += "<br>"
                 })
             }
+
         })
+        document.getElementById("cy").classList.remove((messages=="")?"invalid":"valid")
+        document.getElementById("cy").classList.add((messages=="")?"valid":"invalid")            
         document.getElementById("outMessages").innerHTML = messages
     })
     .catch((error) => {

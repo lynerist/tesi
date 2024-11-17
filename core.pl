@@ -48,3 +48,6 @@ valid(ToCheck, CantProvide) :-
 
 valid(ToCheck) :-
     valid(ToCheck, []).
+
+couldExist(Thing) :-
+    provides(Provider, Thing).
