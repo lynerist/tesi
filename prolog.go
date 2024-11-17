@@ -190,6 +190,27 @@ func findMissingRequirements(feature featureName, state *State)Requirements{ //T
 		}
 		(*requirements.ANY)[IDGrouptoIndex[variables["IDGroup"].(int)]].add(unHash(hash(fmt.Sprintf("'%s'", variables["Atom"])), state).(declaration))		
 	}
+
+	//ONE
+	query = fmt.Sprintf("requiresOne(%s, Atom, IDGroup), (\\+ (requiresOne(%s, OtherAtom, IDGroup), exists(OtherAtom)); (requiresOne(%s, OtherAtom, IDGroup), exists(OtherAtom), exists(Atom), Atom \\= OtherAtom)).",
+						 hashFeature(feature, state), hashFeature(feature, state), hashFeature(feature, state))
+	solutions, err = state.core.interpreter.Query(query)
+	if err != nil{
+		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
+		return Requirements{}
+	}
+
+	//I don't assume groupIDs to be ordered or grouped
+	IDGrouptoIndex = make(map[int]int)
+	for solutions.Next(){
+		variables := make(map[string]any)
+		solutions.Scan(variables)
+		if _, present := IDGrouptoIndex[variables["IDGroup"].(int)]; !present{
+			IDGrouptoIndex[variables["IDGroup"].(int)] = len(IDGrouptoIndex)
+			*requirements.ONE = append(*requirements.ONE, make(set[declaration]))
+		}
+		(*requirements.ONE)[IDGrouptoIndex[variables["IDGroup"].(int)]].add(unHash(hash(fmt.Sprintf("'%s'", variables["Atom"])), state).(declaration))		
+	}
 	return requirements
 }
 

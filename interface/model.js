@@ -298,23 +298,47 @@ function handleValidation () {
             })
 
             //ANY
-            requirements.ANY.forEach((group)=>{
-                messages += `<span class="invalidFeature">${invalidFeature.split("::")[0]}</span> is missing `
-                Object.keys(group).forEach((declaration)=>{
-                    messages += `<span class="declaration">${declaration}</span>, `
-                })
-                messages = messages.substring(0, messages.length-2) + ". "
-
-                messages += `Should be solved activating: ` //If can't be activated this message should not be displayed but for now it is.
-                Object.keys(group).forEach((declaration)=>{
-                    Object.keys(data.providers[declaration]).forEach((provider)=>{
-                        messages += `<span class="providerFeature">${provider.split("::")[0]}</span>, `
+            if (requirements.ANY != null){
+                requirements.ANY.forEach((group)=>{
+                    messages += `<span class="invalidFeature">${invalidFeature.split("::")[0]}</span> is missing `
+                    Object.keys(group).forEach((declaration)=>{
+                        messages += `<span class="declaration">${declaration}</span>, `
                     })
-                })
-                messages = messages.substring(0, messages.length-2) + "."
+                    messages = messages.substring(0, messages.length-2) + ". "
 
-                messages += "<br>"
-            })
+                    messages += `Should be solved activating: ` //If can't be activated this message should not be displayed but for now it is.
+                    Object.keys(group).forEach((declaration)=>{
+                        Object.keys(data.providers[declaration]).forEach((provider)=>{
+                            messages += `<span class="providerFeature">${provider.split("::")[0]}</span>, `
+                        })
+                    })
+                    messages = messages.substring(0, messages.length-2) + "."
+
+                    messages += "<br>"
+                })
+            }
+
+
+            //ONE
+            if (requirements.ONE != null){
+                requirements.ONE.forEach((group)=>{
+                    messages += `<span class="invalidFeature">${invalidFeature.split("::")[0]}</span> must have only one of `
+                    Object.keys(group).forEach((declaration)=>{
+                        messages += `<span class="declaration">${declaration}</span>, `
+                    })
+                    messages = messages.substring(0, messages.length-2) + ". "
+
+                    messages += `Should be solved activating only one of: ` //If can't be activated this message should not be displayed but for now it is.
+                    Object.keys(group).forEach((declaration)=>{
+                        Object.keys(data.providers[declaration]).forEach((provider)=>{
+                            messages += `<span class="providerFeature">${provider.split("::")[0]}</span>, `
+                        })
+                    })
+                    messages = messages.substring(0, messages.length-2) + "."
+
+                    messages += "<br>"
+                })
+            }
         })
         document.getElementById("outMessages").innerHTML = messages
     })
