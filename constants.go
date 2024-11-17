@@ -28,4 +28,4 @@ type Requirements struct {
 
 var VARIABLESIMBLE 	rune = '$'
 var GLOBALSIMBLE 	rune = '@'
-
+var VERBOSEVALIDATION bool

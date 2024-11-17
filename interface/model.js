@@ -14,7 +14,8 @@ var cy = cytoscape({
         {selector: ".dependencyAny", style:DEPENDENCYANY},
         {selector: ".dependencyOne", style:DEPENDENCYONE},
     ],
-    layout: LAYOUT
+    layout: LAYOUT,
+    minZoom: 0.05
 });
 
 document.getElementById('fileInput').addEventListener('change', function(event) {
