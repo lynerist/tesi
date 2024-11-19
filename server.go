@@ -87,3 +87,11 @@ func handleValidation(state *State){
 		w.Write(response)
 	})
 }
+
+//Response with true if it changes the option
+func handleVerboseValidationSwitch(){
+	http.HandleFunc("/verboseValidationSwitch", func(w http.ResponseWriter, r *http.Request) {
+		VERBOSEVALIDATION = !VERBOSEVALIDATION
+		w.Write([]byte("true"))
+	})
+}

@@ -351,3 +351,20 @@ function handleValidation () {
         console.error('Error:', error);
     });
 }
+
+
+function handleVerboseValidationSwitch(){
+    fetch(`http://localhost:${PORT}/verboseValidationSwitch`, {})
+    .then(response => response.json())
+    .then(data => {
+        if(document.getElementById("validate").classList.contains("verbose")){
+            document.getElementById("validate").classList.remove("verbose")
+        }else{
+            document.getElementById("validate").classList.add("verbose")
+        }
+        handleValidation()
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}

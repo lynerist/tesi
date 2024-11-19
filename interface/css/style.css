@@ -46,3 +46,12 @@
 .invalid{
     border-color: red !important;
 }
+
+#validate{
+    opacity: 30%;
+}
+
+.verbose{
+    opacity: 100% !important;
+    border-width: 2px !important;
+}

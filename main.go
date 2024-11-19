@@ -11,6 +11,7 @@ func main(){
 	handleVariableUpdate(&state)
 	handleActivation(&state)
 	handleValidation(&state)
+	handleVerboseValidationSwitch()
 
 	startLocalServer()
 }

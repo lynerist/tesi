@@ -162,7 +162,7 @@ func findMissingRequirements(feature featureName, state *State)Requirements{
 	}
 
 	//NOT
-	query = fmt.Sprintf("requiresNot(%s, Atom).", hashFeature(feature, state))
+	query = fmt.Sprintf("requiresNot(%s, Atom), couldExist(Atom).", hashFeature(feature, state))
 	solutions, err = state.core.interpreter.Query(query)
 	if err != nil{
 		fmt.Printf("Errore in '%s': %v\n\n", query, err)	
