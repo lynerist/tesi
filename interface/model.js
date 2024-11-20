@@ -368,3 +368,14 @@ function handleVerboseValidationSwitch(){
         console.error('Error:', error);
     });
 }
+
+function handleExporting(){
+    fetch(`http://localhost:${PORT}/exporting`, {})
+    .then(response => response.json())
+    .then(data => {
+        
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}

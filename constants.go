@@ -1,6 +1,5 @@
 package main
 
-const VERBOSE = false
 const ALL 		string = "all"
 const NOT 		string = "not"
 const ANY 		string = "any"
@@ -29,3 +28,11 @@ type Requirements struct {
 var VARIABLESIMBLE 	rune = '$'
 var GLOBALSIMBLE 	rune = '@'
 var VERBOSEVALIDATION bool
+
+//API CALLS
+const API_LOAD_JSON = "/loadjson"
+const API_UPDATE_ATTRIBUTE = "/updateAttribute"
+const API_SWITCH_ACTIVATION = "/activation"
+const API_VALIDATE = "/validation"
+const API_SWITCH_VERBOSE_VALIDATION = "/verboseValidationSwitch"
+const API_EXPORT_CONFIGURATION = "/exporting"

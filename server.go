@@ -18,7 +18,7 @@ func startLocalServer(){
 
 //Response with interface json
 func handleJSONLoading(state *State) {
-	http.HandleFunc("/loadjson", func(w http.ResponseWriter, r *http.Request) {	
+	http.HandleFunc(API_LOAD_JSON, func(w http.ResponseWriter, r *http.Request) {	
 		/* --- RESET STATE --- */
 		state.reset()
 
@@ -42,7 +42,7 @@ func handleJSONLoading(state *State) {
 
 //Response with full interface json
 func handleVariableUpdate(state *State){
-	http.HandleFunc("/updateAttribute", func(w http.ResponseWriter, r *http.Request) {	
+	http.HandleFunc(API_UPDATE_ATTRIBUTE, func(w http.ResponseWriter, r *http.Request) {	
 		name := r.FormValue("name")
 		value := r.FormValue("value")
 		feature	 := featureName(r.FormValue("feature"))
@@ -65,7 +65,7 @@ func handleVariableUpdate(state *State){
 
 //Response with active nodes list
 func handleActivation(state *State){
-	http.HandleFunc("/activation", func(w http.ResponseWriter, r *http.Request) {	
+	http.HandleFunc(API_SWITCH_ACTIVATION, func(w http.ResponseWriter, r *http.Request) {	
 		feature	 := featureName(r.FormValue("feature"))
 		if _, isDead := state.deadFeatures[feature]; !isDead{
 			if _, isActive := state.activeFeatures[feature]; isActive{
@@ -80,7 +80,7 @@ func handleActivation(state *State){
 
 //Response with a map from invalid features to not fullfilled requirements and a map from declarations(the ones in the previous map) to providers
 func handleValidation(state *State){
-	http.HandleFunc("/validation", func(w http.ResponseWriter, r *http.Request) {	
+	http.HandleFunc(API_VALIDATE, func(w http.ResponseWriter, r *http.Request) {	
 		invalidFeatureRequirements := validate(state)
 		providers := findProvidersForSelectedDeclarations(invalidFeatureRequirements, state)
 		response,_ :=j.Marshal(map[string]any{"invalids":invalidFeatureRequirements, "providers":providers})
@@ -90,8 +90,17 @@ func handleValidation(state *State){
 
 //Response with true if it changes the option
 func handleVerboseValidationSwitch(){
-	http.HandleFunc("/verboseValidationSwitch", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(API_SWITCH_VERBOSE_VALIDATION, func(w http.ResponseWriter, r *http.Request) {
 		VERBOSEVALIDATION = !VERBOSEVALIDATION
+		w.Write([]byte("true"))
+	})
+}
+
+//Response with true if it exports the configuration
+func handleExporting(){
+	http.HandleFunc(API_EXPORT_CONFIGURATION, func(w http.ResponseWriter, r *http.Request) {
+		
+	
 		w.Write([]byte("true"))
 	})
 }
