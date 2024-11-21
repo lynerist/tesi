@@ -37,6 +37,16 @@ func handleJSONLoading(state *State) {
 		generateFeatureTree(ROOT, state.features)
 		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
 		w.Write(outJson)
+		logConfiguration(state)
+	})
+}
+
+//Response with interface json
+func handleJSONRequest(state *State) {
+	http.HandleFunc(API_JSON_REQUEST, func(w http.ResponseWriter, r *http.Request) {	
+		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
+		w.Write(outJson)
+		logConfiguration(state)
 	})
 }
 
@@ -60,6 +70,7 @@ func handleVariableUpdate(state *State){
 
 		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
 		w.Write(outJson)
+		logConfiguration(state)
 	})
 }
 
@@ -75,6 +86,7 @@ func handleActivation(state *State){
 			}
 		}
 		w.Write(state.activeFeatures.jsonFormat())
+		logConfiguration(state)
 	})
 }
 
@@ -96,11 +108,10 @@ func handleVerboseValidationSwitch(){
 	})
 }
 
-//Response with true if it exports the configuration
-func handleExporting(){
+//Response with exported json [{name: "featureName", 
+//									attributes: [{name:"attributeName",value:"attributeValue"}]}]
+func handleExporting(state *State){
 	http.HandleFunc(API_EXPORT_CONFIGURATION, func(w http.ResponseWriter, r *http.Request) {
-		
-	
-		w.Write([]byte("true"))
+		w.Write(exportConfiguration(state))
 	})
 }

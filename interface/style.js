@@ -58,7 +58,10 @@ for (let i = 0; i < 500; i++) {
 
 COLORS = COLORS.filter((color) => !/^#[0-3].[0-7].[0-7].$/.test(color) 
                                 && !/^#[0-7].[0-3].[0-7].$/.test(color) 
-                                && !/^#[0-7].[0-7].[0-3].$/.test(color) //REMOVE dark colors
+                                && !/^#[0-7].[0-7].[0-3].$/.test(color) 
+                                && !/^#[0-9A-E].[0-3].[0-3].$/.test(color) 
+                                && !/^#[0-3].[0-9A-E].[0-3].$/.test(color) 
+                                && !/^#[0-3].[0-3].[0-9A-E].$/.test(color) //REMOVE dark colors
                                 && color.length==7)                     //REMOVE broken colors 
 
 const DEPENDENCYALL = {

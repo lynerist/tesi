@@ -143,9 +143,9 @@ func findMissingRequirements(feature featureName, state *State)Requirements{
 	requirements := newRequirements()
 	//ALL
 	
-	query := fmt.Sprintf("requiresAll(%s, What), \\+ couldExist(What).", hashFeature(feature, state))
+	query := fmt.Sprintf("requiresAll(%s, Atom), \\+ couldExist(Atom).", hashFeature(feature, state))
 	if VERBOSEVALIDATION {
-		query = fmt.Sprintf("requiresAll(%s, What), \\+ exists(What).", hashFeature(feature, state))
+		query = fmt.Sprintf("requiresAll(%s, Atom), \\+ exists(Atom).", hashFeature(feature, state))
 	}
 
 	solutions, err := state.core.interpreter.Query(query)
@@ -156,9 +156,7 @@ func findMissingRequirements(feature featureName, state *State)Requirements{
 	for solutions.Next(){
 		variables := make(map[string]any)
 		solutions.Scan(variables)
-		for _,v := range variables{			
-			requirements.ALL.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
-		}
+		requirements.ALL.add(unHash(hash(fmt.Sprintf("'%s'", variables["Atom"])), state).(declaration))
 	}
 
 	//NOT
@@ -171,9 +169,7 @@ func findMissingRequirements(feature featureName, state *State)Requirements{
 	for solutions.Next(){
 		variables := make(map[string]any)
 		solutions.Scan(variables)
-		for _,v := range variables{	 //TODO REMOVE FOR YOU HAVE ONE VARIABLE		
-			requirements.NOT.add(unHash(hash(fmt.Sprintf("'%s'", v)), state).(declaration))
-		}
+		requirements.NOT.add(unHash(hash(fmt.Sprintf("'%s'", variables["Atom"])), state).(declaration))
 	}
 
 	//ANY
@@ -226,6 +222,7 @@ func findMissingRequirements(feature featureName, state *State)Requirements{
 	return requirements
 }
 
+//return map from invalid features to missing requirements
 func validate(state *State)map[featureName]Requirements{
 	//Populate knowledge base with active features
 	state.core.reset()

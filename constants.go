@@ -1,5 +1,7 @@
 package main
 
+var STANDARD_OUTPUT = true
+
 const ALL 		string = "all"
 const NOT 		string = "not"
 const ANY 		string = "any"
@@ -36,3 +38,4 @@ const API_SWITCH_ACTIVATION = "/activation"
 const API_VALIDATE = "/validation"
 const API_SWITCH_VERBOSE_VALIDATION = "/verboseValidationSwitch"
 const API_EXPORT_CONFIGURATION = "/exporting"
+const API_JSON_REQUEST = "/jsonrequest"

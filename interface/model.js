@@ -1,5 +1,4 @@
 const PORT = "60124"
-var MODEL 
 
 var cy = cytoscape({
     container: document.getElementById('cy'),
@@ -23,6 +22,17 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     if (file) {
         handleJSONloading(file)
     }
+});
+
+fetch(`http://localhost:${PORT}/jsonrequest`, {})
+.then(response => response.json())  
+.then(data => {
+    if (data.length > 1) {
+        displayModel(translateGoJSONtoCytoscapeJSON(data))
+    }
+})
+.catch((error) => {
+    console.error('Error:', error);
 });
 
 function resetCy(){
@@ -225,7 +235,6 @@ function handleJSONloading(file){
     .then(response => response.json())  
     .then(data => {
         displayModel(translateGoJSONtoCytoscapeJSON(data))
-        MODEL = data
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -258,6 +267,7 @@ function handleAttributeUpdate(feature, name, value, isGlobal=false){
                 node.tippy.popper.querySelector("#\\"+name).value = value
             })
         }
+        handleValidation()
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -371,9 +381,28 @@ function handleVerboseValidationSwitch(){
 
 function handleExporting(){
     fetch(`http://localhost:${PORT}/exporting`, {})
-    .then(response => response.json())
-    .then(data => {
-        
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.blob(); // Get the response as a blob
+    })
+    .then(blob => {
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a link element
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'data.json'; // Set the desired file name
+        document.body.appendChild(a); // Append to body
+
+        // Trigger the download
+        a.click();
+
+        // Clean up
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
     })
     .catch((error) => {
         console.error('Error:', error);

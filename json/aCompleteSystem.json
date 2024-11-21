@@ -300,6 +300,9 @@
     },
     {
         "name": "temperature controller",
+        "provides":[
+            {"control":"temperature"}
+        ],
         "requires": {
             "all": [
                 {"interface":"control"},

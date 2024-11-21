@@ -354,3 +354,33 @@ func findProvidersForSelectedDeclarations(invalidFeatureRequirements map[feature
 	}
 	return providers
 }
+
+func exportConfiguration(state *State)[]byte{
+	json := map[string]any{"valid":true, "features":make([]map[string]any, 0)}
+	json["valid"] = len(validate(state)) == 0
+
+	for feature := range state.activeFeatures{
+		exportedFeature := map[string]any{"name":feature, "attributes":make([]map[string]any, 0)}
+
+		for artifact := range state.features[feature].artifacts{
+			for name, value := range state.variables[artifact][feature]{
+				exportedFeature["attributes"] = append(exportedFeature["attributes"].([]map[string]any),
+														map[string]any{"name":name, "value":value, "artifact":artifact})
+			}
+			for name, value := range state.artifacts[artifact].globalsDefault{
+				exportedFeature["attributes"] = append(exportedFeature["attributes"].([]map[string]any),
+														map[string]any{"name":name, "value":value, "artifact":artifact})
+			}
+		}
+		json["features"] = append(json["features"].([]map[string]any), exportedFeature)
+	}
+	outJSON, _ := j.MarshalIndent(json, "", "\t")
+	return outJSON
+}
+
+func logConfiguration(state *State) {
+	if STANDARD_OUTPUT {
+		os.Stdout.Write(exportConfiguration(state))
+		fmt.Println()
+	}
+}
