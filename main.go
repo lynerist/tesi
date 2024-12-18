@@ -35,6 +35,17 @@ func main(){
 			generateFeatureTree(ROOT, state.features)	
 
 			i++
+		case "-stdin":
+			json := parseJSON(os.Stdin)
+			state.reset()
+			/* --- STORE ARTIFACTS --- */
+			storeArtifacts(json, &state)
+			
+			/* --- STORE FEATURES --- */
+			storeFeatures(json, &state)
+
+			/* --- FEATURE TREE GENERATION --- */
+			generateFeatureTree(ROOT, state.features)	
 		}
 	}
 	
