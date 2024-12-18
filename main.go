@@ -10,8 +10,8 @@ func main(){
 
 	for i:=1; i<len(os.Args); i++{
 		switch os.Args[i]{
-		case "-silent":
-			STANDARD_OUTPUT = false
+		case "-verbose":
+			STANDARD_OUTPUT = true
 		case "-file":
 			if i == len(os.Args)-1{
 				fmt.Println("You must give a file name after -file")

@@ -137,7 +137,7 @@ func handleDeadFeature(json []map[string]any, index int, state *State, feature f
 	json[index]["data"].(map[string]any)["active"] = false
 }
 
-func checkDeadFeaturesANDextractInterfaceJSON(state *State)([]byte, error){
+func checkDeadFeaturesANDExtractInterfaceJSON(state *State)([]byte, error){
 	state.deadFeatures = make(set[featureName])
 
 	featuresIndexes := make(map[featureName]int) //to get the index of a specific feature in the json
@@ -318,7 +318,7 @@ func updatePossibleProvidersByGlobalChange(global attributeName, state *State){
 }
 
 func exportFeatureModelJson(path string, state *State){
-	outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
+	outJson, _ := checkDeadFeaturesANDExtractInterfaceJSON(state)
 
 	f, err := os.Create(path)
 	if err != nil {

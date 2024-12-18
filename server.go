@@ -35,7 +35,7 @@ func handleJSONLoading(state *State) {
 
 		/* --- FEATURE TREE GENERATION --- */
 		generateFeatureTree(ROOT, state.features)
-		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
+		outJson, _ := checkDeadFeaturesANDExtractInterfaceJSON(state)
 		w.Write(outJson)
 		logConfiguration(state)
 	})
@@ -44,7 +44,7 @@ func handleJSONLoading(state *State) {
 //Response with interface json
 func handleJSONRequest(state *State) {
 	http.HandleFunc(API_JSON_REQUEST, func(w http.ResponseWriter, r *http.Request) {	
-		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
+		outJson, _ := checkDeadFeaturesANDExtractInterfaceJSON(state)
 		w.Write(outJson)
 		logConfiguration(state)
 	})
@@ -68,7 +68,7 @@ func handleVariableUpdate(state *State){
 			updatePossibleProvidersByVariableChange(artifact, feature, state)
 		}
 
-		outJson, _ := checkDeadFeaturesANDextractInterfaceJSON(state)
+		outJson, _ := checkDeadFeaturesANDExtractInterfaceJSON(state)
 		w.Write(outJson)
 		logConfiguration(state)
 	})

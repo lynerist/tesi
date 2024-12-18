@@ -1,6 +1,6 @@
 package main
 
-var STANDARD_OUTPUT = true
+var STANDARD_OUTPUT = false
 
 const ALL 		string = "all"
 const NOT 		string = "not"

@@ -10,10 +10,10 @@ const LAYOUT = {
 }
 
 const EDGE = {
-    'line-color': '#000000',
+    'line-color': '#FFFFFF',
     'width': 3,
     'target-arrow-shape': 'triangle-backcurve',
-    'target-arrow-color': '#000000',
+    'target-arrow-color': '#FFFFFF',
     'opacity': function(ele){
         return ele.source().data("active") ? 0.95 : 0.3
     },
