@@ -121,7 +121,9 @@ func storeFeatures(json map[string]any, state *State){
 
 			/* --- STORE ARTIFACT VARIABLES --- */
 			for variable, value := range state.artifacts[thisArtifactName].variablesDefault{
-				state.variables[thisArtifactName][feature.name] = make(map[attributeName]attributeValue) 
+				if len(state.variables[thisArtifactName][feature.name]) == 0{
+					state.variables[thisArtifactName][feature.name] = make(map[attributeName]attributeValue) 
+				}
 				state.variables[thisArtifactName][feature.name][variable] = value
 			}
 
