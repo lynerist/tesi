@@ -12,6 +12,7 @@ type Feature struct {
 	parent *featureName
 	requirements map[artifactName]Requirements
 	provisions map[artifactName]set[declaration] 
+	notes string
 }
 
 func newFeatureName(feature any, id int)featureName{
@@ -25,9 +26,9 @@ func (f featureName) String()string{
 	return string(f)
 }
 
-func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact, parent featureName)Feature{
+func newFeature(name featureName, composingArtifacts []any, artifacts map[artifactName]Artifact, parent featureName, notes string)Feature{
 	feature := Feature{name, make(set[artifactName]), make(set[tagName]), make(set[featureName]), 
-		&parent, make(map[artifactName]Requirements), make(map[artifactName]set[declaration])}
+		&parent, make(map[artifactName]Requirements), make(map[artifactName]set[declaration]), notes}
 	
 	for _, artifact := range composingArtifacts {
 		feature.artifacts.add(artifactName(artifact.(string)))
@@ -36,8 +37,8 @@ func newFeature(name featureName, composingArtifacts []any, artifacts map[artifa
 	return feature
 }
 
-func newAbstractFeature(name featureName)Feature{
-	return Feature{name, nil, nil, make(set[featureName]), nil, nil, nil}
+func newAbstractFeature(name featureName, notes string)Feature{
+	return Feature{name, nil, nil, make(set[featureName]), nil, nil, nil, notes}
 }
 
 func (f Feature) String()string {
@@ -81,7 +82,7 @@ func generateFeatureTree(root featureName, features map[featureName]Feature){
 			break
 		}
 
-		newTagNode := newAbstractFeature(featureName(fmt.Sprintf("%s::%d",mostPresentTag, len(features))))
+		newTagNode := newAbstractFeature(featureName(fmt.Sprintf("%s::%d",mostPresentTag, len(features))), "tag")
 		newTagNode.parent = &root
 		for child := range features[root].children{
 			if _, ok := features[child].tags[mostPresentTag]; ok{
@@ -106,7 +107,7 @@ func generateFeatureTree(root featureName, features map[featureName]Feature){
 
 func storeFeatures(json map[string]any, state *State){
 	for _, f := range json["features"].([]any){
-		feature := newFeature(newFeatureName(f, len(state.features)), getArtifactsFromFeatureJSON(f), state.artifacts, ROOT)
+		feature := newFeature(newFeatureName(f, len(state.features)), getArtifactsFromFeatureJSON(f), state.artifacts, ROOT, getNotesFromFeatureJSON(f))
 		for thisArtifactName := range feature.artifacts{
 			artifact := state.artifacts[thisArtifactName]
 			feature.requirements[thisArtifactName]= newRequirements()

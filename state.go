@@ -25,7 +25,7 @@ func (state *State) reset(){
 	state.artifacts		 		= make(map[artifactName]Artifact)
 	state.variables 			= make(map[artifactName]map[featureName]map[attributeName]attributeValue)
 	state.globals 				= newGlobalContext()
-	state.features 				= map[featureName]Feature{ROOT:newAbstractFeature(ROOT)}
+	state.features 				= map[featureName]Feature{ROOT:newAbstractFeature(ROOT, "root")}
 	state.possibleProviders		= make(map[declaration]set[featureName])
 	state.activeFeatures 		= make(set[featureName])
 	state.deadFeatures			= make(set[featureName])

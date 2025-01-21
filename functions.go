@@ -90,6 +90,13 @@ func getArtifactsFromFeatureJSON(f any)[]any{
 	return f.(map[string]any)["artifacts"].([]any)
 }
 
+func getNotesFromFeatureJSON(f any)string{
+	if f.(map[string]any)["notes"] != nil {
+		return f.(map[string]any)["notes"].(string)
+	}
+	return ""
+}
+
 func generateEdgeData(source, target featureName)map[string]any{
 	return map[string]any{"source":source, "target":target}
 }
@@ -360,7 +367,8 @@ func exportConfiguration(state *State)[]byte{
 	json["valid"] = len(validate(state)) == 0
 
 	for feature := range state.activeFeatures{
-		exportedFeature := map[string]any{"name":feature, "attributes":make([]map[string]any, 0)}
+		exportedFeature := map[string]any{"name":feature, "attributes":make([]map[string]any, 0), 
+							"abstract":state.features[feature].isAbstract(), "notes":state.features[feature].notes}
 
 		for artifact := range state.features[feature].artifacts{
 			for name, value := range state.variables[artifact][feature]{
