@@ -365,7 +365,6 @@ func findProvidersForSelectedDeclarations(invalidFeatureRequirements map[feature
 func exportConfiguration(state *State)[]byte{
 	json := map[string]any{"valid":true, "features":make([]map[string]any, 0)}
 	json["valid"] = len(validate(state)) == 0
-
 	for feature := range state.activeFeatures{
 		exportedFeature := map[string]any{"name":feature, "attributes":make([]map[string]any, 0), 
 							"abstract":state.features[feature].isAbstract(), "notes":state.features[feature].notes}
@@ -375,9 +374,9 @@ func exportConfiguration(state *State)[]byte{
 				exportedFeature["attributes"] = append(exportedFeature["attributes"].([]map[string]any),
 														map[string]any{"name":name, "value":value, "artifact":artifact})
 			}
-			for name, value := range state.artifacts[artifact].globalsDefault{
+			for name, _ := range state.artifacts[artifact].globalsDefault{
 				exportedFeature["attributes"] = append(exportedFeature["attributes"].([]map[string]any),
-														map[string]any{"name":name, "value":value, "artifact":artifact})
+														map[string]any{"name":name, "value":state.globals.elected[name], "artifact":artifact})
 			}
 		}
 		json["features"] = append(json["features"].([]map[string]any), exportedFeature)
